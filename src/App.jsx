@@ -3,6 +3,7 @@ import {
   Camera,
   Check,
   ChevronLeft,
+  Gamepad2,
   HeartPulse,
   Home,
   ImagePlus,
@@ -34,6 +35,7 @@ const navItems = [
 
 function App() {
   const [screen, setScreen] = useState('splash')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedMeal, setSelectedMeal] = useState('午餐')
   const [selectedMood, setSelectedMood] = useState('开心')
   const [uploaded, setUploaded] = useState(false)
@@ -44,7 +46,7 @@ function App() {
 
   useEffect(() => {
     if (screen !== 'splash') return undefined
-    const timer = window.setTimeout(() => setScreen('home'), 2000)
+    const timer = window.setTimeout(() => setScreen('login'), 2000)
     return () => window.clearTimeout(timer)
   }, [screen])
 
@@ -69,6 +71,11 @@ function App() {
   }
 
   function goHome() {
+    setScreen(isLoggedIn ? 'home' : 'login')
+  }
+
+  function handleWechatLogin() {
+    setIsLoggedIn(true)
     setScreen('home')
   }
 
@@ -79,6 +86,7 @@ function App() {
         <div className="app-screen">
           <SparkleField />
           {screen === 'splash' && <SplashScreen onEnter={goHome} />}
+          {screen === 'login' && <LoginScreen onLogin={handleWechatLogin} />}
           {screen === 'home' && (
             <HomeScreen
               onCamera={() => setScreen('camera')}
@@ -113,12 +121,48 @@ function App() {
             />
           )}
           {screen === 'report' && <ReportScreen onBack={() => setScreen('home')} />}
-          {screen !== 'splash' && (
+          {isLoggedIn && screen !== 'splash' && screen !== 'login' && (
             <BottomNav current={screen} onNavigate={setScreen} />
           )}
         </div>
       </div>
     </main>
+  )
+}
+
+function LoginScreen({ onLogin }) {
+  return (
+    <section className="screen login-screen">
+      <div className="farm-sky" aria-hidden="true">
+        <span className="pixel-cloud cloud-one" />
+        <span className="pixel-cloud cloud-two" />
+        <span className="pixel-crop crop-one">🥬</span>
+        <span className="pixel-crop crop-two">🍅</span>
+        <span className="pixel-crop crop-three">🥕</span>
+      </div>
+      <div className="pixel-hero glass-card">
+        <div className="pixel-character" aria-label="原创田园记录员角色">
+          <span className="hat" />
+          <span className="face" />
+          <span className="body" />
+        </div>
+        <div>
+          <h1>微信登录</h1>
+          <p>登录后保存你的每日餐食、健康分和营养报告。</p>
+        </div>
+      </div>
+      <button className="wechat-button" onClick={onLogin}>
+        <span>微信</span>
+        一键登录
+      </button>
+      <p className="login-note">
+        当前为 MVP 演示，会模拟微信授权成功；后续接入真实微信 OAuth。
+      </p>
+      <div className="game-hint glass-card">
+        <Gamepad2 size={18} />
+        <span>田园打卡模式：每天记录一餐，点亮一块小菜田。</span>
+      </div>
+    </section>
   )
 }
 
@@ -175,10 +219,20 @@ function HomeScreen({ onCamera, onReport }) {
       <Header
         actionLabel="查看营养报告"
         icon={LineChart}
-        subtitle={today.dateText}
+        subtitle={`${today.dateText} · 微信已登录`}
         title="今日饮食"
         onAction={onReport}
       />
+
+      <div className="farm-profile glass-card">
+        <div className="tiny-avatar">
+          <span>👩🏻‍🌾</span>
+        </div>
+        <div>
+          <strong>小禾的餐食小屋</strong>
+          <p>今日菜田已点亮 3 格，继续轻松打卡。</p>
+        </div>
+      </div>
 
       <button className="score-card glass-card" onClick={onReport}>
         <div>

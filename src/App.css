@@ -1,18 +1,20 @@
 :root {
   --cream: #fffaf0;
-  --cream-2: #fff4e6;
-  --sakura: #ff9ec7;
-  --sakura-soft: #ffd9e8;
-  --mint: #9fe7cc;
-  --blueberry: #9c8bea;
-  --blueberry-deep: #6f5acb;
-  --gold: #e8c274;
-  --ink: #43364d;
-  --muted: #8d7d91;
+  --cream-2: #fff2d8;
+  --sakura: #e89ac0;
+  --sakura-soft: #f7d4df;
+  --mint: #9cd9b8;
+  --blueberry: #8f83cf;
+  --blueberry-deep: #5e568f;
+  --gold: #d8ad61;
+  --soil: #b98a5b;
+  --leaf: #6faa79;
+  --ink: #3e3850;
+  --muted: #84798a;
   --glass: rgba(255, 255, 255, 0.62);
   --glass-strong: rgba(255, 255, 255, 0.82);
   --stroke: rgba(255, 255, 255, 0.74);
-  --shadow: 0 20px 48px rgba(170, 117, 142, 0.2);
+  --shadow: 0 18px 38px rgba(117, 92, 77, 0.16);
   --radius-lg: 28px;
   --radius-md: 22px;
   color: var(--ink);
@@ -46,10 +48,10 @@ button:active {
   place-items: center;
   padding: 32px;
   background:
-    radial-gradient(circle at 22% 12%, rgba(255, 158, 199, 0.35), transparent 28%),
-    radial-gradient(circle at 80% 8%, rgba(156, 139, 234, 0.3), transparent 26%),
-    radial-gradient(circle at 74% 78%, rgba(159, 231, 204, 0.28), transparent 24%),
-    linear-gradient(135deg, #fffaf0 0%, #fff5f9 48%, #f7f4ff 100%);
+    radial-gradient(circle at 22% 12%, rgba(156, 217, 184, 0.34), transparent 28%),
+    radial-gradient(circle at 80% 8%, rgba(143, 131, 207, 0.22), transparent 26%),
+    radial-gradient(circle at 74% 78%, rgba(216, 173, 97, 0.22), transparent 24%),
+    linear-gradient(135deg, #fffaf0 0%, #f8f5e7 48%, #eef8ed 100%);
 }
 
 .phone-shell {
@@ -59,9 +61,9 @@ button:active {
   min-height: 760px;
   padding: 12px;
   border-radius: 48px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 224, 241, 0.88));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(238, 226, 197, 0.9));
   box-shadow:
-    0 34px 90px rgba(104, 77, 113, 0.28),
+    0 34px 90px rgba(87, 72, 57, 0.24),
     inset 0 0 0 1px rgba(255, 255, 255, 0.72);
 }
 
@@ -69,7 +71,7 @@ button:active {
   position: absolute;
   inset: 22px;
   border-radius: 38px;
-  background: linear-gradient(135deg, rgba(255, 158, 199, 0.34), rgba(159, 231, 204, 0.22));
+  background: linear-gradient(135deg, rgba(156, 217, 184, 0.32), rgba(216, 173, 97, 0.18));
   filter: blur(22px);
 }
 
@@ -79,9 +81,12 @@ button:active {
   overflow: hidden;
   border-radius: 38px;
   background:
-    radial-gradient(circle at 18% 12%, rgba(255, 216, 233, 0.96), transparent 28%),
-    radial-gradient(circle at 84% 18%, rgba(214, 207, 255, 0.82), transparent 28%),
-    linear-gradient(180deg, #fffdf7 0%, #fff3f8 52%, #f8fff8 100%);
+    linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    radial-gradient(circle at 18% 12%, rgba(246, 221, 180, 0.78), transparent 28%),
+    radial-gradient(circle at 84% 18%, rgba(201, 224, 193, 0.72), transparent 28%),
+    linear-gradient(180deg, #fffdf5 0%, #f8f3e6 52%, #eef8ed 100%);
+  background-size: 18px 18px, 18px 18px, auto, auto, auto;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.82);
 }
 
@@ -114,7 +119,7 @@ button:active {
   height: 5px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 0 12px rgba(255, 158, 199, 0.95);
+  box-shadow: 0 0 12px rgba(216, 173, 97, 0.72);
   animation: twinkle 3.8s ease-in-out infinite;
 }
 
@@ -151,6 +156,178 @@ button:active {
   justify-content: space-between;
   padding: 66px 26px 44px;
   text-align: center;
+}
+
+.login-screen {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  height: 100%;
+  padding: 32px 24px;
+  overflow: hidden;
+}
+
+.farm-sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pixel-cloud {
+  position: absolute;
+  width: 76px;
+  height: 28px;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, transparent 0 10px, rgba(255,255,255,.74) 10px 66px, transparent 66px),
+    linear-gradient(90deg, transparent 12px, rgba(255,255,255,.88) 12px 54px, transparent 54px);
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 12px rgba(99, 86, 72, 0.08));
+}
+
+.cloud-one {
+  top: 88px;
+  left: 22px;
+}
+
+.cloud-two {
+  top: 150px;
+  right: 22px;
+  transform: scale(0.78);
+}
+
+.pixel-crop {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 3px solid rgba(185, 138, 91, 0.28);
+  border-radius: 14px;
+  background: rgba(255, 246, 224, 0.72);
+  box-shadow: 0 12px 22px rgba(103, 78, 54, 0.12);
+  font-size: 27px;
+}
+
+.crop-one { left: 34px; bottom: 110px; }
+.crop-two { right: 44px; bottom: 162px; }
+.crop-three { right: 118px; top: 88px; }
+
+.pixel-hero {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 28px 22px;
+  border-radius: 30px;
+  text-align: center;
+}
+
+.pixel-hero h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.pixel-hero p,
+.login-note,
+.game-hint {
+  color: var(--muted);
+}
+
+.pixel-character {
+  position: relative;
+  width: 118px;
+  height: 142px;
+  image-rendering: pixelated;
+}
+
+.pixel-character .hat,
+.pixel-character .face,
+.pixel-character .body {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pixel-character .hat {
+  top: 6px;
+  width: 92px;
+  height: 34px;
+  border-radius: 4px 4px 12px 12px;
+  background:
+    linear-gradient(90deg, transparent 0 10px, #d7a45b 10px 82px, transparent 82px),
+    linear-gradient(#f0cd82, #c8914b);
+  box-shadow: inset 0 -6px 0 rgba(113, 79, 43, 0.18);
+}
+
+.pixel-character .face {
+  top: 36px;
+  width: 78px;
+  height: 64px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 30% 42%, #3e3850 0 4px, transparent 5px),
+    radial-gradient(circle at 70% 42%, #3e3850 0 4px, transparent 5px),
+    linear-gradient(#ffd7bd, #f4b99a);
+  box-shadow: inset 0 -5px 0 rgba(167, 95, 64, 0.12);
+}
+
+.pixel-character .body {
+  bottom: 8px;
+  width: 92px;
+  height: 58px;
+  border-radius: 18px 18px 14px 14px;
+  background:
+    linear-gradient(90deg, transparent 0 12px, rgba(255,255,255,.28) 12px 24px, transparent 24px),
+    linear-gradient(135deg, #78b77f, #5e8f68);
+  box-shadow: inset 0 -7px 0 rgba(43, 92, 58, 0.18);
+}
+
+.wechat-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  border-radius: 18px;
+  color: white;
+  font-size: 17px;
+  font-weight: 900;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.16), transparent),
+    linear-gradient(135deg, #52c66b, #2ea44f);
+  box-shadow: 0 18px 36px rgba(46, 164, 79, 0.28);
+}
+
+.wechat-button span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #2ea44f;
+  background: white;
+  font-size: 13px;
+}
+
+.login-note {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.game-hint {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .pearl-orb,
@@ -202,8 +379,8 @@ button:active {
   height: 72px;
   border-radius: 26px;
   color: white;
-  background: linear-gradient(135deg, var(--sakura), var(--blueberry));
-  box-shadow: 0 18px 38px rgba(183, 119, 190, 0.34);
+  background: linear-gradient(135deg, var(--leaf), var(--blueberry));
+  box-shadow: 0 18px 38px rgba(116, 143, 104, 0.3);
 }
 
 .splash-copy h1,
@@ -274,10 +451,10 @@ button:active {
   font-weight: 800;
   background:
     radial-gradient(circle at 24% 22%, rgba(255, 255, 255, 0.7), transparent 20%),
-    linear-gradient(135deg, #ff9ec7, #a18cf4 52%, #9fe7cc);
+    linear-gradient(135deg, #9cd9b8, #8f83cf 62%, #d8ad61);
   box-shadow:
-    0 18px 42px rgba(179, 121, 188, 0.38),
-    0 0 26px rgba(255, 158, 199, 0.52);
+    0 18px 42px rgba(117, 129, 83, 0.28),
+    0 0 22px rgba(216, 173, 97, 0.32);
 }
 
 .screen-header,
@@ -313,6 +490,41 @@ button:active {
   box-shadow: 0 12px 26px rgba(116, 89, 126, 0.12);
 }
 
+.farm-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 13px;
+  border-radius: 22px;
+}
+
+.farm-profile strong {
+  display: block;
+  font-size: 15px;
+}
+
+.farm-profile p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.tiny-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  height: 48px;
+  border: 3px solid rgba(185, 138, 91, 0.26);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.45), transparent),
+    linear-gradient(135deg, #d9edc8, #f0d991);
+  box-shadow: inset 0 -4px 0 rgba(80, 88, 57, 0.08);
+  font-size: 26px;
+}
+
 .score-card {
   display: flex;
   align-items: center;
@@ -335,7 +547,7 @@ button:active {
   margin-top: 3px;
   font-size: 58px;
   line-height: 0.95;
-  background: linear-gradient(135deg, #ff86bb, #826fe5 58%, #d8ad4f);
+  background: linear-gradient(135deg, #6faa79, #776fc1 58%, #c28e43);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -369,8 +581,8 @@ button:active {
   color: white;
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.55), transparent 38%),
-    conic-gradient(from 20deg, #ff9ec7, #a18cf4, #9fe7cc, #ffd982, #ff9ec7);
-  box-shadow: 0 0 22px rgba(255, 158, 199, 0.42);
+    conic-gradient(from 20deg, #9cd9b8, #8f83cf, #d8ad61, #f0d991, #9cd9b8);
+  box-shadow: 0 0 22px rgba(216, 173, 97, 0.32);
 }
 
 .meal-grid {
@@ -398,25 +610,25 @@ button:active {
 .meal-card.pink {
   background:
     radial-gradient(circle at 72% 22%, rgba(255, 255, 255, 0.64), transparent 20%),
-    linear-gradient(135deg, #ffc4dc, #c693eb);
+    linear-gradient(135deg, #f0d991, #c99665);
 }
 
 .meal-card.mint {
   background:
     radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.62), transparent 22%),
-    linear-gradient(135deg, #a9efd4, #8c78df);
+    linear-gradient(135deg, #a7dab5, #6f9e79);
 }
 
 .meal-card.blueberry {
   background:
     radial-gradient(circle at 76% 16%, rgba(255, 255, 255, 0.58), transparent 22%),
-    linear-gradient(135deg, #d4cdfc, #8670db);
+    linear-gradient(135deg, #c8c2e8, #7c73bd);
 }
 
 .meal-card.gold {
   background:
     radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.58), transparent 22%),
-    linear-gradient(135deg, #f5cf7c, #ef98bf);
+    linear-gradient(135deg, #e3bb76, #b98a5b);
 }
 
 .meal-card::after {
@@ -484,10 +696,10 @@ button:active {
   color: white;
   background:
     radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.75), transparent 22%),
-    linear-gradient(135deg, #ff8fc0, #a18cf4 50%, #95e5ca);
+    linear-gradient(135deg, #6faa79, #8f83cf 54%, #d8ad61);
   box-shadow:
-    0 18px 40px rgba(169, 108, 184, 0.36),
-    0 0 28px rgba(255, 158, 199, 0.72);
+    0 18px 40px rgba(91, 96, 63, 0.3),
+    0 0 24px rgba(216, 173, 97, 0.48);
 }
 
 .nutrition-panel,
@@ -559,7 +771,7 @@ button:active {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--sakura), var(--mint), var(--gold));
+  background: linear-gradient(90deg, var(--leaf), var(--mint), var(--gold));
 }
 
 .segmented {
@@ -583,7 +795,7 @@ button:active {
 
 .segmented button.active {
   color: white;
-  background: linear-gradient(135deg, var(--sakura), var(--blueberry));
+  background: linear-gradient(135deg, var(--leaf), var(--blueberry));
   box-shadow: 0 10px 20px rgba(162, 118, 187, 0.22);
 }
 
@@ -615,7 +827,7 @@ button:active {
   background:
     radial-gradient(circle at 36% 42%, rgba(255, 255, 255, 0.86) 0 24%, transparent 25%),
     radial-gradient(circle at 58% 46%, rgba(255, 255, 255, 0.82) 0 18%, transparent 19%),
-    linear-gradient(135deg, #f9bfd5 0%, #aee9d2 45%, #b7a6f2 100%);
+    linear-gradient(135deg, #f0d991 0%, #a7dab5 48%, #c8c2e8 100%);
 }
 
 .mock-meal-photo::before {
@@ -759,7 +971,7 @@ button:active {
   border-radius: 999px;
   color: white;
   font-weight: 900;
-  background: linear-gradient(135deg, var(--sakura), var(--blueberry));
+  background: linear-gradient(135deg, var(--leaf), var(--blueberry));
   box-shadow: 0 12px 26px rgba(157, 110, 184, 0.2);
 }
 
@@ -1029,7 +1241,7 @@ button:active {
 
 .tag-cloud button.active {
   color: white;
-  background: linear-gradient(135deg, var(--sakura), var(--blueberry));
+  background: linear-gradient(135deg, var(--leaf), var(--blueberry));
   box-shadow: 0 12px 24px rgba(157, 110, 184, 0.2);
 }
 
@@ -1255,7 +1467,7 @@ button:active {
 
 .bottom-nav button.active {
   color: white;
-  background: linear-gradient(135deg, var(--sakura), var(--blueberry));
+  background: linear-gradient(135deg, var(--leaf), var(--blueberry));
   box-shadow: 0 12px 26px rgba(157, 110, 184, 0.25);
 }
 
