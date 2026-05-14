@@ -5,6 +5,12 @@ export const today = {
     current: 1622,
     target: 1800,
   },
+  nutrients: [
+    { name: '蛋白质', value: '78g', percent: 86 },
+    { name: '碳水', value: '192g', percent: 72 },
+    { name: '脂肪', value: '52g', percent: 58 },
+    { name: '膳食纤维', value: '18g', percent: 76 },
+  ],
 }
 
 export const mealCards = [
@@ -44,7 +50,7 @@ export const mealCards = [
 
 export const mealOptions = ['早餐', '午餐', '晚餐', '加餐', '饮品']
 
-export const noteTags = ['少油', '半糖', '无糖', '自定义备注']
+export const noteTags = ['少油', '半碗饭', '无糖', '自定义备注']
 
 export const analysisSummary = {
   calories: 568,
@@ -109,6 +115,7 @@ export const diary = {
     { day: 25, active: false },
   ],
   moods: ['开心', '一般', '疲惫', '满足'],
+  postMealStates: ['轻盈', '有饱腹感', '不困', '想散步'],
   meals: [
     { name: '早餐', time: '07:30', kcal: 412, photos: ['🥣', '🍳', '🫐'] },
     { name: '午餐', time: '12:40', kcal: 568, photos: ['🍚', '🥦', '🍗', '🍅'] },

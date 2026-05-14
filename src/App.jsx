@@ -4,8 +4,6 @@ import {
   Check,
   ChevronLeft,
   Gamepad2,
-  HeartPulse,
-  Home,
   ImagePlus,
   Leaf,
   LineChart,
@@ -15,6 +13,7 @@ import {
   Sparkles,
   Star,
 } from 'lucide-react'
+import { BottomNav, Header, SparkleField } from './components/AppChrome'
 import {
   analysisSummary,
   diary,
@@ -26,12 +25,6 @@ import {
   today,
 } from './data/mockData'
 import './App.css'
-
-const navItems = [
-  { id: 'home', label: '首页', icon: Home },
-  { id: 'camera', label: '拍照', icon: Camera },
-  { id: 'diary', label: '日记', icon: HeartPulse },
-]
 
 function App() {
   const [screen, setScreen] = useState('splash')
@@ -61,7 +54,13 @@ function App() {
     [portions],
   )
 
-  const analysisCalories = analyzedFoods.reduce((sum, food) => sum + food.kcal, 0)
+  const baselineCalories = recognizedFoods.reduce(
+    (sum, food) => sum + food.baseKcal,
+    0,
+  )
+  const adjustedFoodCalories = analyzedFoods.reduce((sum, food) => sum + food.kcal, 0)
+  const analysisCalories =
+    analysisSummary.calories + adjustedFoodCalories - baselineCalories
 
   function updatePortion(foodId, direction) {
     setPortions((current) => ({
@@ -141,10 +140,9 @@ function LoginScreen({ onLogin }) {
         <span className="pixel-crop crop-three">🥕</span>
       </div>
       <div className="pixel-hero glass-card">
-        <div className="pixel-character" aria-label="原创田园记录员角色">
-          <span className="hat" />
-          <span className="face" />
-          <span className="body" />
+        <div className="diary-assistant" aria-label="健康日记小助手">
+          <span>✨</span>
+          <strong>Hi</strong>
         </div>
         <div>
           <h1>微信登录</h1>
@@ -160,19 +158,9 @@ function LoginScreen({ onLogin }) {
       </p>
       <div className="game-hint glass-card">
         <Gamepad2 size={18} />
-        <span>田园打卡模式：每天记录一餐，点亮一块小菜田。</span>
+        <span>轻松打卡模式：每天记录一餐，点亮一颗闪闪星。</span>
       </div>
     </section>
-  )
-}
-
-function SparkleField() {
-  return (
-    <div className="sparkle-field" aria-hidden="true">
-      {Array.from({ length: 18 }).map((_, index) => (
-        <span key={index} />
-      ))}
-    </div>
   )
 }
 
@@ -229,8 +217,8 @@ function HomeScreen({ onCamera, onReport }) {
           <span>👩🏻‍🌾</span>
         </div>
         <div>
-          <strong>小禾的餐食小屋</strong>
-          <p>今日菜田已点亮 3 格，继续轻松打卡。</p>
+          <strong>小禾的健康日记</strong>
+          <p>今日已记录 3 餐，继续保持轻盈节奏。</p>
         </div>
       </div>
 
@@ -240,8 +228,11 @@ function HomeScreen({ onCamera, onReport }) {
           <strong>{today.healthScore}</strong>
           <small>分 · 闪闪状态在线</small>
         </div>
-        <div className="score-ring">
+        <div className="score-ring score-ring-large">
           <Sparkles size={28} />
+          <i />
+          <i />
+          <i />
         </div>
       </button>
 
@@ -256,6 +247,22 @@ function HomeScreen({ onCamera, onReport }) {
         <div className="progress">
           <i style={{ width: `${percent}%` }} />
         </div>
+      </section>
+
+      <section className="daily-nutrition glass-card">
+        <div className="panel-title">
+          <h2>今日营养进度</h2>
+          <span>轻盈达标中</span>
+        </div>
+        {today.nutrients.map((item) => (
+          <div className="nutrition-row" key={item.name}>
+            <span>{item.name}</span>
+            <strong>{item.value}</strong>
+            <div className="progress">
+              <i style={{ width: `${item.percent}%` }} />
+            </div>
+          </div>
+        ))}
       </section>
 
       <div className="meal-grid">
@@ -298,6 +305,9 @@ function CameraScreen({
             key={meal}
             onClick={() => onSelectMeal(meal)}
           >
+            <span className="meal-option-icon" aria-hidden="true">
+              {getMealIcon(meal)}
+            </span>
             {meal}
           </button>
         ))}
@@ -340,7 +350,7 @@ function CameraScreen({
         <textarea
           value={note}
           onChange={(event) => onNoteChange(event.target.value)}
-          placeholder="例如：少油、半糖、无糖、不要香菜"
+          placeholder="例如：少油、半碗饭、无糖、不要香菜"
         />
       </section>
 
@@ -416,9 +426,9 @@ function AnalysisScreen({ calories, foods, onBack, onSave, onUpdatePortion }) {
       </div>
 
       <div className="ai-advice glass-card">
-        <div className="advice-score">
-          <Sparkles size={22} />
-          <strong>{analysisSummary.healthScore}</strong>
+        <div className="ai-helper">
+          <span>🥗</span>
+          <Sparkles size={18} />
         </div>
         <div>
           <h2>AI 营养建议</h2>
@@ -475,6 +485,15 @@ function DiaryScreen({ onMoodChange, onReport, selectedMood }) {
             >
               {mood}
             </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="tag-panel glass-card">
+        <h2>餐后状态</h2>
+        <div className="tag-cloud">
+          {diary.postMealStates.map((state) => (
+            <button key={state}>{state}</button>
           ))}
         </div>
       </section>
@@ -581,39 +600,14 @@ function ReportScreen({ onBack }) {
   )
 }
 
-function Header({ actionLabel = '添加记录', icon: Icon = Plus, onAction, subtitle, title }) {
-  return (
-    <header className="screen-header">
-      <div>
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
-      </div>
-      <button onClick={onAction} aria-label={actionLabel}>
-        <Icon size={20} />
-      </button>
-    </header>
-  )
-}
-
-function BottomNav({ current, onNavigate }) {
-  return (
-    <nav className="bottom-nav">
-      {navItems.map((item) => {
-        const Icon = item.icon
-        const active = current === item.id || (current === 'analysis' && item.id === 'camera')
-        return (
-          <button
-            className={active ? 'active' : ''}
-            key={item.id}
-            onClick={() => onNavigate(item.id)}
-          >
-            <Icon size={20} />
-            <span>{item.label}</span>
-          </button>
-        )
-      })}
-    </nav>
-  )
+function getMealIcon(meal) {
+  return {
+    早餐: '☀️',
+    午餐: '🥗',
+    晚餐: '🌙',
+    加餐: '🫐',
+    饮品: '🥤',
+  }[meal]
 }
 
 export default App
