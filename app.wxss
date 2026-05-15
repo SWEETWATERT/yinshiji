@@ -1,0 +1,108 @@
+page {
+  min-height: 100vh;
+  color: #43364d;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(255, 158, 199, 0.22), transparent 28%),
+    radial-gradient(circle at 86% 10%, rgba(156, 139, 234, 0.18), transparent 26%),
+    linear-gradient(180deg, #fffdf7 0%, #fff4f9 52%, #f7fff8 100%);
+}
+
+view,
+text,
+button,
+input,
+textarea {
+  box-sizing: border-box;
+}
+
+button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  line-height: 1.2;
+}
+
+button::after {
+  border: 0;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32rpx 28rpx 140rpx;
+}
+
+.page-title {
+  font-size: 52rpx;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.page-subtitle {
+  margin-top: 10rpx;
+  color: #8d7d91;
+  font-size: 28rpx;
+}
+
+.glass-card {
+  border: 2rpx solid rgba(255, 255, 255, 0.72);
+  border-radius: 44rpx;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48));
+  box-shadow: 0 24rpx 56rpx rgba(170, 117, 142, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.gradient-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 900;
+  background:
+    radial-gradient(circle at 24% 22%, rgba(255, 255, 255, 0.62), transparent 20%),
+    linear-gradient(135deg, #ff9ec7, #9c8bea 58%, #9fe7cc);
+  box-shadow: 0 22rpx 48rpx rgba(179, 121, 188, 0.32);
+}
+
+.progress {
+  height: 14rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: rgba(148, 126, 155, 0.12);
+}
+
+.progress-inner {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #ff9ec7, #9fe7cc, #e8c274);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56rpx;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  color: #6f5acb;
+  font-size: 24rpx;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.tag.active {
+  color: #fff;
+  background: linear-gradient(135deg, #ff9ec7, #9c8bea);
+}
+
+.spark {
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #fff;
+  box-shadow: 0 0 18rpx rgba(255, 158, 199, 0.9);
+}

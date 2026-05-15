@@ -1,0 +1,41 @@
+<view class="page record-page">
+  <view class="page-title">记录这一餐</view>
+  <view class="page-subtitle">拍照或从相册选择餐食照片</view>
+
+  <view class="meal-tabs">
+    <block wx:for="{{mealTypes}}" wx:key="type">
+      <button class="meal-tab {{selectedMeal === item.type ? 'active' : ''}}" data-type="{{item.type}}" bindtap="selectMeal">
+        <text>{{item.icon}}</text>
+        <text>{{item.label}}</text>
+      </button>
+    </block>
+  </view>
+
+  <view class="upload-card glass-card">
+    <button class="upload-preview" bindtap="chooseFromAlbum">
+      <image wx:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFill"></image>
+      <view wx:else class="upload-empty">
+        <text class="camera-icon">📷</text>
+        <text>点击拍照或上传美食照片</text>
+        <text class="hint">支持识别食物并估算营养</text>
+      </view>
+    </button>
+
+    <view class="upload-actions">
+      <button bindtap="takePhoto">📷 拍下这一餐</button>
+      <button bindtap="chooseFromAlbum">🖼 从相册选择</button>
+    </view>
+  </view>
+
+  <view class="note-card glass-card">
+    <view class="section-title">备注</view>
+    <view class="tag-row">
+      <block wx:for="{{noteTags}}" wx:key="*this">
+        <button class="tag {{note === item ? 'active' : ''}}" data-note="{{item}}" bindtap="setNote">{{item}}</button>
+      </block>
+    </view>
+    <textarea value="{{note}}" bindinput="onNoteInput" placeholder="例如：少油、半碗饭、无糖"></textarea>
+  </view>
+
+  <button class="gradient-button analyze-button" bindtap="startAnalyze">开始分析 ✨</button>
+</view>

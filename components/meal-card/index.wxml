@@ -1,0 +1,5 @@
+<view class="meal-card">
+  <view class="thumb">{{image}}</view>
+  <view class="title">{{title}}</view>
+  <view class="sub">{{sub}}</view>
+</view>

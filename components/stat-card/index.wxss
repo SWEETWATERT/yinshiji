@@ -1,0 +1,20 @@
+.stat-card {
+  padding: 28rpx;
+  border-radius: 36rpx;
+}
+
+.icon {
+  font-size: 42rpx;
+}
+
+.value {
+  margin-top: 14rpx;
+  font-size: 38rpx;
+  font-weight: 900;
+}
+
+.label {
+  margin-top: 8rpx;
+  color: #8d7d91;
+  font-size: 24rpx;
+}

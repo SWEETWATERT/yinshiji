@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/record/index",
+    "pages/analyze/index",
+    "pages/diary/index",
+    "pages/report/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "健康饮食记",
+    "navigationBarBackgroundColor": "#fff8fb",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fff8fb"
+  },
+  "tabBar": {
+    "color": "#8d7d91",
+    "selectedColor": "#d86ba5",
+    "backgroundColor": "#fffafd",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/record/index",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/diary/index",
+        "text": "日记"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

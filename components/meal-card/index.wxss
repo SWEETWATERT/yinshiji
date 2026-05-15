@@ -1,0 +1,21 @@
+.meal-card {
+  padding: 24rpx;
+  border-radius: 34rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #ffc4dc, #9c8bea);
+}
+
+.thumb {
+  font-size: 44rpx;
+}
+
+.title {
+  margin-top: 22rpx;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+}

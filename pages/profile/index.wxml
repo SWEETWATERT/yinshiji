@@ -1,0 +1,38 @@
+<view class="page profile-page">
+  <view class="page-title">我的</view>
+  <view class="page-subtitle">个人目标与饮食偏好</view>
+
+  <view class="user-card glass-card">
+    <view class="avatar">🌸</view>
+    <view>
+      <view class="nickname">{{user.nickname}}</view>
+      <view class="muted">微信 mock 登录 · 后续接入真实授权</view>
+    </view>
+  </view>
+
+  <view class="profile-grid">
+    <view class="profile-item glass-card">
+      <text>身高</text>
+      <strong>{{user.height}} cm</strong>
+    </view>
+    <view class="profile-item glass-card">
+      <text>体重</text>
+      <strong>{{user.weight}} kg</strong>
+    </view>
+    <view class="profile-item glass-card">
+      <text>每日热量目标</text>
+      <strong>{{user.calorieTarget}} kcal</strong>
+    </view>
+    <view class="profile-item glass-card">
+      <text>蛋白质目标</text>
+      <strong>{{user.proteinTarget}} g</strong>
+    </view>
+  </view>
+
+  <view class="goal-card glass-card">
+    <view class="section-title">饮食目标</view>
+    <view class="goal-copy">保持规律记录，优先补足蛋白质和蔬菜摄入，减少含糖饮料。</view>
+  </view>
+
+  <button class="gradient-button" bindtap="mockRelogin">重新 mock 登录</button>
+</view>

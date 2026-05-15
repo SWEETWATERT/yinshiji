@@ -1,0 +1,64 @@
+<view class="page home-page">
+  <view class="header">
+    <view>
+      <view class="page-title">今日饮食</view>
+      <view class="page-subtitle">{{todayText}} · {{user.nickname}}已登录</view>
+    </view>
+    <button class="report-entry" bindtap="goReport">周报</button>
+  </view>
+
+  <view class="score-card glass-card">
+    <view>
+      <view class="soft-label">今日健康评分</view>
+      <view class="score">{{healthScore}}</view>
+      <view class="score-copy">分 · 闪闪状态在线</view>
+    </view>
+    <view class="score-ring">
+      <text>✦</text>
+      <i class="spark s1"></i>
+      <i class="spark s2"></i>
+      <i class="spark s3"></i>
+    </view>
+  </view>
+
+  <view class="calorie-card glass-card">
+    <view class="card-head">
+      <text>今日总摄入热量</text>
+      <text>{{caloriePercent}}%</text>
+    </view>
+    <view class="calorie-main">{{totals.kcal}} <text>/ {{target}} kcal</text></view>
+    <view class="progress"><view class="progress-inner" style="width: {{caloriePercent}}%;"></view></view>
+  </view>
+
+  <view class="nutrition-card glass-card">
+    <view class="card-head">
+      <text>今日营养进度</text>
+      <text>轻盈达标中</text>
+    </view>
+    <view class="nutrition-row">
+      <text>蛋白质</text><text>{{totals.protein}}g</text>
+      <view class="progress"><view class="progress-inner" style="width: {{proteinPercent}}%;"></view></view>
+    </view>
+    <view class="nutrition-row">
+      <text>碳水</text><text>{{totals.carbs}}g</text>
+      <view class="progress"><view class="progress-inner" style="width: {{carbsPercent}}%;"></view></view>
+    </view>
+    <view class="nutrition-row">
+      <text>脂肪</text><text>{{totals.fat}}g</text>
+      <view class="progress"><view class="progress-inner" style="width: {{fatPercent}}%;"></view></view>
+    </view>
+  </view>
+
+  <view class="meal-grid">
+    <block wx:for="{{mealCards}}" wx:key="type">
+      <view class="meal-card {{item.tone}}">
+        <view class="meal-thumb">{{item.image}}</view>
+        <view class="meal-status">{{item.recorded ? '已记录' : '未记录'}}</view>
+        <view class="meal-name">{{item.name}}</view>
+        <view class="meal-kcal">{{item.kcal}} kcal</view>
+      </view>
+    </block>
+  </view>
+
+  <button class="camera-fab" bindtap="goRecord">📷</button>
+</view>

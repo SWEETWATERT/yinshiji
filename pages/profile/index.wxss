@@ -1,0 +1,69 @@
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-top: 30rpx;
+  padding: 34rpx;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 36rpx;
+  font-size: 54rpx;
+  background: linear-gradient(135deg, #ff9ec7, #9c8bea 58%, #9fe7cc);
+}
+
+.nickname {
+  font-size: 36rpx;
+  font-weight: 900;
+}
+
+.muted {
+  margin-top: 8rpx;
+  color: #8d7d91;
+  font-size: 24rpx;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-top: 26rpx;
+}
+
+.profile-item {
+  padding: 30rpx;
+}
+
+.profile-item text {
+  color: #8d7d91;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.profile-item strong {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 36rpx;
+}
+
+.goal-card {
+  margin: 26rpx 0;
+  padding: 32rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.goal-copy {
+  margin-top: 12rpx;
+  color: #8d7d91;
+  font-size: 26rpx;
+  line-height: 1.6;
+}

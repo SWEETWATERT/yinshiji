@@ -1,0 +1,69 @@
+<view class="page diary-page">
+  <view class="header">
+    <view>
+      <view class="page-title">饮食日记</view>
+      <view class="page-subtitle">连续记录 23 天</view>
+    </view>
+    <button class="report-entry" bindtap="goReport">周报</button>
+  </view>
+
+  <view class="streak-card glass-card">
+    <view>
+      <view class="soft-label">连续记录天数</view>
+      <view class="streak">23</view>
+      <view class="muted">天 · 继续轻松打卡</view>
+    </view>
+    <view class="sticker">🥬</view>
+  </view>
+
+  <scroll-view class="date-strip glass-card" scroll-x>
+    <block wx:for="{{dates}}" wx:key="date">
+      <button class="date-item {{selectedDate === item.date ? 'active' : ''}}" data-date="{{item.date}}" bindtap="selectDate">
+        <text>{{item.day}}</text>
+        <text>{{item.week}}</text>
+      </button>
+    </block>
+  </scroll-view>
+
+  <view class="tag-card glass-card">
+    <view class="section-title">心情记录</view>
+    <view class="tag-row">
+      <block wx:for="{{moods}}" wx:key="*this">
+        <button class="tag {{selectedMood === item ? 'active' : ''}}" data-value="{{item}}" bindtap="selectMood">{{item}}</button>
+      </block>
+    </view>
+    <view class="section-title state-title">餐后状态</view>
+    <view class="tag-row">
+      <block wx:for="{{states}}" wx:key="*this">
+        <button class="tag">{{item}}</button>
+      </block>
+    </view>
+  </view>
+
+  <view class="meal-list">
+    <block wx:if="{{meals.length}}">
+      <block wx:for="{{meals}}" wx:key="id">
+        <view class="meal-row glass-card">
+          <view class="meal-top">
+            <view>
+              <view class="meal-title">{{mealTypeText[item.mealType] || item.mealType}}</view>
+              <view class="meal-time">{{item.time}}</view>
+            </view>
+            <view class="meal-kcal">{{item.totalNutrition.kcal}} kcal</view>
+          </view>
+          <scroll-view scroll-x class="food-wall">
+            <block wx:for="{{item.foods}}" wx:for-item="food" wx:key="id">
+              <view class="food-tile">{{food.image}}</view>
+            </block>
+          </scroll-view>
+          <view class="food-names">
+            <block wx:for="{{item.foods}}" wx:for-item="food" wx:key="id">
+              <text>{{food.name}}</text>
+            </block>
+          </view>
+        </view>
+      </block>
+    </block>
+    <view wx:else class="empty glass-card">这一天还没有记录餐食</view>
+  </view>
+</view>

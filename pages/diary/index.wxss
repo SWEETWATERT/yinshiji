@@ -1,0 +1,149 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-entry {
+  width: 92rpx;
+  height: 72rpx;
+  border-radius: 28rpx;
+  color: #6f5acb;
+  font-size: 24rpx;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.streak-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 28rpx;
+  padding: 38rpx;
+}
+
+.soft-label,
+.muted {
+  color: #8d7d91;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.streak {
+  margin-top: 8rpx;
+  font-size: 80rpx;
+  line-height: 1;
+  font-weight: 900;
+  color: #b46add;
+}
+
+.sticker {
+  font-size: 66rpx;
+}
+
+.date-strip {
+  white-space: nowrap;
+  margin-top: 26rpx;
+  padding: 14rpx;
+}
+
+.date-item {
+  display: inline-grid;
+  place-items: center;
+  width: 92rpx;
+  height: 92rpx;
+  margin-right: 12rpx;
+  border-radius: 30rpx;
+  color: #8d7d91;
+  font-size: 24rpx;
+  font-weight: 900;
+  background: rgba(255,255,255,.62);
+}
+
+.date-item.active {
+  color: #fff;
+  background: linear-gradient(135deg, #ff9ec7, #9c8bea);
+}
+
+.tag-card {
+  margin-top: 26rpx;
+  padding: 28rpx;
+}
+
+.section-title {
+  margin-bottom: 16rpx;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.state-title {
+  margin-top: 26rpx;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+
+.meal-list {
+  display: grid;
+  gap: 22rpx;
+  margin-top: 26rpx;
+}
+
+.meal-row {
+  padding: 28rpx;
+}
+
+.meal-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.meal-title {
+  font-size: 32rpx;
+  font-weight: 900;
+}
+
+.meal-time,
+.food-names {
+  margin-top: 6rpx;
+  color: #8d7d91;
+  font-size: 24rpx;
+}
+
+.meal-kcal {
+  color: #8d7d91;
+  font-size: 28rpx;
+  font-weight: 900;
+}
+
+.food-wall {
+  margin-top: 20rpx;
+  white-space: nowrap;
+}
+
+.food-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96rpx;
+  height: 96rpx;
+  margin-right: 14rpx;
+  border-radius: 32rpx;
+  font-size: 46rpx;
+  background: linear-gradient(135deg, #ffc6d9, #b59bf1);
+}
+
+.food-names text {
+  margin-right: 16rpx;
+}
+
+.empty {
+  padding: 48rpx;
+  color: #8d7d91;
+  text-align: center;
+  font-size: 28rpx;
+}

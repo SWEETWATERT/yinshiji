@@ -1,0 +1,12 @@
+{
+  "appid": "touristappid",
+  "projectname": "yinshiji",
+  "compileType": "miniprogram",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "miniprogramRoot": "./"
+}

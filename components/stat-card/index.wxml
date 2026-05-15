@@ -1,0 +1,5 @@
+<view class="stat-card glass-card">
+  <view class="icon">{{icon}}</view>
+  <view class="value">{{value}}</view>
+  <view class="label">{{label}}</view>
+</view>

@@ -1,0 +1,126 @@
+.score-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 28rpx;
+  padding: 42rpx;
+}
+
+.soft-label,
+.muted {
+  color: #8d7d91;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.score {
+  margin-top: 8rpx;
+  font-size: 100rpx;
+  line-height: 1;
+  font-weight: 900;
+  color: #b46add;
+}
+
+.score-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  font-size: 56rpx;
+  background: conic-gradient(from 20deg, #ff9ec7, #9c8bea, #9fe7cc, #ffd982, #ff9ec7);
+  box-shadow: 0 0 34rpx rgba(255, 158, 199, 0.42);
+}
+
+.trend-card,
+.protein-card,
+.advice-card {
+  margin-top: 26rpx;
+  padding: 32rpx;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 22rpx;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.card-head text:last-child {
+  color: #8d7d91;
+  font-size: 24rpx;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 20rpx;
+  height: 260rpx;
+  padding: 20rpx 8rpx 0;
+}
+
+.bar {
+  flex: 1;
+  min-height: 32rpx;
+  border-radius: 999rpx 999rpx 16rpx 16rpx;
+  background: linear-gradient(180deg, #ff9ec7, #9c8bea);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-top: 26rpx;
+}
+
+.stat-card {
+  padding: 30rpx;
+}
+
+.stat-icon {
+  font-size: 46rpx;
+}
+
+.stat-value {
+  margin-top: 18rpx;
+  font-size: 42rpx;
+  font-weight: 900;
+}
+
+.stat-label {
+  margin-top: 8rpx;
+  color: #8d7d91;
+  font-size: 24rpx;
+}
+
+.advice-card {
+  display: flex;
+  gap: 20rpx;
+}
+
+.helper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 86rpx;
+  height: 86rpx;
+  border-radius: 30rpx;
+  color: #fff;
+  font-size: 38rpx;
+  background: linear-gradient(135deg, #ff9ec7, #9c8bea);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.advice {
+  margin-top: 8rpx;
+  color: #8d7d91;
+  font-size: 26rpx;
+  line-height: 1.55;
+}
