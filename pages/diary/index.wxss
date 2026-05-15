@@ -1,149 +1,225 @@
-.header {
+.diary-page {
+  padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
+}
+
+.page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 24rpx;
 }
 
 .report-entry {
-  width: 92rpx;
-  height: 72rpx;
-  border-radius: 28rpx;
-  color: #6f5acb;
+  flex: 0 0 104rpx;
+  height: 56rpx;
+  border-radius: 18rpx;
+  color: #7b66d9;
   font-size: 24rpx;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.72);
+  background: #fff;
 }
 
 .streak-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 28rpx;
-  padding: 38rpx;
+  margin-top: 24rpx;
+  padding: 24rpx 28rpx;
 }
 
-.soft-label,
-.muted {
-  color: #8d7d91;
-  font-size: 24rpx;
-  font-weight: 800;
+.streak-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+  margin-top: 6rpx;
 }
 
 .streak {
-  margin-top: 8rpx;
-  font-size: 80rpx;
+  color: #8d7cf0;
+  font-size: 56rpx;
+  font-weight: 700;
   line-height: 1;
-  font-weight: 900;
-  color: #b46add;
 }
 
-.sticker {
-  font-size: 66rpx;
+.streak-unit,
+.streak-copy {
+  color: #8c8498;
+  font-size: 24rpx;
 }
 
 .date-strip {
+  width: 100%;
+  margin-top: 24rpx;
   white-space: nowrap;
-  margin-top: 26rpx;
-  padding: 14rpx;
+}
+
+.date-inner {
+  display: flex;
+  gap: 14rpx;
+  width: max-content;
+  padding-right: 32rpx;
 }
 
 .date-item {
-  display: inline-grid;
-  place-items: center;
-  width: 92rpx;
-  height: 92rpx;
-  margin-right: 12rpx;
-  border-radius: 30rpx;
-  color: #8d7d91;
-  font-size: 24rpx;
-  font-weight: 900;
-  background: rgba(255,255,255,.62);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 82rpx;
+  height: 88rpx;
+  border-radius: 22rpx;
+  color: #8c8498;
+  background: #fff;
+  box-shadow: 0 6rpx 18rpx rgba(31, 25, 36, 0.04);
 }
 
 .date-item.active {
   color: #fff;
-  background: linear-gradient(135deg, #ff9ec7, #9c8bea);
+  background: linear-gradient(135deg, #f58bb8 0%, #8d7cf0 100%);
 }
 
-.tag-card {
-  margin-top: 26rpx;
+.date-day {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.date-week {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+}
+
+.mood-card {
+  margin-top: 24rpx;
   padding: 28rpx;
-}
-
-.section-title {
-  margin-bottom: 16rpx;
-  font-size: 30rpx;
-  font-weight: 900;
 }
 
 .state-title {
-  margin-top: 26rpx;
+  margin-top: 24rpx;
 }
 
-.tag-row {
+.chip-row {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
   gap: 14rpx;
+  margin-top: 16rpx;
 }
 
+.diary-page .chip {
+  flex: 0 0 auto;
+}
+
+.section-block {
+  margin-top: 28rpx;
+}
+
+.meal-status-list,
 .meal-list {
   display: grid;
-  gap: 22rpx;
-  margin-top: 26rpx;
+  gap: 16rpx;
+  margin-top: 18rpx;
+}
+
+.meal-status-row {
+  display: grid;
+  grid-template-columns: 56rpx minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx;
+}
+
+.meal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 18rpx;
+  font-size: 32rpx;
+  background: #f3f1f5;
+}
+
+.meal-info {
+  min-width: 0;
+}
+
+.meal-name,
+.meal-title {
+  color: #2f2936;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.meal-sub,
+.meal-time,
+.food-names {
+  margin-top: 4rpx;
+  color: #8c8498;
+  font-size: 24rpx;
+}
+
+.status-chip {
+  min-height: 44rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  color: #8c8498;
+  font-size: 22rpx;
+  line-height: 44rpx;
+  background: #f3f1f5;
+}
+
+.status-chip.done {
+  color: #2f8b68;
+  background: #e9f8f1;
 }
 
 .meal-row {
-  padding: 28rpx;
+  padding: 24rpx;
 }
 
 .meal-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-}
-
-.meal-title {
-  font-size: 32rpx;
-  font-weight: 900;
-}
-
-.meal-time,
-.food-names {
-  margin-top: 6rpx;
-  color: #8d7d91;
-  font-size: 24rpx;
+  gap: 18rpx;
 }
 
 .meal-kcal {
-  color: #8d7d91;
-  font-size: 28rpx;
-  font-weight: 900;
+  color: #2f2936;
+  font-size: 26rpx;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .food-wall {
-  margin-top: 20rpx;
+  margin-top: 16rpx;
   white-space: nowrap;
+}
+
+.food-inner {
+  width: max-content;
 }
 
 .food-tile {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 96rpx;
-  height: 96rpx;
-  margin-right: 14rpx;
-  border-radius: 32rpx;
-  font-size: 46rpx;
-  background: linear-gradient(135deg, #ffc6d9, #b59bf1);
+  width: 68rpx;
+  height: 68rpx;
+  margin-right: 12rpx;
+  border-radius: 20rpx;
+  font-size: 30rpx;
+  line-height: 1;
+  background: #f3f1f5;
 }
 
-.food-names text {
+.food-name-item {
   margin-right: 16rpx;
 }
 
 .empty {
-  padding: 48rpx;
-  color: #8d7d91;
+  padding: 36rpx;
+  color: #8c8498;
   text-align: center;
-  font-size: 28rpx;
+  font-size: 26rpx;
 }

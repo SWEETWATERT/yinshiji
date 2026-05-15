@@ -12,7 +12,7 @@ Page({
       { type: 'snack', label: '加餐', icon: '🫐' },
       { type: 'drink', label: '饮品', icon: '🥤' }
     ],
-    noteTags: ['少油', '半碗饭', '无糖', '自定义备注']
+    noteTags: ['少油', '半碗饭', '无糖', '外食', '夜宵', '自定义']
   },
 
   selectMeal(event) {

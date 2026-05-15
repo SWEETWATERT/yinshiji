@@ -3,10 +3,13 @@
   <view class="page-subtitle">最近 7 天饮食趋势</view>
 
   <view class="score-card glass-card">
-    <view>
+    <view class="score-main">
       <view class="soft-label">本周平均健康评分</view>
-      <view class="score">{{averageScore}}</view>
-      <view class="muted">分 · 平均 {{averageCalories}} kcal</view>
+      <view class="score-line">
+        <text class="score">{{averageScore}}</text>
+        <text class="score-unit">分</text>
+      </view>
+      <view class="muted">平均 {{averageCalories}} kcal</view>
     </view>
     <view class="score-ring">★</view>
   </view>
@@ -14,7 +17,7 @@
   <view class="trend-card glass-card">
     <view class="card-head">
       <text>热量趋势</text>
-      <text>近 7 天</text>
+      <text class="head-meta">近 7 天</text>
     </view>
     <view class="bars">
       <block wx:for="{{calorieBars}}" wx:key="index">
@@ -26,7 +29,7 @@
   <view class="protein-card glass-card">
     <view class="card-head">
       <text>蛋白质达标率</text>
-      <text>{{proteinRate}}%</text>
+      <text class="head-meta">{{proteinRate}}%</text>
     </view>
     <view class="progress"><view class="progress-inner" style="width: {{proteinRate}}%;"></view></view>
   </view>
@@ -42,7 +45,6 @@
   </view>
 
   <view class="advice-card glass-card">
-    <view class="helper">✨</view>
     <view>
       <view class="section-title">本周建议</view>
       <view class="advice">{{summary}}</view>

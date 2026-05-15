@@ -1,55 +1,57 @@
-<view class="page analyze-page">
-  <view class="top-row">
-    <button class="back" bindtap="goBack">‹</button>
-    <view>
-      <view class="page-title">AI 分析结果</view>
-      <view class="page-subtitle">营养估算仅作生活方式参考</view>
-    </view>
-  </view>
-
-  <view class="summary-card glass-card">
-    <view>
-      <view class="soft-label">本餐总热量</view>
-      <view class="kcal">{{totalNutrition.kcal}} <text>kcal</text></view>
-    </view>
-    <view class="score-pill">✨ {{healthScore}} 分</view>
-  </view>
-
-  <view class="macro-grid">
-    <view class="macro-card glass-card">
-      <text>蛋白质</text><strong>{{totalNutrition.protein}}g</strong>
-    </view>
-    <view class="macro-card glass-card">
-      <text>碳水</text><strong>{{totalNutrition.carbs}}g</strong>
-    </view>
-    <view class="macro-card glass-card">
-      <text>脂肪</text><strong>{{totalNutrition.fat}}g</strong>
-    </view>
-  </view>
-
-  <view class="food-list">
-    <block wx:for="{{foods}}" wx:key="id">
-      <view class="food-card glass-card">
-        <view class="food-img">{{item.image}}</view>
-        <view class="food-main">
-          <view class="food-name">{{item.name}}</view>
-          <view class="food-sub">{{item.weight}}g · {{item.kcal}} kcal</view>
-        </view>
-        <view class="food-actions">
-          <button data-id="{{item.id}}" data-delta="-10" bindtap="adjustWeight">－</button>
-          <button data-id="{{item.id}}" data-delta="10" bindtap="adjustWeight">＋</button>
-        </view>
+<view class="page page-container analyze-page">
+  <view class="summary-card section-card">
+    <view class="summary-head">
+      <view>
+        <view class="section-title">本餐估算</view>
+        <view class="page-subtitle">营养估算仅作生活方式参考</view>
       </view>
-    </block>
-  </view>
-
-  <view class="advice-card glass-card">
-    <view class="helper">🥗</view>
-    <view>
-      <view class="section-title">AI 营养建议</view>
-      <view class="advice">{{suggestion}}</view>
+      <view class="score-pill">评分 {{healthScore}}</view>
+    </view>
+    <view class="kcal-line">
+      <text class="kcal">{{totalNutrition.kcal}}</text>
+      <text class="kcal-unit">kcal</text>
+    </view>
+    <view class="macro-grid">
+      <view class="macro-item">
+        <text class="macro-label">蛋白质</text>
+        <text class="macro-value">{{totalNutrition.protein}}g</text>
+      </view>
+      <view class="macro-item">
+        <text class="macro-label">碳水</text>
+        <text class="macro-value">{{totalNutrition.carbs}}g</text>
+      </view>
+      <view class="macro-item">
+        <text class="macro-label">脂肪</text>
+        <text class="macro-value">{{totalNutrition.fat}}g</text>
+      </view>
     </view>
   </view>
 
-  <button class="gradient-button save-button" bindtap="saveMeal">保存记录</button>
+  <view class="section-block">
+    <view class="section-title">识别食物</view>
+    <view class="food-list">
+      <block wx:for="{{foods}}" wx:key="id">
+        <view class="food-card section-card">
+          <view class="food-img">{{item.image}}</view>
+          <view class="food-main">
+            <view class="food-name">{{item.name}}</view>
+            <view class="food-sub">{{item.weight}}g · {{item.kcal}} kcal</view>
+          </view>
+          <view class="food-actions">
+            <button class="food-action-button" data-id="{{item.id}}" data-delta="-10" bindtap="adjustWeight">－</button>
+            <button class="food-action-button" data-id="{{item.id}}" data-delta="10" bindtap="adjustWeight">＋</button>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="advice-card section-card">
+    <view class="section-title">AI 营养建议</view>
+    <view class="advice">{{suggestion}}</view>
+  </view>
+
+  <view class="safe-bottom save-bar">
+    <button class="primary-button save-button" bindtap="saveMeal">保存记录</button>
+  </view>
 </view>

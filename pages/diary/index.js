@@ -1,15 +1,23 @@
 const { formatDate, getMealsByDate } = require('../../utils/storage')
 
+const MEAL_META = [
+  { type: 'breakfast', name: '早餐', icon: '🥣' },
+  { type: 'lunch', name: '午餐', icon: '🥗' },
+  { type: 'dinner', name: '晚餐', icon: '🍲' },
+  { type: 'snack', name: '加餐', icon: '🫐' }
+]
+
 function buildDates() {
   const weekMap = ['日', '一', '二', '三', '四', '五', '六']
   const today = new Date()
   return Array.from({ length: 7 }).map((_, index) => {
     const date = new Date(today)
     date.setDate(today.getDate() - 3 + index)
+    const isToday = formatDate(date) === formatDate(today)
     return {
       date: formatDate(date),
       day: date.getDate(),
-      week: weekMap[date.getDay()]
+      week: isToday ? '今天' : `周${weekMap[date.getDay()]}`
     }
   })
 }
@@ -22,6 +30,7 @@ Page({
     moods: ['开心', '一般', '疲惫', '满足'],
     states: ['轻盈', '有饱腹感', '不困', '想散步'],
     meals: [],
+    mealCards: [],
     mealTypeText: {
       breakfast: '早餐',
       lunch: '午餐',
@@ -46,7 +55,16 @@ Page({
   },
 
   loadMeals() {
-    this.setData({ meals: getMealsByDate(this.data.selectedDate) })
+    const meals = getMealsByDate(this.data.selectedDate)
+    const mealCards = MEAL_META.map((meta) => {
+      const meal = meals.find((item) => item.mealType === meta.type)
+      return {
+        ...meta,
+        recorded: Boolean(meal),
+        kcal: meal ? meal.totalNutrition.kcal : 0
+      }
+    })
+    this.setData({ meals, mealCards })
   },
 
   goReport() {
