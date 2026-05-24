@@ -23,3 +23,6 @@ project.private.config.json
 *.njsproj
 *.sln
 *.sw?
+
+# Local API credentials (never commit)
+services/config.local.js

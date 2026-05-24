@@ -9,13 +9,14 @@
   ],
   "window": {
     "navigationBarTitleText": "健康饮食记",
-    "navigationBarBackgroundColor": "#F7F8FA",
+    "navigationBarBackgroundColor": "#F7F2EA",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#F7F8FA"
+    "backgroundColor": "#F7F2EA"
   },
   "tabBar": {
+    "custom": true,
     "color": "#8C8498",
-    "selectedColor": "#7B66D9",
+    "selectedColor": "#8B6CFF",
     "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
