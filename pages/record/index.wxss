@@ -54,6 +54,8 @@
 .upload-card {
   padding: 24rpx;
   margin-bottom: 20rpx;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .upload-zone {
@@ -131,11 +133,17 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16rpx;
+  width: 100%;
+  box-sizing: border-box;
   margin-top: 20rpx;
 }
 
 .btn-take {
-  min-height: 88rpx;
+  width: 100%;
+  min-width: 0;
+  height: 72rpx;
+  min-height: 0;
+  box-sizing: border-box;
   font-size: 28rpx;
 }
 
@@ -143,10 +151,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 88rpx;
+  width: 100%;
+  min-width: 0;
+  height: 72rpx;
+  min-height: 0;
+  box-sizing: border-box;
   border-radius: 14rpx;
   color: #8B6CFF;
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 600;
   background: #EEE8FF;
   border: 1.5rpx solid rgba(139, 108, 255, 0.25);

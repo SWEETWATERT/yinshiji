@@ -2,42 +2,189 @@
   padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
 }
 
+/* ── User Card ── */
 .user-card {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 20rpx;
-  margin-top: 24rpx;
-  padding: 24rpx;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 28rpx 0 0 28rpx;
+  margin: 24rpx 0;
+  overflow: hidden;
+  min-height: 360rpx;
+  position: relative;
 }
 
-.avatar {
+.user-card-left {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex: 0 0 80rpx;
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 24rpx;
-  font-size: 34rpx;
-  line-height: 1;
-  background: #fff0f5;
-}
-
-.user-main {
+  gap: 22rpx;
+  flex: 1;
   min-width: 0;
+  padding-bottom: 28rpx;
+  position: relative;
+  z-index: 2;
+  width: 58%;
 }
 
-.nickname {
-  color: #2f2936;
-  font-size: 30rpx;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.setting-card {
-  margin-top: 24rpx;
+.user-avatar {
+  flex: 0 0 96rpx;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
   overflow: hidden;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.user-name {
+  color: #25232A;
+  font-size: 34rpx;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.user-tag {
+  color: #807987;
+  font-size: 24rpx;
+}
+
+.user-streak {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  background: #EEE8FF;
+  color: #8B6CFF;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.user-character {
+  position: absolute;
+  right: -10rpx;
+  bottom: -8rpx;
+  width: 360rpx;
+  height: 420rpx;
+  z-index: 1;
+  opacity: 1;
+}
+
+/* ── Module Title ── */
+.module-title {
+  color: #25232A;
+  font-size: 34rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+/* ── Data Grid 2×2 ── */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.data-card {
+  padding: 24rpx 22rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.data-label {
+  color: #807987;
+  font-size: 24rpx;
+  font-weight: 400;
+}
+
+.data-num-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5rpx;
+}
+
+.data-big {
+  color: #25232A;
+  font-size: 52rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.data-unit {
+  color: #807987;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+/* ── Diet Mode Card ── */
+.mode-card {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  padding: 0;
+  margin-bottom: 24rpx;
+}
+
+.mode-accent {
+  width: 6rpx;
+  flex-shrink: 0;
+  background: #7FA66A;
+}
+
+.mode-inner {
+  flex: 1;
+  padding: 22rpx 22rpx 22rpx 20rpx;
+}
+
+.mode-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 10rpx;
+}
+
+.mode-name {
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.mode-badge {
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  background: #EAF3E4;
+  color: #7FA66A;
+  font-size: 23rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mode-desc {
+  color: #807987;
+  font-size: 26rpx;
+  line-height: 1.6;
+  display: block;
+}
+
+/* ── Privacy Section ── */
+.privacy-section {
+  overflow: hidden;
+}
+
+.privacy-hd {
+  padding: 20rpx 28rpx 12rpx;
+  color: #807987;
+  font-size: 24rpx;
+  font-weight: 500;
+  border-bottom: 1rpx solid #E9E1D8;
 }
 
 .setting-row {
@@ -45,71 +192,28 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 96rpx;
+  min-height: 88rpx;
   padding: 0 28rpx;
-  border-bottom: 1rpx solid #f0edf2;
-  color: #2f2936;
-  font-size: 26rpx;
+  border-top: 1rpx solid #E9E1D8;
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 400;
   text-align: left;
-  background: #fff;
+  background: transparent;
 }
 
-.setting-row.last {
-  border-bottom: 0;
-}
-
-.setting-row.danger {
-  color: #d85c76;
-  border-top: 1rpx solid #f0edf2;
-  border-bottom: 0;
+.setting-row-last {
+  color: #807987;
 }
 
 .setting-label {
   flex: 1;
-  font-weight: 400;
   text-align: left;
-  white-space: nowrap;
 }
 
-.setting-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12rpx;
-  min-width: 176rpx;
-  color: #8c8498;
-  font-size: 26rpx;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.setting-right.compact {
-  min-width: 40rpx;
-}
-
-.arrow {
-  color: #b8b1c0;
-  font-size: 34rpx;
+.setting-arr {
+  color: #C4B8D0;
+  font-size: 40rpx;
+  font-weight: 300;
   line-height: 1;
-}
-
-.goal-card {
-  margin-top: 24rpx;
-  padding: 28rpx;
-}
-
-.goal-copy,
-.privacy-copy {
-  margin-top: 10rpx;
-  color: #8c8498;
-  font-size: 26rpx;
-  line-height: 1.55;
-}
-
-.privacy-row {
-  padding: 28rpx;
-}
-
-.login-button {
-  margin-top: 28rpx;
 }

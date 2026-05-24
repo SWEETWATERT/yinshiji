@@ -1,24 +1,43 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/abstract-da-vinci-bg.jpg" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
 <view class="page page-container diary-page">
-  <view class="page-header">
+
+  <!-- Brand Header -->
+  <brand-header></brand-header>
+
+  <!-- Header -->
+  <view class="diary-header">
     <view>
       <view class="page-title">饮食日记</view>
       <view class="page-subtitle">连续记录 23 天</view>
     </view>
-    <button class="report-entry" bindtap="goReport">周报</button>
+    <button class="report-btn" bindtap="goReport">周报</button>
   </view>
 
+  <!-- Streak Card -->
   <view class="streak-card section-card">
-    <view>
-      <view class="muted">连续记录</view>
-      <view class="streak-line"><text class="streak">23</text><text class="streak-unit">天</text></view>
+    <view class="streak-left">
+      <text class="streak-desc">连续记录</text>
+      <view class="streak-num-row">
+        <text class="streak-num">23</text>
+        <text class="streak-unit">天</text>
+      </view>
     </view>
-    <view class="streak-copy">继续轻松打卡</view>
+    <view class="streak-right">
+      <view class="streak-btn">继续打卡</view>
+    </view>
   </view>
 
+  <!-- Date Strip -->
   <scroll-view class="date-strip" scroll-x>
     <view class="date-inner">
       <block wx:for="{{dates}}" wx:key="date">
-        <view class="date-item {{selectedDate === item.date ? 'active' : ''}}" data-date="{{item.date}}" bindtap="selectDate">
+        <view
+          class="date-item {{selectedDate === item.date ? 'date-active' : ''}}"
+          data-date="{{item.date}}"
+          bindtap="selectDate"
+        >
           <text class="date-day">{{item.day}}</text>
           <text class="date-week">{{item.week}}</text>
         </view>
@@ -26,66 +45,64 @@
     </view>
   </scroll-view>
 
-  <view class="section-card mood-card">
-    <view class="section-title">心情记录</view>
-    <view class="chip-row">
-      <block wx:for="{{moods}}" wx:key="*this">
-        <view class="chip {{selectedMood === item ? 'chip-active' : ''}}" data-value="{{item}}" bindtap="selectMood">{{item}}</view>
-      </block>
-    </view>
-    <view class="section-title state-title">餐后状态</view>
-    <view class="chip-row">
-      <block wx:for="{{states}}" wx:key="*this">
-        <view class="chip">{{item}}</view>
-      </block>
-    </view>
-  </view>
-
-  <view class="section-block">
-    <view class="section-title">今日餐食状态</view>
-    <view class="meal-status-list">
-      <block wx:for="{{mealCards}}" wx:key="type">
-        <view class="meal-status-row section-card">
-          <view class="meal-icon">{{item.icon}}</view>
-          <view class="meal-info">
-            <view class="meal-name">{{item.name}}</view>
-            <view class="meal-sub">{{item.recorded ? item.kcal + ' kcal' : '还未记录'}}</view>
-          </view>
-          <view class="status-chip {{item.recorded ? 'done' : ''}}">{{item.recorded ? '已记录' : '未记录'}}</view>
+  <!-- Meal Photo Wall -->
+  <view class="module-title">今日餐食</view>
+  <view class="photo-wall">
+    <block wx:for="{{mealCards}}" wx:key="type">
+      <view class="photo-card section-card {{item.recorded ? '' : 'photo-empty'}}">
+        <view class="photo-top ph-tone-{{item.tone}}">
+          <image wx:if="{{item.imageUrl}}" class="photo-real-img" src="{{item.imageUrl}}" mode="aspectFill"></image>
+          <text wx:else class="photo-meal-icon">{{item.icon}}</text>
+          <view wx:if="{{item.recorded}}" class="photo-check">✓</view>
         </view>
-      </block>
+        <view class="photo-meta">
+          <text class="photo-name">{{item.name}}</text>
+          <text class="photo-kcal {{item.recorded ? '' : 'dim'}}">
+            {{item.recorded ? item.kcal + ' kcal' : '待记录'}}
+          </text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- Mood & State -->
+  <view class="mood-card section-card">
+    <view class="mood-section">
+      <text class="mood-title">心情记录</text>
+      <view class="chip-row">
+        <block wx:for="{{moods}}" wx:key="*this">
+          <view
+            class="chip {{selectedMood === item ? 'chip-active' : ''}}"
+            data-value="{{item}}"
+            bindtap="selectMood"
+          >{{item}}</view>
+        </block>
+      </view>
+    </view>
+    <view class="mood-divider"></view>
+    <view class="mood-section">
+      <text class="mood-title">餐后状态</text>
+      <view class="chip-row">
+        <block wx:for="{{states}}" wx:key="*this">
+          <view class="chip">{{item}}</view>
+        </block>
+      </view>
     </view>
   </view>
 
-  <view class="section-block">
-    <view class="section-title">餐食明细</view>
-    <view class="meal-list">
-      <block wx:if="{{meals.length}}">
-        <block wx:for="{{meals}}" wx:key="id">
-          <view class="meal-row section-card">
-            <view class="meal-top">
-              <view>
-                <view class="meal-title">{{mealTypeText[item.mealType] || item.mealType}}</view>
-                <view class="meal-time">{{item.time}}</view>
-              </view>
-              <view class="meal-kcal">{{item.totalNutrition.kcal}} kcal</view>
-            </view>
-            <scroll-view scroll-x class="food-wall">
-              <view class="food-inner">
-                <block wx:for="{{item.foods}}" wx:for-item="food" wx:key="id">
-                  <view class="food-tile">{{food.image}}</view>
-                </block>
-              </view>
-            </scroll-view>
-            <view class="food-names">
-              <block wx:for="{{item.foods}}" wx:for-item="food" wx:key="id">
-                <text class="food-name-item">{{food.name}}</text>
-              </block>
-            </view>
-          </view>
-        </block>
-      </block>
-      <view wx:else class="empty section-card">这一天还没有记录餐食</view>
+  <!-- AI Summary -->
+  <view class="summary-card section-card">
+    <view class="summary-hd">
+      <view class="summary-dot"></view>
+      <text class="summary-title">今日总结</text>
+    </view>
+    <text class="summary-body">
+      今天蛋白质摄入不错，蔬菜略少。晚餐可以补一份深色蔬菜，让今天的餐盘更完整。
+    </text>
+    <view class="summary-tags">
+      <text class="stag stag-good">蛋白质达标</text>
+      <text class="stag stag-warn">蔬菜偏少</text>
     </view>
   </view>
+
 </view>
