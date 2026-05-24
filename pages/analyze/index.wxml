@@ -1,57 +1,148 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/abstract-da-vinci-bg.jpg" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
 <view class="page page-container analyze-page">
-  <view class="summary-card section-card">
-    <view class="summary-head">
-      <view>
-        <view class="section-title">本餐估算</view>
-        <view class="page-subtitle">营养估算仅作生活方式参考</view>
-      </view>
-      <view class="score-pill">评分 {{healthScore}}</view>
-    </view>
-    <view class="kcal-line">
-      <text class="kcal">{{totalNutrition.kcal}}</text>
-      <text class="kcal-unit">kcal</text>
-    </view>
-    <view class="macro-grid">
-      <view class="macro-item">
-        <text class="macro-label">蛋白质</text>
-        <text class="macro-value">{{totalNutrition.protein}}g</text>
-      </view>
-      <view class="macro-item">
-        <text class="macro-label">碳水</text>
-        <text class="macro-value">{{totalNutrition.carbs}}g</text>
-      </view>
-      <view class="macro-item">
-        <text class="macro-label">脂肪</text>
-        <text class="macro-value">{{totalNutrition.fat}}g</text>
-      </view>
-    </view>
+
+  <!-- Back -->
+  <view class="analyze-nav">
+    <button class="nav-back-btn" bindtap="goBack">‹ 返回</button>
+    <view class="analyze-title">分析结果</view>
   </view>
 
-  <view class="section-block">
-    <view class="section-title">识别食物</view>
+  <!-- ── Loading ── -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">AI 正在识别食物和估算营养…</text>
+  </view>
+
+  <!-- ── Main Content ── -->
+  <block wx:else>
+
+    <!-- Meal Photo -->
+    <view wx:if="{{imageUrl}}" class="meal-photo-card section-card">
+      <image class="meal-photo-img" src="{{imageUrl}}" mode="aspectFill"></image>
+      <view class="meal-photo-label">本次记录的餐食</view>
+    </view>
+    <view wx:else class="no-photo-hint section-card">
+      <text class="no-photo-icon">📷</text>
+      <text class="no-photo-text">未获取到餐食图片，请返回重新拍照。</text>
+    </view>
+
+    <!-- Warnings -->
+    <block wx:if="{{warnings.length > 0}}">
+      <view class="warning-card" wx:for="{{warnings}}" wx:key="*this">
+        <text class="warning-icon">⚠</text>
+        <text class="warning-text">{{item}}</text>
+      </view>
+    </block>
+
+    <!-- Total Nutrition Summary -->
+    <view class="summary-card section-card">
+      <view class="summary-head">
+        <view class="page-subtitle">本餐营养估算</view>
+        <view class="score-pill">{{total.kcal}} kcal</view>
+      </view>
+      <view class="macro-grid">
+        <view class="macro-item">
+          <text class="macro-label">蛋白质</text>
+          <text class="macro-value">{{total.proteinG}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">碳水</text>
+          <text class="macro-value">{{total.carbsG}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">脂肪</text>
+          <text class="macro-value">{{total.fatG}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">膳食纤维</text>
+          <text class="macro-value">{{total.fiberG}}g</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Food List -->
+    <view class="section-hd">
+      <view class="food-list-hd">识别食物</view>
+      <view class="add-food-btn" bindtap="openSearch">＋ 添加</view>
+    </view>
+
+    <!-- Empty state -->
+    <view wx:if="{{detectedFoods.length === 0}}" class="empty-state section-card">
+      <text class="empty-icon">📝</text>
+      <text class="empty-text">暂未识别到食物</text>
+      <text class="empty-hint">请在备注中输入食物名称，或点击「＋ 添加」手动选择</text>
+    </view>
+
+    <!-- Food cards -->
     <view class="food-list">
-      <block wx:for="{{foods}}" wx:key="id">
-        <view class="food-card section-card">
-          <view class="food-img">{{item.image}}</view>
-          <view class="food-main">
-            <view class="food-name">{{item.name}}</view>
-            <view class="food-sub">{{item.weight}}g · {{item.kcal}} kcal</view>
+      <block wx:for="{{detectedFoods}}" wx:key="uid">
+        <view class="food-card section-card {{item.needUserConfirm ? 'card-unconfirmed' : ''}}">
+          <view class="food-row-top">
+            <view class="food-icon-box">{{item.icon}}</view>
+            <view class="food-main">
+              <view class="food-name">{{item.nameCn}}</view>
+              <view class="food-sub">{{item.kcal}} kcal · 蛋白 {{item.proteinG}}g</view>
+            </view>
+            <view wx:if="{{item.needUserConfirm}}" class="confirm-badge">请确认</view>
+            <button class="delete-btn" data-uid="{{item.uid}}" bindtap="deleteFood">×</button>
           </view>
-          <view class="food-actions">
-            <button class="food-action-button" data-id="{{item.id}}" data-delta="-10" bindtap="adjustWeight">－</button>
-            <button class="food-action-button" data-id="{{item.id}}" data-delta="10" bindtap="adjustWeight">＋</button>
+          <view class="food-row-weight">
+            <button class="weight-btn" data-uid="{{item.uid}}" data-delta="-10" bindtap="adjustWeight">－</button>
+            <text class="weight-val">{{item.weightG}}g</text>
+            <button class="weight-btn" data-uid="{{item.uid}}" data-delta="10" bindtap="adjustWeight">＋</button>
           </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- AI Advice -->
+    <view wx:if="{{aiAdvice}}" class="advice-card section-card">
+      <view class="advice-hd">
+        <view class="advice-dot"></view>
+        <text class="advice-title">AI 营养建议</text>
+      </view>
+      <text class="advice-body">{{aiAdvice}}</text>
+    </view>
+
+  </block>
+
+  <!-- Confirm Save -->
+  <view class="save-bar fixed-bottom-button">
+    <button class="primary-button save-button" bindtap="confirmSave">确认并保存</button>
+  </view>
+
+  <!-- Search Panel -->
+  <view wx:if="{{showSearch}}" class="search-mask" bindtap="closeSearch"></view>
+  <view wx:if="{{showSearch}}" class="search-panel">
+    <view class="search-hd">
+      <text class="search-title">添加食物</text>
+      <button class="search-close" bindtap="closeSearch">×</button>
+    </view>
+    <input
+      class="search-input"
+      placeholder="搜索食物，如：鸡蛋 / 西兰花"
+      placeholder-class="search-placeholder"
+      value="{{searchKeyword}}"
+      bindinput="onSearchInput"
+      focus
+    />
+    <view class="search-results">
+      <view wx:if="{{searchKeyword && searchResults.length === 0}}" class="search-empty">
+        未找到"{{searchKeyword}}"，请换个关键词
+      </view>
+      <block wx:for="{{searchResults}}" wx:key="id">
+        <view class="search-result-item" data-id="{{item.id}}" bindtap="addFoodFromSearch">
+          <text class="sri-icon">{{item.icon}}</text>
+          <view class="sri-info">
+            <text class="sri-name">{{item.nameCn}}</text>
+            <text class="sri-cal">{{item.kcalPer100g}} kcal/100g · {{item.category}}</text>
+          </view>
+          <text class="sri-add">＋</text>
         </view>
       </block>
     </view>
   </view>
 
-  <view class="advice-card section-card">
-    <view class="section-title">AI 营养建议</view>
-    <view class="advice">{{suggestion}}</view>
-  </view>
-
-  <view class="safe-bottom save-bar">
-    <button class="primary-button save-button" bindtap="saveMeal">保存记录</button>
-  </view>
 </view>
