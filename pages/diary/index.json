@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "饮食日记"
+  "navigationBarTitleText": "饮食日记",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
 }

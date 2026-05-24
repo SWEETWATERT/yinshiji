@@ -1,46 +1,78 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.10;"></image>
+</view>
 <view class="page page-container record-page">
+
+  <!-- Brand Header -->
+  <brand-header></brand-header>
+
+  <!-- Header -->
   <view class="page-title">记录这一餐</view>
-  <view class="page-subtitle">拍照或从相册选择餐食照片</view>
+  <view class="page-subtitle">AI 帮你看懂热量和营养</view>
 
-  <view class="section-card meal-section">
-    <view class="section-title">餐次</view>
-    <view class="chip-row">
-      <block wx:for="{{mealTypes}}" wx:key="type">
-        <view class="chip {{selectedMeal === item.type ? 'chip-active' : ''}}" data-type="{{item.type}}" bindtap="selectMeal">
-          <text class="chip-icon">{{item.icon}}</text>
-          <text>{{item.label}}</text>
-        </view>
-      </block>
-    </view>
-  </view>
-
-  <view class="section-card upload-card">
-    <view class="section-title">餐食照片</view>
-    <button class="upload-box" bindtap="chooseFromAlbum">
-      <image wx:if="{{imagePath}}" class="upload-image" src="{{imagePath}}" mode="aspectFill"></image>
-      <view wx:else class="upload-empty">
-        <text class="upload-icon">📷</text>
-        <text class="upload-title">上传或拍摄餐食照片</text>
-        <text class="upload-hint">用于模拟识别食物和营养估算</text>
+  <!-- Meal Type Pills -->
+  <view class="meal-type-wrap">
+    <block wx:for="{{mealTypes}}" wx:key="type">
+      <view
+        class="meal-pill {{selectedMeal === item.type ? 'meal-pill-active' : ''}}"
+        data-type="{{item.type}}"
+        bindtap="selectMeal"
+      >
+        <text class="pill-icon">{{item.icon}}</text>
+        <text class="pill-label">{{item.label}}</text>
       </view>
-    </button>
-    <view class="upload-actions">
-      <button class="upload-action" bindtap="takePhoto">拍下这一餐</button>
-      <button class="upload-action" bindtap="chooseFromAlbum">从相册选择</button>
-    </view>
+    </block>
   </view>
 
-  <view class="section-card note-card">
-    <view class="section-title">备注</view>
-    <view class="chip-row">
-      <block wx:for="{{noteTags}}" wx:key="*this">
-        <view class="chip {{note === item ? 'chip-active' : ''}}" data-note="{{item}}" bindtap="setNote">{{item}}</view>
+  <!-- Camera Upload Card -->
+  <view class="upload-card section-card">
+    <view class="upload-zone" bindtap="takePhoto">
+      <block wx:if="{{imagePath}}">
+        <image class="upload-preview" src="{{imagePath}}" mode="aspectFill"></image>
+      </block>
+      <block wx:else>
+        <view class="cam-wrap">
+          <view class="cam-body">
+            <view class="cam-lens"></view>
+          </view>
+        </view>
+        <text class="upload-title">点击拍照或上传餐食照片</text>
+        <text class="upload-hint">支持识别食物和估算营养</text>
       </block>
     </view>
-    <textarea class="note-input" value="{{note}}" bindinput="onNoteInput" placeholder="例如：少油、半碗饭、无糖"></textarea>
+    <view class="upload-actions">
+      <button class="btn-take primary-button" bindtap="takePhoto">拍照</button>
+      <button class="btn-album btn-ghost" bindtap="chooseFromAlbum">从相册选择</button>
+    </view>
   </view>
 
-  <view class="fixed-bottom-button action-bottom">
-    <button class="primary-button analyze-button" bindtap="startAnalyze">开始分析</button>
+  <!-- Note Section -->
+  <view class="note-card section-card">
+    <view class="note-head">小备注</view>
+    <view class="note-chips">
+      <block wx:for="{{noteTags}}" wx:key="*this">
+        <view
+          class="chip {{note === item ? 'chip-active' : ''}}"
+          data-note="{{item}}"
+          bindtap="setNote"
+        >{{item}}</view>
+      </block>
+    </view>
+    <view class="note-label">今天这餐有什么特别？</view>
+    <textarea
+      class="note-input"
+      value="{{note}}"
+      bindinput="onNoteInput"
+      placeholder="比如少油少盐、米饭半碗、无糖饮品…"
+      placeholder-class="note-placeholder"
+      maxlength="100"
+      auto-height
+    ></textarea>
   </view>
+
+  <!-- Fixed Analyze Button -->
+  <view class="fixed-bottom-button">
+    <button class="primary-button" bindtap="startAnalyze">开始分析</button>
+  </view>
+
 </view>

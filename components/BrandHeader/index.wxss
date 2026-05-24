@@ -1,0 +1,32 @@
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin: -32rpx -32rpx 24rpx -32rpx;
+  padding: 18rpx 32rpx 20rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border-bottom: 1rpx solid #DED6C8;
+  border-radius: 0 0 24rpx 24rpx;
+}
+
+.brand-logo-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.brand-logo-img {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+}
+
+.brand-name {
+  color: #20231F;
+  font-size: 36rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.5rpx;
+}

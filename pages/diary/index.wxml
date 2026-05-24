@@ -1,5 +1,5 @@
 <view class="page-bg-layer">
-  <image class="page-bg-img" src="/assets/abstract-da-vinci-bg.jpg" mode="aspectFill" style="opacity:0.08;"></image>
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.10;"></image>
 </view>
 <view class="page page-container diary-page">
 

@@ -1,30 +1,11 @@
-const {
-  buildSuggestion,
-  calculateFoodNutrition,
-  calculateHealthScore,
-  calculateTotals
-} = require('../utils/nutrition')
+/**
+ * 已迁移至 services/mealAnalysis.js
+ * 此文件保留向后兼容，直接代理到新服务
+ */
+const { analyzeMealImage } = require('../services/mealAnalysis')
 
-function mockAnalyzeMealImage({ imagePath, mealType }) {
-  const foods = [
-    { id: 'rice', name: '米饭', weight: 150, image: '🍚' },
-    { id: 'chicken', name: '鸡胸肉', weight: 120, image: '🍗' },
-    { id: 'broccoli', name: '西兰花', weight: 80, image: '🥦' },
-    { id: 'egg', name: '鸡蛋', weight: 50, image: '🥚' }
-  ].map(calculateFoodNutrition)
-
-  const totalNutrition = calculateTotals(foods)
-
-  return {
-    imagePath,
-    mealType,
-    foods,
-    totalNutrition,
-    healthScore: calculateHealthScore(totalNutrition),
-    suggestion: buildSuggestion(totalNutrition)
-  }
+function mockAnalyzeMealImage({ imagePath, mealType, note }) {
+  return analyzeMealImage({ imagePath, mealType, note })
 }
 
-module.exports = {
-  mockAnalyzeMealImage
-}
+module.exports = { mockAnalyzeMealImage }

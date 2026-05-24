@@ -1,0 +1,7 @@
+// Copy this file to services/config.local.js and fill in your real credentials.
+// config.local.js is gitignored — never commit it.
+
+module.exports = {
+  FATSECRET_CLIENT_ID:     'YOUR_FATSECRET_CLIENT_ID',
+  FATSECRET_CLIENT_SECRET: 'YOUR_FATSECRET_CLIENT_SECRET'
+}

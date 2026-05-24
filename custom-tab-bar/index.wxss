@@ -1,0 +1,86 @@
+/* ── Custom Tab Bar ── */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(120rpx + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 999;
+}
+
+.tab-bar-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1rpx;
+  background: #E9E1D8;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding-top: 10rpx;
+}
+
+.tab-label {
+  color: #8D8499;
+  font-size: 24rpx;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.label-active {
+  color: #8B6CFF;
+  font-weight: 700;
+}
+
+/* ── Tab Icons via SVG data URI ── */
+.tab-icon {
+  width: 44rpx;
+  height: 44rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Home */
+.icon-home {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M3 13L12 4L21 13V22H15V16H9V22H3V13Z' stroke='%238D8499' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.icon-home.icon-active {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M3 13L12 4L21 13V22H15V16H9V22H3V13Z' stroke='%238B6CFF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Record (Camera) */
+.icon-record {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Crect x='2' y='7' width='20' height='14' rx='3' stroke='%238D8499' stroke-width='2'/%3E%3Cpath d='M16 7V6a2 2 0 00-2-2h-4a2 2 0 00-2 2v1' stroke='%238D8499' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='14' r='3' stroke='%238D8499' stroke-width='2'/%3E%3C/svg%3E");
+}
+.icon-record.icon-active {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Crect x='2' y='7' width='20' height='14' rx='3' stroke='%238B6CFF' stroke-width='2.5'/%3E%3Cpath d='M16 7V6a2 2 0 00-2-2h-4a2 2 0 00-2 2v1' stroke='%238B6CFF' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='14' r='3' stroke='%238B6CFF' stroke-width='2.5'/%3E%3C/svg%3E");
+}
+
+/* Diary (Book) */
+.icon-diary {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Crect x='4' y='2' width='16' height='20' rx='2' stroke='%238D8499' stroke-width='2'/%3E%3Cpath d='M8 7h8M8 11h8M8 15h5' stroke='%238D8499' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.icon-diary.icon-active {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Crect x='4' y='2' width='16' height='20' rx='2' stroke='%238B6CFF' stroke-width='2.5'/%3E%3Cpath d='M8 7h8M8 11h8M8 15h5' stroke='%238B6CFF' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* Profile (Person) */
+.icon-profile {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='8' r='4' stroke='%238D8499' stroke-width='2'/%3E%3Cpath d='M4 20c0-4 3.6-7 8-7s8 3 8 7' stroke='%238D8499' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.icon-profile.icon-active {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='8' r='4' stroke='%238B6CFF' stroke-width='2.5'/%3E%3Cpath d='M4 20c0-4 3.6-7 8-7s8 3 8 7' stroke='%238B6CFF' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}

@@ -1,5 +1,5 @@
 {
-  "appid": "wx71e8f31dc3521875",
+  "appid": "wxaaf0b18d6aa69fcc",
   "projectname": "yinshiji",
   "compileType": "miniprogram",
   "setting": {
@@ -32,5 +32,6 @@
     "ignore": [],
     "include": []
   },
-  "editorSetting": {}
+  "editorSetting": {},
+  "libVersion": "3.16.0"
 }

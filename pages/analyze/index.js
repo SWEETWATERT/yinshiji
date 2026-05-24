@@ -1,66 +1,140 @@
-const {
-  buildSuggestion,
-  calculateFoodNutrition,
-  calculateHealthScore,
-  calculateTotals
-} = require('../../utils/nutrition')
-const { mockAnalyzeMealImage } = require('../../mock/mockAnalyzeMealImage')
+const { analyzeMealImage, recalcFoodWeight, searchFoodsByKeyword, _calcTotals } = require('../../services/mealAnalysis')
+const { getFoodById, buildFoodItem } = require('../../mock/foodDatabase')
 const { formatDate, formatTime, saveMeal } = require('../../utils/storage')
+const { calculateHealthScore } = require('../../utils/nutrition')
 
 Page({
   data: {
-    imagePath: '',
+    imageUrl: '',
     mealType: 'lunch',
     note: '',
-    foods: [],
-    totalNutrition: { kcal: 0, protein: 0, carbs: 0, fat: 0 },
-    healthScore: 88,
-    suggestion: ''
+    loading: true,
+    analysisId: '',
+    detectedFoods: [],
+    total: { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0, fiberG: 0 },
+    warnings: [],
+    aiAdvice: '',
+    showSearch: false,
+    searchKeyword: '',
+    searchResults: []
   },
 
   onLoad(query) {
-    const imagePath = decodeURIComponent(query.imagePath || '')
+    const imageUrl = decodeURIComponent(query.imagePath || query.imageUrl || '')
     const mealType = query.mealType || 'lunch'
     const note = decodeURIComponent(query.note || '')
-    const result = mockAnalyzeMealImage({ imagePath, mealType })
-    this.setData({ ...result, note })
+    this.setData({ imageUrl, mealType, note })
+    this._doAnalyze(imageUrl, mealType, note)
   },
 
-  adjustWeight(event) {
-    const id = event.currentTarget.dataset.id
-    const delta = Number(event.currentTarget.dataset.delta)
-    const foods = this.data.foods.map((food) => {
-      if (food.id !== id) return food
-      return calculateFoodNutrition({
-        ...food,
-        weight: Math.max(10, Number(food.weight) + delta)
+  _doAnalyze(imageUrl, mealType, note) {
+    this.setData({ loading: true })
+    analyzeMealImage({ imageUrl, mealType, note })
+      .then(result => {
+        this.setData({
+          loading: false,
+          analysisId: result.analysisId,
+          imageUrl: result.imageUrl || imageUrl,
+          detectedFoods: result.detectedFoods,
+          total: result.total,
+          warnings: result.warnings,
+          aiAdvice: result.aiAdvice
+        })
       })
+      .catch(() => {
+        this.setData({ loading: false })
+        wx.showToast({ title: '分析失败，请重试', icon: 'none' })
+      })
+  },
+
+  // ── 删除食物 ──────────────────────────────────
+  deleteFood(e) {
+    const uid = e.currentTarget.dataset.uid
+    const detectedFoods = this.data.detectedFoods.filter(f => f.uid !== uid)
+    this.setData({ detectedFoods, total: _calcTotals(detectedFoods) })
+  },
+
+  // ── 调整重量 ─────────────────────────────────
+  adjustWeight(e) {
+    const { uid, delta } = e.currentTarget.dataset
+    const detectedFoods = this.data.detectedFoods.map(f => {
+      if (f.uid !== uid) return f
+      const newW = Math.max(10, f.weightG + Number(delta))
+      return recalcFoodWeight(f, newW)
     })
-    const totalNutrition = calculateTotals(foods)
+    this.setData({ detectedFoods, total: _calcTotals(detectedFoods) })
+  },
+
+  // ── 搜索 + 添加食物 ───────────────────────────
+  openSearch() {
+    this.setData({ showSearch: true, searchKeyword: '', searchResults: [] })
+  },
+
+  closeSearch() {
+    this.setData({ showSearch: false })
+  },
+
+  onSearchInput(e) {
+    const kw = e.detail.value
     this.setData({
-      foods,
-      totalNutrition,
-      healthScore: calculateHealthScore(totalNutrition),
-      suggestion: buildSuggestion(totalNutrition)
+      searchKeyword: kw,
+      searchResults: kw.trim() ? searchFoodsByKeyword(kw) : []
     })
   },
 
-  saveMeal() {
+  addFoodFromSearch(e) {
+    const foodId = e.currentTarget.dataset.id
+    const food = getFoodById(foodId)
+    if (!food) return
+    const newItem = buildFoodItem(food, food.defaultWeightG, 1.0)
+    const detectedFoods = [...this.data.detectedFoods, newItem]
+    this.setData({
+      detectedFoods,
+      total: _calcTotals(detectedFoods),
+      showSearch: false,
+      searchKeyword: '',
+      searchResults: []
+    })
+    wx.showToast({ title: `已添加 ${food.nameCn}`, icon: 'none' })
+  },
+
+  // ── 确认保存 ─────────────────────────────────
+  confirmSave() {
+    const { detectedFoods, total, mealType, imageUrl, note, aiAdvice } = this.data
+    if (!detectedFoods.length) {
+      wx.showToast({ title: '请先添加食物', icon: 'none' })
+      return
+    }
     const meal = {
-      id: `meal-${Date.now()}`,
-      mealType: this.data.mealType,
+      id: `meal_${Date.now()}`,
+      mealType,
       date: formatDate(),
       time: formatTime(),
-      imageUrl: this.data.imagePath,
-      note: this.data.note,
-      foods: this.data.foods,
-      totalNutrition: this.data.totalNutrition,
-      healthScore: this.data.healthScore,
-      suggestion: this.data.suggestion
+      imageUrl,
+      note,
+      foods: detectedFoods.map(f => ({
+        id: f.uid,
+        name: f.nameCn,
+        weight: f.weightG,
+        kcal: f.kcal,
+        protein: f.proteinG,
+        carbs: f.carbsG,
+        fat: f.fatG,
+        fiber: f.fiberG
+      })),
+      totalNutrition: {
+        kcal: total.kcal,
+        protein: total.proteinG,
+        carbs: total.carbsG,
+        fat: total.fatG,
+        fiber: total.fiberG
+      },
+      healthScore: calculateHealthScore(total),
+      suggestion: aiAdvice
     }
     saveMeal(meal)
-    wx.showToast({ title: '已保存' })
-    setTimeout(() => wx.switchTab({ url: '/pages/home/index' }), 450)
+    wx.showToast({ title: '已保存', icon: 'success' })
+    setTimeout(() => wx.switchTab({ url: '/pages/home/index' }), 500)
   },
 
   goBack() {

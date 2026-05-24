@@ -1,68 +1,87 @@
-const nutritionMap = {
-  米饭: { kcal: 116, protein: 2.6, carbs: 25.9, fat: 0.3 },
-  鸡胸肉: { kcal: 165, protein: 31, carbs: 0, fat: 3.6 },
-  西兰花: { kcal: 34, protein: 2.8, carbs: 6.6, fat: 0.4 },
-  鸡蛋: { kcal: 143, protein: 12.6, carbs: 0.7, fat: 9.5 },
-  糙米饭: { kcal: 116, protein: 2.6, carbs: 23, fat: 0.9 },
-  圣女果: { kcal: 22, protein: 1, carbs: 4, fat: 0.2 },
-  橄榄油: { kcal: 884, protein: 0, carbs: 0, fat: 100 }
+/**
+ * 营养计算工具 — 使用 foodDatabase 作为数据源
+ */
+const { getFoodById, buildFoodItem } = require('../mock/foodDatabase')
+
+function round1(n) {
+  return Math.round(n * 10) / 10
 }
 
-function round(value, digits = 1) {
-  const base = 10 ** digits
-  return Math.round(value * base) / base
-}
-
-function calculateFoodNutrition(food) {
-  const item = nutritionMap[food.name] || { kcal: 80, protein: 3, carbs: 10, fat: 2 }
-  const ratio = Number(food.weight || 0) / 100
-
-  return {
-    ...food,
-    kcal: Math.round(item.kcal * ratio),
-    protein: round(item.protein * ratio),
-    carbs: round(item.carbs * ratio),
-    fat: round(item.fat * ratio)
-  }
-}
-
+/**
+ * 计算一组食物的营养合计
+ */
 function calculateTotals(foods) {
   return foods.reduce(
-    (totals, food) => {
-      const item = calculateFoodNutrition(food)
-      return {
-        kcal: totals.kcal + item.kcal,
-        protein: round(totals.protein + item.protein),
-        carbs: round(totals.carbs + item.carbs),
-        fat: round(totals.fat + item.fat)
-      }
-    },
-    { kcal: 0, protein: 0, carbs: 0, fat: 0 }
+    (acc, f) => ({
+      kcal: acc.kcal + (f.kcal || 0),
+      protein: round1(acc.protein + (f.proteinG || f.protein || 0)),
+      carbs: round1(acc.carbs + (f.carbsG || f.carbs || 0)),
+      fat: round1(acc.fat + (f.fatG || f.fat || 0)),
+      fiber: round1(acc.fiber + (f.fiberG || f.fiber || 0))
+    }),
+    { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
   )
 }
 
+/**
+ * 根据食物名和重量计算营养（兼容旧接口）
+ */
+function calculateFoodNutrition(food) {
+  // Try to find in database by nameCn
+  const dbFood = getFoodById(food.id) || findByName(food.name)
+  const ratio = Number(food.weight || 0) / 100
+
+  if (dbFood) {
+    return buildFoodItem(dbFood, Number(food.weight || 0), food.confidence || 1.0)
+  }
+
+  // Fallback for unknown foods
+  return {
+    ...food,
+    kcal: Math.round(80 * ratio),
+    protein: round1(3 * ratio),
+    carbs: round1(10 * ratio),
+    fat: round1(2 * ratio),
+    fiber: round1(1 * ratio)
+  }
+}
+
+function findByName(name) {
+  if (!name) return null
+  const { FOOD_DATABASE } = require('../mock/foodDatabase')
+  return FOOD_DATABASE.find(f =>
+    f.nameCn === name || (f.aliases && f.aliases.includes(name))
+  ) || null
+}
+
 function calculateHealthScore(totals) {
-  let score = 88
-  if (totals.protein >= 30) score += 4
-  if (totals.kcal > 800) score -= 8
-  if (totals.fat > 35) score -= 4
+  const kcal = totals.kcal || 0
+  const protein = totals.protein || totals.proteinG || 0
+  const fat = totals.fat || totals.fatG || 0
+  let score = 78
+  if (protein >= 20) score += 6
+  else if (protein >= 10) score += 3
+  if (kcal <= 600) score += 5
+  else if (kcal > 900) score -= 8
+  if (fat > 35) score -= 5
   return Math.max(60, Math.min(98, score))
 }
 
 function buildSuggestion(totals) {
-  if (totals.protein < 25) {
-    return '这餐蛋白质略少，可以补充鸡蛋、豆腐或鱼虾，作为生活方式参考。'
+  const protein = totals.protein || totals.proteinG || 0
+  const kcal = totals.kcal || 0
+  if (protein < 15) {
+    return '本餐蛋白质略少，可以补充鸡蛋、豆腐或鱼虾。'
   }
-  if (totals.kcal > 800) {
-    return '这餐热量偏高，建议下一餐清淡一些，并搭配轻量活动。'
+  if (kcal > 800) {
+    return '本餐热量偏高，下一餐可以适当清淡，搭配轻量活动。'
   }
-  return '这餐搭配不错，蛋白质和蔬菜都比较均衡，饭后散步 20 分钟会更轻松。'
+  return '本餐搭配不错，蛋白质和蔬菜比较均衡，继续保持。'
 }
 
 module.exports = {
-  nutritionMap,
-  calculateFoodNutrition,
   calculateTotals,
+  calculateFoodNutrition,
   calculateHealthScore,
   buildSuggestion
 }

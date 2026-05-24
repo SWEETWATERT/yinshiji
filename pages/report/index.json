@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "营养报告"
+  "navigationBarTitleText": "营养报告",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
 }

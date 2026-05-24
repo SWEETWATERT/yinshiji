@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "今日饮食"
+  "navigationBarTitleText": "今日饮食",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
 }

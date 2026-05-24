@@ -67,10 +67,10 @@
 
 .user-character {
   position: absolute;
-  right: -10rpx;
-  bottom: -8rpx;
-  width: 360rpx;
-  height: 420rpx;
+  right: 0rpx;
+  bottom: 0rpx;
+  width: 300rpx;
+  height: 330rpx;
   z-index: 1;
   opacity: 1;
 }

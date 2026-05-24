@@ -15,6 +15,12 @@ Page({
     noteTags: ['少油', '半碗饭', '无糖', '外食', '夜宵', '自定义']
   },
 
+  onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 1 })
+    }
+  },
+
   selectMeal(event) {
     this.setData({ selectedMeal: event.currentTarget.dataset.type })
   },

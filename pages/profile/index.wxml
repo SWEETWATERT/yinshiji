@@ -1,49 +1,86 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.12;"></image>
+</view>
 <view class="page page-container profile-page">
+
+  <!-- Brand Header -->
+  <brand-header></brand-header>
+
+  <!-- Header -->
   <view class="page-title">我的</view>
   <view class="page-subtitle">个人目标与饮食偏好</view>
 
+  <!-- User Card -->
   <view class="user-card section-card">
-    <view class="avatar">🌸</view>
-    <view class="user-main">
-      <view class="nickname">{{user.nickname}}</view>
-      <view class="muted">微信 mock 登录 · 后续接入真实授权</view>
+    <view class="user-card-left">
+      <image class="user-avatar" src="/assets/girl-avatar.jpg" mode="aspectFill"></image>
+      <view class="user-info">
+        <view class="user-name">{{user.nickname || '小禾'}}</view>
+        <view class="user-tag">健康饮食 · 轻记录</view>
+        <view class="user-streak">连续记录 23 天</view>
+      </view>
+    </view>
+    <image class="user-character" src="/assets/girl-3d-character-crop.png" mode="aspectFit"></image>
+  </view>
+
+  <!-- Body Data 2×2 -->
+  <view class="module-title">身体数据</view>
+  <view class="data-grid">
+    <view class="data-card section-card">
+      <text class="data-label">身高</text>
+      <view class="data-num-row">
+        <text class="data-big">{{user.height || 165}}</text>
+        <text class="data-unit">cm</text>
+      </view>
+    </view>
+    <view class="data-card section-card">
+      <text class="data-label">体重</text>
+      <view class="data-num-row">
+        <text class="data-big">{{user.weight || 52}}</text>
+        <text class="data-unit">kg</text>
+      </view>
+    </view>
+    <view class="data-card section-card">
+      <text class="data-label">每日热量目标</text>
+      <view class="data-num-row">
+        <text class="data-big">{{user.calorieTarget || 1800}}</text>
+        <text class="data-unit">kcal</text>
+      </view>
+    </view>
+    <view class="data-card section-card">
+      <text class="data-label">蛋白质目标</text>
+      <view class="data-num-row">
+        <text class="data-big">{{user.proteinTarget || 90}}</text>
+        <text class="data-unit">g</text>
+      </view>
     </view>
   </view>
 
-  <view class="section-card setting-card">
-    <button class="setting-row" bindtap="showSettingToast">
-      <text class="setting-label">身高</text>
-      <view class="setting-right"><text>{{user.height}} cm</text><text class="arrow">›</text></view>
-    </button>
-    <button class="setting-row" bindtap="showSettingToast">
-      <text class="setting-label">体重</text>
-      <view class="setting-right"><text>{{user.weight}} kg</text><text class="arrow">›</text></view>
-    </button>
-    <button class="setting-row" bindtap="showSettingToast">
-      <text class="setting-label">每日热量目标</text>
-      <view class="setting-right"><text>{{user.calorieTarget}} kcal</text><text class="arrow">›</text></view>
-    </button>
-    <button class="setting-row last" bindtap="showSettingToast">
-      <text class="setting-label">蛋白质目标</text>
-      <view class="setting-right"><text>{{user.proteinTarget}} g</text><text class="arrow">›</text></view>
-    </button>
-  </view>
-
-  <view class="goal-card section-card">
-    <view class="section-title">饮食目标</view>
-    <view class="goal-copy">保持规律记录，优先补足蛋白质和蔬菜摄入，减少含糖饮料。</view>
-  </view>
-
-  <view class="section-card setting-card">
-    <view class="privacy-row">
-      <view class="section-title">隐私说明</view>
-      <view class="privacy-copy">当前版本仅使用本地 mock 数据，餐食记录保存在本机缓存中。</view>
+  <!-- Diet Mode Card -->
+  <view class="mode-card section-card">
+    <view class="mode-accent"></view>
+    <view class="mode-inner">
+      <view class="mode-hd">
+        <text class="mode-name">我的饮食模式</text>
+        <text class="mode-badge">轻盈健康</text>
+      </view>
+      <text class="mode-desc">
+        优先补足蛋白质和蔬菜摄入，减少含糖饮料，保持规律记录。
+      </text>
     </view>
-    <button class="setting-row danger" bindtap="clearLocalData">
+  </view>
+
+  <!-- Privacy Section -->
+  <view class="privacy-section section-card">
+    <view class="privacy-hd">数据与隐私</view>
+    <button class="setting-row" bindtap="clearLocalData">
       <text class="setting-label">清除本地数据</text>
-      <view class="setting-right compact"><text class="arrow">›</text></view>
+      <text class="setting-arr">›</text>
+    </button>
+    <button class="setting-row setting-row-last" bindtap="mockRelogin">
+      <text class="setting-label">重新登录</text>
+      <text class="setting-arr">›</text>
     </button>
   </view>
 
-  <button class="primary-button login-button" bindtap="mockRelogin">重新登录</button>
 </view>

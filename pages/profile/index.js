@@ -3,11 +3,18 @@ const { getUserProfile, saveUserProfile } = require('../../utils/storage')
 
 Page({
   data: {
-    user: {}
+    user: {},
+    avatarChar: '禾'
   },
 
   onShow() {
-    this.setData({ user: getUserProfile() || mockLogin() })
+    const user = getUserProfile() || mockLogin()
+    const name = user.nickname || '小禾'
+    const avatarChar = name.length >= 2 ? name[1] : name[0]
+    this.setData({ user, avatarChar })
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 3 })
+    }
   },
 
   mockRelogin() {
