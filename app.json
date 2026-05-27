@@ -1,11 +1,13 @@
 {
   "pages": [
+    "pages/splash/index",
     "pages/home/index",
     "pages/record/index",
     "pages/analyze/index",
     "pages/diary/index",
     "pages/report/index",
-    "pages/profile/index"
+    "pages/profile/index",
+    "pages/onboarding/index"
   ],
   "window": {
     "navigationBarTitleText": "健康饮食记",

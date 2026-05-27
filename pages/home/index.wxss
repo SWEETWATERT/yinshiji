@@ -28,11 +28,18 @@
 /* ── Hero Score Card ── */
 .hero-card {
   width: 100%;
-  padding: 44rpx 36rpx 36rpx;
+  padding: 34rpx 32rpx 30rpx;
   border-radius: 24rpx;
   background: linear-gradient(135deg, #FF83B7 0%, #8B6CFF 100%);
   box-shadow: 0 12rpx 32rpx rgba(139, 108, 255, 0.22);
-  margin-bottom: 24rpx;
+  margin-top: 24rpx;
+  margin-bottom: 4rpx;
+}
+
+.hero-card-empty {
+  background: #FFFFFF;
+  border: 1rpx solid #E9E1D8;
+  box-shadow: 0 2rpx 12rpx rgba(37, 35, 42, 0.05);
 }
 
 .hero-inner {
@@ -101,10 +108,73 @@
   font-weight: 700;
 }
 
+.hero-card-empty .hero-label,
+.hero-card-empty .hero-praise {
+  color: #807987;
+}
+
+.hero-empty-title {
+  margin: 14rpx 0 10rpx;
+  color: #25232A;
+  font-size: 42rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 /* ── Intake Card ── */
 .intake-card {
   padding: 28rpx;
   margin-bottom: 24rpx;
+}
+
+/* ── First Use Guide ── */
+.guide-card {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 24rpx;
+  border-color: rgba(139, 108, 255, 0.18);
+  background: #FFFCFE;
+}
+
+.guide-mark {
+  flex: 0 0 52rpx;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 52rpx;
+  text-align: center;
+  background: linear-gradient(135deg, #FF83B7 0%, #8B6CFF 100%);
+}
+
+.guide-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.guide-title {
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.guide-desc {
+  margin-top: 6rpx;
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.guide-action {
+  flex: 0 0 auto;
+  color: #8B6CFF;
+  font-size: 25rpx;
+  font-weight: 700;
 }
 
 .intake-head {

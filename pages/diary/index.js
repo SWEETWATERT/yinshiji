@@ -1,11 +1,17 @@
-const { formatDate, getMealsByDate } = require('../../utils/storage')
-
 const MEAL_META = [
-  { type: 'breakfast', name: '早餐', icon: '🥣', tone: 'pink',   mockKcal: 412, mockRecorded: true },
-  { type: 'lunch',     name: '午餐', icon: '🥗', tone: 'mint',   mockKcal: 568, mockRecorded: true },
-  { type: 'dinner',    name: '晚餐', icon: '🍲', tone: 'purple', mockKcal: 0,   mockRecorded: false },
-  { type: 'snack',     name: '加餐', icon: '🫐', tone: 'gold',   mockKcal: 156, mockRecorded: true }
+  { type: 'breakfast', name: '早餐', icon: '🥣', tone: 'pink' },
+  { type: 'lunch',     name: '午餐', icon: '🥗', tone: 'mint' },
+  { type: 'dinner',    name: '晚餐', icon: '🍲', tone: 'purple' },
+  { type: 'snack',     name: '加餐', icon: '🫐', tone: 'gold' }
 ]
+
+function formatDate(date) {
+  const d = date || new Date()
+  const year = d.getFullYear()
+  const month = `${d.getMonth() + 1}`.padStart(2, '0')
+  const day = `${d.getDate()}`.padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 function buildDates() {
   const weekMap = ['日', '一', '二', '三', '四', '五', '六']
@@ -20,6 +26,30 @@ function buildDates() {
       week: isToday ? '今天' : `周${weekMap[date.getDay()]}`
     }
   })
+}
+
+function normalizeMealType(mealType) {
+  const typeMap = {
+    breakfast: 'breakfast',
+    早餐: 'breakfast',
+    lunch: 'lunch',
+    午餐: 'lunch',
+    dinner: 'dinner',
+    晚餐: 'dinner',
+    snack: 'snack',
+    加餐: 'snack',
+    drink: 'snack',
+    饮品: 'snack'
+  }
+  return typeMap[mealType] || mealType
+}
+
+function getMealKcal(meal) {
+  return Number((meal.totalNutrition && meal.totalNutrition.kcal) || (meal.total && meal.total.kcal) || meal.kcal || 0)
+}
+
+function getMealImage(meal) {
+  return meal.imageFileID || meal.imageUrl || ''
 }
 
 Page({
@@ -40,9 +70,13 @@ Page({
   },
 
   onShow() {
-    const dates = buildDates()
-    const selectedDate = formatDate()
-    this.setData({ dates, selectedDate }, () => this.loadMeals())
+    const app = getApp()
+    app.globalData.loginReady.then(() => {
+      if (app.checkOnboarding()) return
+      const dates = buildDates()
+      const selectedDate = formatDate()
+      this.setData({ dates, selectedDate }, () => this.loadMeals())
+    })
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 2 })
     }
@@ -57,20 +91,40 @@ Page({
   },
 
   loadMeals() {
-    const meals = getMealsByDate(this.data.selectedDate)
-    const mealCards = MEAL_META.map((meta) => {
-      const meal = meals.find((item) => item.mealType === meta.type)
-      return {
-        ...meta,
-        recorded: Boolean(meal),
-        kcal: meal ? meal.totalNutrition.kcal : 0,
-        imageUrl: meal ? meal.imageUrl : ''
-      }
+    const date = this.data.selectedDate
+    wx.cloud.callFunction({
+      name: 'getMealRecords',
+      data: { date }
     })
-    this.setData({ meals, mealCards })
+      .then(res => {
+        const result = res.result || {}
+        const meals = result.records || []
+        const mealCards = MEAL_META.map(meta => {
+          const meal = meals.find(item => normalizeMealType(item.mealType) === meta.type)
+          return {
+            ...meta,
+            recorded: Boolean(meal),
+            kcal: meal ? getMealKcal(meal) : 0,
+            imageUrl: meal ? getMealImage(meal) : ''
+          }
+        })
+        this.setData({ meals, mealCards })
+      })
+      .catch(() => {
+        this.setData({
+          meals: [],
+          mealCards: MEAL_META.map(m => ({
+            ...m, recorded: false, kcal: 0, imageUrl: ''
+          }))
+        })
+      })
   },
 
   goReport() {
     wx.navigateTo({ url: '/pages/report/index' })
+  },
+
+  goRecord() {
+    wx.switchTab({ url: '/pages/record/index' })
   }
 })

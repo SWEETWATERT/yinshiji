@@ -1,0 +1,159 @@
+.onboarding-page {
+  padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
+}
+
+.onboarding-page .page-title {
+  margin-top: 16rpx;
+}
+
+/* ── Card ── */
+.ob-card {
+  padding: 28rpx;
+  margin-top: 24rpx;
+}
+
+.ob-label {
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 700;
+  margin-bottom: 18rpx;
+}
+
+/* ── Chip Row ── */
+.ob-chip-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.ob-chip-wrap {
+  flex-wrap: wrap;
+}
+
+/* ── Input Field ── */
+.ob-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72rpx;
+}
+
+.ob-field .ob-label {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #25232A;
+}
+
+.ob-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.ob-input {
+  width: 180rpx;
+  height: 72rpx;
+  padding: 0 20rpx;
+  border-radius: 14rpx;
+  background: #F7F2EA;
+  border: 1.5rpx solid #E9E1D8;
+  color: #25232A;
+  font-size: 30rpx;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ob-unit {
+  color: #807987;
+  font-size: 26rpx;
+  min-width: 48rpx;
+}
+
+.ob-placeholder {
+  color: #C4B8D0;
+  font-weight: 400;
+}
+
+.ob-divider {
+  height: 1rpx;
+  background: #F0ECF4;
+  margin: 16rpx 0;
+}
+
+/* ── BMI Card ── */
+.ob-bmi-card {
+  background: #FDFBF9;
+}
+
+.ob-bmi-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ob-bmi-left {
+  display: flex;
+  align-items: baseline;
+  gap: 14rpx;
+}
+
+.ob-bmi-label {
+  color: #807987;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.ob-bmi-value {
+  color: #25232A;
+  font-size: 52rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ob-bmi-tag {
+  padding: 6rpx 20rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.ob-bmi-normal {
+  color: #7FA66A;
+  background: #EAF3E4;
+}
+
+.ob-bmi-thin {
+  color: #E4A543;
+  background: #FFF4DF;
+}
+
+.ob-bmi-over {
+  color: #D85C76;
+  background: #FFECF0;
+}
+
+.ob-bmi-hint {
+  display: block;
+  margin-top: 14rpx;
+  color: #B0AAB8;
+  font-size: 22rpx;
+}
+
+/* ── Textarea ── */
+.ob-textarea {
+  width: 100%;
+  min-height: 100rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 14rpx;
+  background: #F7F2EA;
+  border: 1.5rpx solid #E9E1D8;
+  color: #25232A;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
+/* ── Bottom ── */
+.ob-bottom {
+  bottom: calc(20rpx + env(safe-area-inset-bottom)) !important;
+}

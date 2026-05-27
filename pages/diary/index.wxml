@@ -10,7 +10,7 @@
   <view class="diary-header">
     <view>
       <view class="page-title">饮食日记</view>
-      <view class="page-subtitle">连续记录 23 天</view>
+      <view class="page-subtitle">看看今天吃了什么，也可以补记漏掉的一餐</view>
     </view>
     <button class="report-btn" bindtap="goReport">周报</button>
   </view>
@@ -46,19 +46,19 @@
   </scroll-view>
 
   <!-- Meal Photo Wall -->
-  <view class="module-title">今日餐食</view>
+  <view class="module-title">今日餐食状态</view>
   <view class="photo-wall">
     <block wx:for="{{mealCards}}" wx:key="type">
-      <view class="photo-card section-card {{item.recorded ? '' : 'photo-empty'}}">
+      <view class="photo-card section-card {{item.recorded ? '' : 'photo-empty'}}" bindtap="goRecord">
         <view class="photo-top ph-tone-{{item.tone}}">
-          <image wx:if="{{item.imageUrl}}" class="photo-real-img" src="{{item.imageUrl}}" mode="aspectFill"></image>
+          <image wx:if="{{item.imageUrl}}" class="photo-real-img" src="{{item.imageUrl}}" mode="aspectFit"></image>
           <text wx:else class="photo-meal-icon">{{item.icon}}</text>
           <view wx:if="{{item.recorded}}" class="photo-check">✓</view>
         </view>
         <view class="photo-meta">
           <text class="photo-name">{{item.name}}</text>
           <text class="photo-kcal {{item.recorded ? '' : 'dim'}}">
-            {{item.recorded ? item.kcal + ' kcal' : '待记录'}}
+            {{item.recorded ? item.kcal + ' kcal' : '去补记'}}
           </text>
         </view>
       </view>
@@ -91,7 +91,7 @@
   </view>
 
   <!-- AI Summary -->
-  <view class="summary-card section-card">
+  <view wx:if="{{meals.length > 0}}" class="summary-card section-card">
     <view class="summary-hd">
       <view class="summary-dot"></view>
       <text class="summary-title">今日总结</text>
@@ -103,6 +103,14 @@
       <text class="stag stag-good">蛋白质达标</text>
       <text class="stag stag-warn">蔬菜偏少</text>
     </view>
+  </view>
+  <view wx:else class="summary-card section-card summary-empty" bindtap="goRecord">
+    <view class="summary-hd">
+      <view class="summary-dot"></view>
+      <text class="summary-title">还没有餐食记录</text>
+    </view>
+    <text class="summary-body">先记录一餐，日记会自动整理照片、热量和当天状态。</text>
+    <view class="summary-empty-action">去记录第一餐</view>
   </view>
 
 </view>

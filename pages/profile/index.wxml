@@ -13,30 +13,34 @@
   <!-- User Card -->
   <view class="user-card section-card">
     <view class="user-card-left">
-      <image class="user-avatar" src="/assets/girl-avatar.jpg" mode="aspectFill"></image>
+      <image wx:if="{{!avatarLoadError && avatarUrl}}" class="user-avatar" src="{{avatarUrl}}" mode="aspectFill" binderror="onAvatarError"></image>
+      <view wx:else class="user-avatar avatar-fallback">{{avatarFallbackText}}</view>
       <view class="user-info">
-        <view class="user-name">{{user.nickname || '小禾'}}</view>
-        <view class="user-tag">健康饮食 · 轻记录</view>
-        <view class="user-streak">连续记录 23 天</view>
+        <view class="user-name">{{displayName}}</view>
+        <view class="user-tag">{{user.healthGoal || '健康饮食'}} · {{genderText}}</view>
+        <view class="user-streak">BMI {{user.bmi || '--'}} · {{user.bmiLevel || '待测'}}</view>
       </view>
     </view>
-    <image class="user-character" src="/assets/girl-3d-character-crop.png" mode="aspectFit"></image>
+    <image wx:if="{{characterUrl}}" class="user-character" src="{{characterUrl}}" mode="aspectFit" binderror="onCharacterError"></image>
   </view>
 
   <!-- Body Data 2×2 -->
-  <view class="module-title">身体数据</view>
+  <view class="profile-section-hd">
+    <text class="module-title">身体数据</text>
+    <button class="edit-profile-btn" bindtap="goEditProfile">编辑</button>
+  </view>
   <view class="data-grid">
     <view class="data-card section-card">
       <text class="data-label">身高</text>
       <view class="data-num-row">
-        <text class="data-big">{{user.height || 165}}</text>
+        <text class="data-big">{{user.heightCm || '--'}}</text>
         <text class="data-unit">cm</text>
       </view>
     </view>
     <view class="data-card section-card">
       <text class="data-label">体重</text>
       <view class="data-num-row">
-        <text class="data-big">{{user.weight || 52}}</text>
+        <text class="data-big">{{user.weightKg || '--'}}</text>
         <text class="data-unit">kg</text>
       </view>
     </view>
@@ -62,7 +66,7 @@
     <view class="mode-inner">
       <view class="mode-hd">
         <text class="mode-name">我的饮食模式</text>
-        <text class="mode-badge">轻盈健康</text>
+        <text class="mode-badge">{{user.healthGoal || '轻盈健康'}}</text>
       </view>
       <text class="mode-desc">
         优先补足蛋白质和蔬菜摄入，减少含糖饮料，保持规律记录。
@@ -70,15 +74,27 @@
     </view>
   </view>
 
+  <!-- Preference Card -->
+  <view class="preference-card section-card">
+    <view class="preference-title">我的饮食偏好</view>
+    <view class="preference-desc">后续营养建议会优先参考这些方向。</view>
+    <view class="preference-chips">
+      <view class="chip chip-active">{{user.healthGoal || '轻盈健康'}}</view>
+      <view class="chip">少油</view>
+      <view class="chip">高蛋白</view>
+      <view class="chip">多蔬菜</view>
+    </view>
+  </view>
+
   <!-- Privacy Section -->
   <view class="privacy-section section-card">
     <view class="privacy-hd">数据与隐私</view>
-    <button class="setting-row" bindtap="clearLocalData">
-      <text class="setting-label">清除本地数据</text>
+    <button class="setting-row" bindtap="goEditProfile">
+      <text class="setting-label">编辑身体资料</text>
       <text class="setting-arr">›</text>
     </button>
-    <button class="setting-row setting-row-last" bindtap="mockRelogin">
-      <text class="setting-label">重新登录</text>
+    <button class="setting-row setting-row-last" bindtap="showSettingToast">
+      <text class="setting-label">设置</text>
       <text class="setting-arr">›</text>
     </button>
   </view>

@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 project.private.config.json
+assets_backup_before_compress/
 
 # Editor directories and files
 .vscode/*

@@ -20,7 +20,7 @@
 
     <!-- Meal Photo -->
     <view wx:if="{{imageUrl}}" class="meal-photo-card section-card">
-      <image class="meal-photo-img" src="{{imageUrl}}" mode="aspectFill"></image>
+      <image class="meal-photo-img" src="{{imageUrl}}" mode="aspectFit"></image>
       <view class="meal-photo-label">本次记录的餐食</view>
     </view>
     <view wx:else class="no-photo-hint section-card">
@@ -84,6 +84,9 @@
             <view class="food-main">
               <view class="food-name">{{item.nameCn}}</view>
               <view class="food-sub">{{item.kcal}} kcal · 蛋白 {{item.proteinG}}g</view>
+              <view class="food-confidence">
+                {{item.confidenceLabel || '待确认'}} · {{item.weightConfidence === 'user_confirmed' ? '份量已确认' : '份量需确认'}}
+              </view>
             </view>
             <view wx:if="{{item.needUserConfirm}}" class="confirm-badge">请确认</view>
             <button class="delete-btn" data-uid="{{item.uid}}" bindtap="deleteFood">×</button>
@@ -132,8 +135,8 @@
       <view wx:if="{{searchKeyword && searchResults.length === 0}}" class="search-empty">
         未找到"{{searchKeyword}}"，请换个关键词
       </view>
-      <block wx:for="{{searchResults}}" wx:key="id">
-        <view class="search-result-item" data-id="{{item.id}}" bindtap="addFoodFromSearch">
+      <block wx:for="{{searchResults}}" wx:key="foodId">
+        <view class="search-result-item" data-id="{{item.foodId}}" bindtap="addFoodFromSearch">
           <text class="sri-icon">{{item.icon}}</text>
           <view class="sri-info">
             <text class="sri-name">{{item.nameCn}}</text>

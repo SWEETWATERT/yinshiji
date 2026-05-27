@@ -166,6 +166,7 @@
   width: 100%;
   height: 100%;
   display: block;
+  background: #F7F2EA;
 }
 
 .photo-check {
@@ -200,6 +201,7 @@
 .photo-kcal {
   color: #807987;
   font-size: 24rpx;
+  font-weight: 600;
 }
 
 .dim { color: #C4B8D0; }
@@ -272,6 +274,24 @@
   display: flex;
   gap: 10rpx;
   margin-top: 16rpx;
+}
+
+.summary-empty {
+  border-color: rgba(139, 108, 255, 0.18);
+}
+
+.summary-empty-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56rpx;
+  margin-top: 18rpx;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  color: #8B6CFF;
+  font-size: 25rpx;
+  font-weight: 700;
+  background: #EEE8FF;
 }
 
 .stag {

@@ -1,0 +1,17 @@
+<view class="splash-page" bindtap="enterHome">
+  <image
+    class="splash-frame"
+    src="{{frameSrc}}"
+    mode="aspectFill"
+    binderror="onFrameError"
+  />
+  <view wx:if="{{frameError}}" class="splash-fallback"></view>
+  <cover-view wx:if="{{frameError}}" class="splash-content">
+    <cover-view class="splash-logo">🥗</cover-view>
+    <cover-view class="splash-title">健康饮食记</cover-view>
+    <cover-view class="splash-subtitle">拍一拍，记录你的每一餐</cover-view>
+    <cover-view class="loading-bar">
+      <cover-view class="loading-fill"></cover-view>
+    </cover-view>
+  </cover-view>
+</view>

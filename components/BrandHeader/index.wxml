@@ -2,8 +2,8 @@
   <view class="brand-logo-wrap">
     <image
       class="brand-logo-img"
-      src="/assets/yinshiji-logo.png"
-      mode="aspectFill"
+      src="/assets/yinshiji-logo-circle.png"
+      mode="aspectFit"
     ></image>
   </view>
   <view class="brand-name">饮食记</view>

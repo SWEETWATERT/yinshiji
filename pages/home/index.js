@@ -1,17 +1,57 @@
 const { calculateHealthScore, calculateTotals } = require('../../utils/nutrition')
-const { formatDate, getMealsByDate, getUserProfile } = require('../../utils/storage')
 
 const MEAL_META = [
-  { type: 'breakfast', name: '早餐', image: '🥣', tone: 'pink', mockKcal: 412 },
-  { type: 'lunch',     name: '午餐', image: '🥗', tone: 'mint', mockKcal: 568 },
-  { type: 'dinner',    name: '晚餐', image: '🍲', tone: 'purple', mockKcal: 0 },
-  { type: 'snack',     name: '加餐', image: '🫐', tone: 'gold', mockKcal: 156 }
+  { type: 'breakfast', name: '早餐', image: '🥣', tone: 'pink' },
+  { type: 'lunch',     name: '午餐', image: '🥗', tone: 'mint' },
+  { type: 'dinner',    name: '晚餐', image: '🍲', tone: 'purple' },
+  { type: 'snack',     name: '加餐', image: '🫐', tone: 'gold' }
 ]
 
-const MOCK = {
-  kcal: 1622, protein: 78, carbs: 192, fat: 52,
-  score: 92, remaining: 178,
-  caloriePercent: 90, proteinPercent: 87, carbsPercent: 77, fatPercent: 80
+const EMPTY_TOTALS = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+
+function normalizeMealType(mealType) {
+  const typeMap = {
+    breakfast: 'breakfast',
+    早餐: 'breakfast',
+    lunch: 'lunch',
+    午餐: 'lunch',
+    dinner: 'dinner',
+    晚餐: 'dinner',
+    snack: 'snack',
+    加餐: 'snack',
+    drink: 'snack',
+    饮品: 'snack'
+  }
+  return typeMap[mealType] || mealType
+}
+
+function getMealNutrition(meal) {
+  const total = meal.totalNutrition || meal.total || {}
+  return {
+    kcal: Number(total.kcal || meal.kcal || 0),
+    protein: Number(total.protein || total.proteinG || 0),
+    carbs: Number(total.carbs || total.carbsG || 0),
+    fat: Number(total.fat || total.fatG || 0),
+    fiber: Number(total.fiber || total.fiberG || 0)
+  }
+}
+
+function sumMealNutrition(meals) {
+  const totals = meals.reduce((acc, meal) => {
+    const current = getMealNutrition(meal)
+    return {
+      kcal: acc.kcal + current.kcal,
+      protein: acc.protein + current.protein,
+      carbs: acc.carbs + current.carbs,
+      fat: acc.fat + current.fat,
+      fiber: acc.fiber + current.fiber
+    }
+  }, { ...EMPTY_TOTALS })
+  return calculateTotals([{ ...totals }])
+}
+
+function getMealImage(meal) {
+  return meal.imageFileID || meal.imageUrl || ''
 }
 
 Page({
@@ -19,55 +59,97 @@ Page({
     user: {},
     todayText: '',
     target: 1800,
-    healthScore: MOCK.score,
+    healthScore: 0,
     hasMeals: false,
-    remainingCalories: MOCK.remaining,
-    totals: { kcal: MOCK.kcal, protein: MOCK.protein, carbs: MOCK.carbs, fat: MOCK.fat },
-    caloriePercent: MOCK.caloriePercent,
-    proteinPercent: MOCK.proteinPercent,
-    carbsPercent: MOCK.carbsPercent,
-    fatPercent: MOCK.fatPercent,
+    remainingCalories: 1800,
+    totals: EMPTY_TOTALS,
+    caloriePercent: 0,
+    proteinPercent: 0,
+    carbsPercent: 0,
+    fatPercent: 0,
+    fiberPercent: 0,
     mealCards: MEAL_META.map(m => ({
-      ...m, recorded: m.mockKcal > 0, kcal: m.mockKcal
+      ...m, recorded: false, kcal: 0
     }))
   },
 
   onShow() {
-    this.loadToday()
+    const app = getApp()
+    if (app.shouldShowSplash && app.shouldShowSplash()) {
+      wx.navigateTo({ url: '/pages/splash/index' })
+      return
+    }
+
+    app.globalData.loginReady.then(() => {
+      if (app.checkOnboarding()) return
+      this.loadToday()
+    })
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 0 })
     }
   },
 
   loadToday() {
-    const user = getUserProfile() || getApp().globalData.user || {}
+    const app = getApp()
+    const user = app.globalData.user || {}
     const target = user.calorieTarget || 1800
-    const date = formatDate()
-    const meals = getMealsByDate(date)
-    const hasMeals = meals.length > 0
+    const now = new Date()
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
-    const foods = meals.flatMap((meal) => meal.foods || [])
-    const totals = hasMeals ? calculateTotals(foods) : { kcal: MOCK.kcal, protein: MOCK.protein, carbs: MOCK.carbs, fat: MOCK.fat }
-    const score = hasMeals ? calculateHealthScore(totals) : MOCK.score
-    const remaining = hasMeals ? Math.max(0, target - totals.kcal) : MOCK.remaining
-    const calPct = hasMeals ? Math.min(100, Math.round((totals.kcal / target) * 100)) : MOCK.caloriePercent
-    const protPct = hasMeals ? Math.min(100, Math.round((totals.protein / (user.proteinTarget || 90)) * 100)) : MOCK.proteinPercent
-    const carbPct = hasMeals ? Math.min(100, Math.round((totals.carbs / 250) * 100)) : MOCK.carbsPercent
-    const fatPct  = hasMeals ? Math.min(100, Math.round((totals.fat / 65) * 100)) : MOCK.fatPercent
+    this.setData({ user, target, todayText: date })
 
-    const mealCards = hasMeals
-      ? MEAL_META.map((meta) => {
-          const meal = meals.find((item) => item.mealType === meta.type)
-          return { ...meta, recorded: Boolean(meal), kcal: meal ? meal.totalNutrition.kcal : 0 }
-        })
-      : MEAL_META.map(m => ({ ...m, recorded: m.mockKcal > 0, kcal: m.mockKcal }))
-
-    this.setData({
-      user, target, todayText: date, totals, hasMeals,
-      healthScore: score, remainingCalories: remaining,
-      caloriePercent: calPct, proteinPercent: protPct,
-      carbsPercent: carbPct, fatPercent: fatPct, mealCards
+    wx.cloud.callFunction({
+      name: 'getMealRecords',
+      data: { date }
     })
+      .then(res => {
+        const result = res.result || {}
+        const meals = result.records || []
+        const hasMeals = meals.length > 0
+
+        const totals = hasMeals ? sumMealNutrition(meals) : { ...EMPTY_TOTALS }
+        const score = hasMeals ? calculateHealthScore(totals) : 0
+        const remaining = Math.max(0, target - totals.kcal)
+        const calPct = hasMeals ? Math.min(100, Math.round((totals.kcal / target) * 100)) : 0
+        const protPct = hasMeals ? Math.min(100, Math.round((totals.protein / (user.proteinTarget || 90)) * 100)) : 0
+        const carbPct = hasMeals ? Math.min(100, Math.round((totals.carbs / 250) * 100)) : 0
+        const fatPct = hasMeals ? Math.min(100, Math.round((totals.fat / 65) * 100)) : 0
+        const fiberPct = hasMeals ? Math.min(100, Math.round((totals.fiber / 25) * 100)) : 0
+
+        const mealCards = MEAL_META.map(meta => {
+          const meal = meals.find(item => normalizeMealType(item.mealType) === meta.type)
+          const nutrition = meal ? getMealNutrition(meal) : EMPTY_TOTALS
+          return {
+            ...meta,
+            recorded: Boolean(meal),
+            kcal: nutrition.kcal,
+            imageUrl: meal ? getMealImage(meal) : ''
+          }
+        })
+
+        this.setData({
+          totals, hasMeals,
+          healthScore: score, remainingCalories: remaining,
+          caloriePercent: calPct, proteinPercent: protPct,
+          carbsPercent: carbPct, fatPercent: fatPct, fiberPercent: fiberPct, mealCards
+        })
+      })
+      .catch(() => {
+        this.setData({
+          totals: { ...EMPTY_TOTALS },
+          hasMeals: false,
+          healthScore: 0,
+          remainingCalories: target,
+          caloriePercent: 0,
+          proteinPercent: 0,
+          carbsPercent: 0,
+          fatPercent: 0,
+          fiberPercent: 0,
+          mealCards: MEAL_META.map(m => ({
+            ...m, recorded: false, kcal: 0, imageUrl: ''
+          }))
+        })
+      })
   },
 
   goRecord() {

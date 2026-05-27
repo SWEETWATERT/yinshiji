@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  },
+  "navigationBarTitleText": "身体资料"
+}

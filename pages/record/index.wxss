@@ -63,7 +63,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 360rpx;
+  height: 340rpx;
   border-radius: 16rpx;
   border: 2rpx dashed #C4B8D0;
   background: #F7F2EA;
@@ -74,6 +74,7 @@
 .upload-preview {
   width: 100%;
   height: 100%;
+  background: #F7F2EA;
 }
 
 /* CSS Camera Icon */
@@ -127,6 +128,8 @@
   color: #807987;
   font-size: 26rpx;
   text-align: center;
+  max-width: 420rpx;
+  line-height: 1.45;
 }
 
 .upload-actions {
@@ -206,4 +209,10 @@
 .note-placeholder {
   color: #C4B8D0;
   font-size: 26rpx;
+}
+
+.primary-button-disabled {
+  color: rgba(255, 255, 255, 0.82);
+  background: linear-gradient(135deg, #D8CFDE 0%, #BFB4D8 100%);
+  box-shadow: none;
 }

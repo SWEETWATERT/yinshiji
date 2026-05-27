@@ -26,6 +26,7 @@
       "outputPath": ""
     }
   },
+  "cloudfunctionRoot": "cloudfunctions/",
   "miniprogramRoot": "./",
   "simulatorPluginLibVersion": {},
   "packOptions": {

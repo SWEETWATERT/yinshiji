@@ -10,27 +10,9 @@
   <view class="home-header">
     <view>
       <view class="page-title">今日饮食</view>
-      <view class="page-subtitle">{{todayText}} · {{user.nickname || '小禾'}}已登录</view>
+      <view class="page-subtitle">{{todayText}} · 拍一餐，自动估算热量和营养</view>
     </view>
     <button class="report-btn" bindtap="goReport">周报</button>
-  </view>
-
-  <!-- Health Score Hero -->
-  <view class="hero-card">
-    <view class="hero-inner">
-      <text class="hero-label">今日健康分</text>
-      <view class="hero-score-row">
-        <text class="hero-score">{{healthScore}}</text>
-        <text class="hero-unit">分</text>
-      </view>
-      <text class="hero-praise">太棒了，继续保持</text>
-      <view class="hero-divider"></view>
-      <view class="hero-stat-row">
-        <text class="hero-stat-label">热量控制</text>
-        <text class="hero-stat-val">{{caloriePercent}}%</text>
-        <text class="hero-stat-label">· 比昨天高 8 分</text>
-      </view>
-    </view>
   </view>
 
   <!-- Today Intake -->
@@ -47,6 +29,28 @@
       <view class="progress-inner" style="width: {{caloriePercent}}%;"></view>
     </view>
     <text class="remain-txt">还可摄入 {{remainingCalories}} kcal</text>
+  </view>
+
+  <!-- First Use Guide -->
+  <view wx:if="{{!hasMeals}}" class="guide-card section-card" bindtap="goRecord">
+    <view class="guide-mark">1</view>
+    <view class="guide-copy">
+      <view class="guide-title">从记录第一餐开始</view>
+      <view class="guide-desc">拍照上传餐食，确认识别结果后，首页会生成今日摄入和健康评分。</view>
+    </view>
+    <text class="guide-action">去记录</text>
+  </view>
+
+  <!-- Record Entry -->
+  <view class="record-entry section-card" bindtap="goRecord">
+    <view class="rec-icon-box">
+      <text class="rec-icon-char">拍</text>
+    </view>
+    <view class="rec-text">
+      <view class="rec-title">拍照记录这一餐</view>
+      <view class="rec-sub">拍清楚食物和份量，识别会更准</view>
+    </view>
+    <text class="rec-arrow">›</text>
   </view>
 
   <!-- Nutrition Grid 2x2 -->
@@ -104,34 +108,22 @@
         <text class="nutri-name">纤维</text>
       </view>
       <view class="nutri-num-row">
-        <text class="nutri-big">18</text>
+        <text class="nutri-big">{{totals.fiber}}</text>
         <text class="nutri-g">g</text>
       </view>
       <text class="nutri-goal">目标 25g</text>
       <view class="nutri-bar">
-        <view class="nbar-fill nbar-teal" style="width: 72%;"></view>
+        <view class="nbar-fill nbar-teal" style="width: {{fiberPercent}}%;"></view>
       </view>
     </view>
 
-  </view>
-
-  <!-- Record Entry -->
-  <view class="record-entry section-card" bindtap="goRecord">
-    <view class="rec-icon-box">
-      <text class="rec-icon-char">拍</text>
-    </view>
-    <view class="rec-text">
-      <view class="rec-title">拍照记录这一餐</view>
-      <view class="rec-sub">AI 估算热量和营养</view>
-    </view>
-    <text class="rec-arrow">›</text>
   </view>
 
   <!-- Today Meals -->
   <view class="module-title">今日餐次</view>
   <view class="meal-grid">
     <block wx:for="{{mealCards}}" wx:key="type">
-      <view class="meal-card section-card">
+      <view class="meal-card section-card" bindtap="goRecord">
         <view class="meal-accent tone-{{item.tone}}"></view>
         <view class="meal-body">
           <text class="meal-emoji-lg">{{item.image}}</text>
@@ -143,11 +135,34 @@
             <text wx:if="{{item.recorded}}" class="meal-kcal-u"> kcal</text>
           </view>
           <view class="meal-status-tag {{item.recorded ? 'tag-done' : 'tag-todo'}}">
-            {{item.recorded ? '已记录' : '待记录'}}
+            {{item.recorded ? '已记录' : '点这里补记'}}
           </view>
         </view>
       </view>
     </block>
+  </view>
+
+  <!-- Health Score Hero -->
+  <view class="hero-card {{hasMeals ? '' : 'hero-card-empty'}}">
+    <view class="hero-inner">
+      <text class="hero-label">今日健康评分</text>
+      <block wx:if="{{hasMeals}}">
+        <view class="hero-score-row">
+          <text class="hero-score">{{healthScore}}</text>
+          <text class="hero-unit">分</text>
+        </view>
+        <text class="hero-praise">这一天吃得不错，继续保持</text>
+        <view class="hero-divider"></view>
+        <view class="hero-stat-row">
+          <text class="hero-stat-label">热量完成度</text>
+          <text class="hero-stat-val">{{caloriePercent}}%</text>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="hero-empty-title">暂无评分</view>
+        <text class="hero-praise">记录一餐后，会自动生成今日评分和建议</text>
+      </block>
+    </view>
   </view>
 
 </view>

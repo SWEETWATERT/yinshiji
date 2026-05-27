@@ -1,27 +1,85 @@
-const { mockLogin } = require('../../services/auth')
-const { getUserProfile, saveUserProfile } = require('../../utils/storage')
+function normalizeGender(gender) {
+  if (gender === 'male' || gender === '男') return 'male'
+  if (gender === 'female' || gender === '女') return 'female'
+  return 'neutral'
+}
 
 Page({
   data: {
     user: {},
-    avatarChar: '禾'
+    displayName: '我的档案',
+    genderText: '未设置',
+    avatarUrl: '',
+    avatarFallbackText: '我',
+    avatarLoadError: false,
+    characterUrl: ''
   },
 
   onShow() {
-    const user = getUserProfile() || mockLogin()
-    const name = user.nickname || '小禾'
-    const avatarChar = name.length >= 2 ? name[1] : name[0]
-    this.setData({ user, avatarChar })
+    const app = getApp()
+    app.globalData.loginReady.then(() => {
+      if (app.checkOnboarding()) return
+      this._loadProfile()
+    })
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 3 })
     }
   },
 
-  mockRelogin() {
-    const user = mockLogin()
-    saveUserProfile(user)
-    this.setData({ user })
-    wx.showToast({ title: '已登录' })
+  _loadProfile() {
+    wx.cloud.callFunction({
+      name: 'userProfile',
+      data: { action: 'get' }
+    })
+      .then(res => {
+        const u = res.result && res.result.user
+        if (u) {
+          getApp().globalData.user = u
+          this._applyUserData(u)
+        } else {
+          this._applyUserData(getApp().globalData.user || {})
+        }
+      })
+      .catch(() => {
+        this._applyUserData(getApp().globalData.user || {})
+      })
+  },
+
+  _applyUserData(u) {
+    const gender = normalizeGender(u.gender)
+    const displayName = u.nickName || u.nickname || '我的档案'
+
+    let genderText, avatarUrl, avatarFallbackText, characterUrl
+    if (gender === 'male') {
+      genderText = '男'
+      avatarUrl = '/assets/avatar-male.png'
+      avatarFallbackText = '男'
+      characterUrl = '/assets/boy-3d-character.png'
+    } else if (gender === 'female') {
+      genderText = '女'
+      avatarUrl = '/assets/girl-avatar.jpg'
+      avatarFallbackText = '女'
+      characterUrl = '/assets/girl-3d-character-profile.png'
+    } else {
+      genderText = '未设置'
+      avatarUrl = ''
+      avatarFallbackText = '我'
+      characterUrl = ''
+    }
+
+    this.setData({ user: u, displayName, genderText, avatarUrl, avatarFallbackText, avatarLoadError: false, characterUrl })
+  },
+
+  onAvatarError() {
+    this.setData({ avatarLoadError: true })
+  },
+
+  onCharacterError() {
+    this.setData({ characterUrl: '' })
+  },
+
+  goEditProfile() {
+    wx.navigateTo({ url: '/pages/onboarding/index?mode=edit' })
   },
 
   showSettingToast() {
@@ -29,16 +87,6 @@ Page({
   },
 
   clearLocalData() {
-    wx.showModal({
-      title: '清除本地数据',
-      content: '将清除本机缓存中的餐食记录，个人资料会保留。',
-      confirmText: '清除',
-      confirmColor: '#d85c76',
-      success: (res) => {
-        if (!res.confirm) return
-        wx.removeStorageSync('meals')
-        wx.showToast({ title: '已清除' })
-      }
-    })
+    wx.showToast({ title: '数据已迁移到云端，无需清除本地缓存', icon: 'none' })
   }
 })

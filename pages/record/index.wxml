@@ -8,7 +8,7 @@
 
   <!-- Header -->
   <view class="page-title">记录这一餐</view>
-  <view class="page-subtitle">AI 帮你看懂热量和营养</view>
+  <view class="page-subtitle">拍照或从相册选择，系统会帮你估算营养</view>
 
   <!-- Meal Type Pills -->
   <view class="meal-type-wrap">
@@ -28,7 +28,7 @@
   <view class="upload-card section-card">
     <view class="upload-zone" bindtap="takePhoto">
       <block wx:if="{{imagePath}}">
-        <image class="upload-preview" src="{{imagePath}}" mode="aspectFill"></image>
+        <image class="upload-preview" src="{{imagePath}}" mode="aspectFit"></image>
       </block>
       <block wx:else>
         <view class="cam-wrap">
@@ -37,7 +37,7 @@
           </view>
         </view>
         <text class="upload-title">点击拍照或上传餐食照片</text>
-        <text class="upload-hint">支持识别食物和估算营养</text>
+        <text class="upload-hint">尽量拍清楚食物和份量，结果会更准确</text>
       </block>
     </view>
     <view class="upload-actions">
@@ -72,7 +72,15 @@
 
   <!-- Fixed Analyze Button -->
   <view class="fixed-bottom-button">
-    <button class="primary-button" bindtap="startAnalyze">开始分析</button>
+    <button
+      class="primary-button {{imagePath ? '' : 'primary-button-disabled'}}"
+      bindtap="startAnalyze"
+      disabled="{{uploading}}"
+    >
+      <block wx:if="{{uploading}}">上传中…</block>
+      <block wx:elif="{{imagePath}}">开始分析</block>
+      <block wx:else>先上传一张餐食照片</block>
+    </button>
   </view>
 
 </view>

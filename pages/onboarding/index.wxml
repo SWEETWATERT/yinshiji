@@ -1,0 +1,123 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
+<view class="page page-container onboarding-page">
+
+  <brand-header></brand-header>
+
+  <view class="page-title">先了解你的身体状态</view>
+  <view class="page-subtitle">用于计算 BMI 和生成饮食目标</view>
+
+  <!-- 性别 -->
+  <view class="ob-card section-card">
+    <view class="ob-label">性别</view>
+    <view class="ob-chip-row">
+      <view
+        class="chip {{gender === '男' ? 'chip-active' : ''}}"
+        data-value="男"
+        bindtap="selectGender"
+      >男</view>
+      <view
+        class="chip {{gender === '女' ? 'chip-active' : ''}}"
+        data-value="女"
+        bindtap="selectGender"
+      >女</view>
+    </view>
+  </view>
+
+  <!-- 年龄 / 身高 / 体重 -->
+  <view class="ob-card section-card">
+    <view class="ob-field">
+      <view class="ob-label">年龄</view>
+      <view class="ob-input-wrap">
+        <input
+          class="ob-input"
+          type="number"
+          value="{{age}}"
+          placeholder="例如 25"
+          placeholder-class="ob-placeholder"
+          bindinput="onAgeInput"
+        />
+        <text class="ob-unit">岁</text>
+      </view>
+    </view>
+    <view class="ob-divider"></view>
+    <view class="ob-field">
+      <view class="ob-label">身高</view>
+      <view class="ob-input-wrap">
+        <input
+          class="ob-input"
+          type="digit"
+          value="{{heightCm}}"
+          placeholder="例如 165"
+          placeholder-class="ob-placeholder"
+          bindinput="onHeightInput"
+        />
+        <text class="ob-unit">cm</text>
+      </view>
+    </view>
+    <view class="ob-divider"></view>
+    <view class="ob-field">
+      <view class="ob-label">体重</view>
+      <view class="ob-input-wrap">
+        <input
+          class="ob-input"
+          type="digit"
+          value="{{weightKg}}"
+          placeholder="例如 55"
+          placeholder-class="ob-placeholder"
+          bindinput="onWeightInput"
+        />
+        <text class="ob-unit">kg</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- BMI -->
+  <view wx:if="{{bmi > 0}}" class="ob-card section-card ob-bmi-card">
+    <view class="ob-bmi-row">
+      <view class="ob-bmi-left">
+        <text class="ob-bmi-label">BMI</text>
+        <text class="ob-bmi-value">{{bmi}}</text>
+      </view>
+      <view class="ob-bmi-tag ob-bmi-{{bmiLevel === '正常' ? 'normal' : bmiLevel === '偏瘦' ? 'thin' : 'over'}}">{{bmiLevel}}</view>
+    </view>
+    <text class="ob-bmi-hint">仅作健康记录参考</text>
+  </view>
+
+  <!-- 健康目标 -->
+  <view class="ob-card section-card">
+    <view class="ob-label">健康目标</view>
+    <view class="ob-chip-row ob-chip-wrap">
+      <block wx:for="{{goals}}" wx:key="*this">
+        <view
+          class="chip {{healthGoal === item ? 'chip-active' : ''}}"
+          data-value="{{item}}"
+          bindtap="selectGoal"
+        >{{item}}</view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 备注 -->
+  <view class="ob-card section-card">
+    <view class="ob-label">备注</view>
+    <textarea
+      class="ob-textarea"
+      value="{{remark}}"
+      placeholder="饮食偏好、忌口、健康关注点…"
+      placeholder-class="ob-placeholder"
+      bindinput="onRemarkInput"
+      maxlength="200"
+      auto-height
+    ></textarea>
+  </view>
+
+  <!-- Save -->
+  <view class="fixed-bottom-button ob-bottom">
+    <button class="primary-button" bindtap="saveProfile" disabled="{{saving}}">
+      {{saving ? '保存中…' : (mode === 'edit' ? '保存修改' : '保存并开始使用')}}
+    </button>
+  </view>
+
+</view>
