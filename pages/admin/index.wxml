@@ -7,24 +7,67 @@
   <view class="admin-header">
     <view>
       <view class="page-title">后台管理</view>
-      <view class="page-subtitle">v0.2 后台与人工复核骨架</view>
+      <view class="page-subtitle">数据概览与人工复核入口</view>
     </view>
     <view class="admin-badge">{{adminStatus}}</view>
   </view>
 
-  <view class="section-card admin-summary">
-    <view class="summary-title">数据看板</view>
-    <view class="summary-desc">下一步接入 `adminApi.dashboard`，展示用户、餐食、分析日志、复核和反馈统计。</view>
+  <view class="section-card admin-identity">
+    <view class="identity-row">
+      <text class="identity-label">isAdmin</text>
+      <text class="identity-value">{{adminFlagText}}</text>
+    </view>
+    <view class="identity-row">
+      <text class="identity-label">身份状态</text>
+      <text class="identity-value">{{adminStatus}}</text>
+    </view>
+    <view class="identity-row">
+      <text class="identity-label">角色</text>
+      <text class="identity-value">{{roleText}}</text>
+    </view>
+    <view class="identity-row">
+      <text class="identity-label">当前日期</text>
+      <text class="identity-value">{{today ? today : '--'}}</text>
+    </view>
   </view>
 
+  <view wx:if="{{errorText}}" class="section-card permission-card">
+    <view class="permission-title">{{errorText}}</view>
+    <view class="permission-desc">如果你已经是管理员，请确认 admin_users 集合或 ADMIN_OPENIDS 已配置当前账号，并重新部署 adminApi。</view>
+  </view>
+
+  <view class="section-card admin-summary">
+    <view class="summary-head">
+      <view>
+        <view class="summary-title">数据概览</view>
+        <view class="summary-desc">{{today ? today : '今日'}} 后台统计</view>
+      </view>
+      <view wx:if="{{loading}}" class="loading-text">加载中</view>
+    </view>
+
+    <view class="stats-grid">
+      <block wx:for="{{cards}}" wx:key="key">
+        <view class="stat-card">
+          <view class="stat-label">{{item.label}}</view>
+          <view class="stat-value-row">
+            <text class="stat-value">{{item.value}}</text>
+            <text class="stat-unit">{{item.unit}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="section-title admin-section-title">功能入口</view>
   <view class="admin-menu">
     <block wx:for="{{menu}}" wx:key="title">
       <view class="section-card admin-menu-item" data-url="{{item.url}}" bindtap="openMenu">
+        <view class="menu-icon">{{item.icon}}</view>
         <view class="menu-copy">
           <view class="menu-title">{{item.title}}</view>
           <view class="menu-desc">{{item.desc}}</view>
         </view>
-        <text class="menu-arrow">{{item.url ? '›' : '待接入'}}</text>
+        <text class="menu-arrow">›</text>
       </view>
     </block>
   </view>

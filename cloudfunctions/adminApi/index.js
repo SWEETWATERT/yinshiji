@@ -4,6 +4,7 @@ const db = cloud.database()
 const _ = db.command
 
 const MAX_PAGE_SIZE = 50
+const ADMIN_ROLE_SET = ['owner', 'admin']
 
 function pageArgs(event) {
   const page = Math.max(1, Number(event.page || 1))
@@ -11,10 +12,20 @@ function pageArgs(event) {
   return { page, pageSize, skip: (page - 1) * pageSize }
 }
 
+function normalizeOpenid(value) {
+  return String(value || '')
+    .replace(/[\s\u200B-\u200D\uFEFF]/g, '')
+    .trim()
+}
+
+function normalizeText(value) {
+  return String(value || '').trim().toLowerCase()
+}
+
 function normalizeAdminOpenids() {
   return String(process.env.ADMIN_OPENIDS || '')
     .split(',')
-    .map(item => item.trim())
+    .map(item => normalizeOpenid(item))
     .filter(Boolean)
 }
 
@@ -24,33 +35,95 @@ async function isAdmin(openid) {
 }
 
 async function getAdminInfo(openid) {
-  if (normalizeAdminOpenids().includes(openid)) {
+  const currentOpenid = normalizeOpenid(openid)
+
+  if (!currentOpenid) {
     return {
-      openid,
+      openid: '',
+      isAdmin: false,
+      roles: [],
+      message: '当前账号暂无后台权限。'
+    }
+  }
+
+  if (normalizeAdminOpenids().includes(currentOpenid)) {
+    return {
+      openid: currentOpenid,
       isAdmin: true,
       roles: ['owner'],
       message: '当前账号已通过 ADMIN_OPENIDS 白名单获得后台权限。'
     }
   }
 
-  const { data } = await db.collection('admin_users')
-    .where({ _openid: openid, status: 'active' })
-    .limit(1)
-    .get()
-  if (data.length > 0) {
-    return {
-      openid,
-      isAdmin: true,
-      roles: [data[0].role || 'admin'],
-      message: '当前账号已通过 admin_users 集合获得后台权限。'
+  const adminRecord = await findAdminRecord(currentOpenid)
+  if (adminRecord) {
+    const adminInfo = parseAdminRecord(adminRecord)
+    if (adminInfo.isAdmin) {
+      return {
+        openid: currentOpenid,
+        isAdmin: true,
+        roles: adminInfo.roles,
+        message: '当前账号已通过 admin_users 集合获得后台权限。'
+      }
     }
   }
 
   return {
-    openid,
+    openid: currentOpenid,
     isAdmin: false,
     roles: [],
     message: '当前账号暂无后台权限。'
+  }
+}
+
+async function findAdminRecord(openid) {
+  const currentOpenid = normalizeOpenid(openid)
+  if (!currentOpenid) return null
+
+  try {
+    const { data } = await db.collection('admin_users')
+      .where({ _openid: currentOpenid })
+      .limit(1)
+      .get()
+    if (data && data[0]) return data[0]
+  } catch (err) {
+    // Continue to fallback queries for manually created admin records.
+  }
+
+  try {
+    const { data } = await db.collection('admin_users')
+      .where({ openid: currentOpenid })
+      .limit(1)
+      .get()
+    if (data && data[0]) return data[0]
+  } catch (err) {
+    // Continue to final fallback.
+  }
+
+  const { data } = await db.collection('admin_users')
+    .limit(100)
+    .get()
+
+  return (data || []).find(record => {
+    const recordOpenid = normalizeOpenid(record && record.openid)
+    const recordUnderscoreOpenid = normalizeOpenid(record && record._openid)
+    return recordOpenid === currentOpenid || recordUnderscoreOpenid === currentOpenid
+  }) || null
+}
+
+function parseAdminRecord(record) {
+  const status = normalizeText(record && record.status)
+  const role = normalizeText(record && record.role)
+  const roles = Array.isArray(record && record.roles)
+    ? record.roles.map(item => normalizeText(item)).filter(Boolean)
+    : []
+  const activeOk = status === 'active'
+  const roleOk = ADMIN_ROLE_SET.includes(role) || roles.some(item => ADMIN_ROLE_SET.includes(item))
+  const normalizedRoles = roles.length ? roles : (role ? [role] : [])
+
+  return {
+    isAdmin: Boolean(record && activeOk && roleOk),
+    roles: normalizedRoles
   }
 }
 

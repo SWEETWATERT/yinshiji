@@ -22,9 +22,68 @@
   text-align: center;
 }
 
+.admin-identity {
+  padding: 24rpx 26rpx;
+  margin-bottom: 20rpx;
+}
+
+.identity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  min-height: 44rpx;
+}
+
+.identity-row + .identity-row {
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx solid #F0ECE7;
+}
+
+.identity-label {
+  color: #807987;
+  font-size: 24rpx;
+}
+
+.identity-value {
+  color: #25232A;
+  font-size: 25rpx;
+  font-weight: 700;
+  text-align: right;
+}
+
+.permission-card {
+  padding: 24rpx 26rpx;
+  margin-bottom: 20rpx;
+  border-color: #F0D6DC;
+  background: #FFF8FA;
+}
+
+.permission-title {
+  color: #D94B73;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.permission-desc {
+  margin-top: 10rpx;
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
 .admin-summary {
   padding: 26rpx;
   margin-bottom: 20rpx;
+}
+
+.summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 22rpx;
 }
 
 .summary-title {
@@ -40,6 +99,61 @@
   line-height: 1.55;
 }
 
+.loading-text {
+  flex-shrink: 0;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  color: #8B6CFF;
+  background: #EEE8FF;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.stat-card {
+  min-height: 142rpx;
+  padding: 22rpx;
+  border-radius: 22rpx;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
+}
+
+.stat-label {
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.35;
+}
+
+.stat-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+  margin-top: 18rpx;
+}
+
+.stat-value {
+  color: #25232A;
+  font-size: 48rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-unit {
+  color: #807987;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.admin-section-title {
+  margin: 26rpx 0 16rpx;
+  font-size: 30rpx;
+}
+
 .admin-menu {
   display: flex;
   flex-direction: column;
@@ -52,6 +166,20 @@
   justify-content: space-between;
   gap: 20rpx;
   padding: 24rpx 26rpx;
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+  color: #8B6CFF;
+  background: #EEE8FF;
+  font-size: 26rpx;
+  font-weight: 700;
 }
 
 .menu-copy {
