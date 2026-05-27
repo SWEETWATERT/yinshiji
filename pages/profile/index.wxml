@@ -86,6 +86,15 @@
     </view>
   </view>
 
+  <!-- Admin Entry -->
+  <view wx:if="{{user.isAdmin}}" class="admin-entry section-card" bindtap="goAdmin">
+    <view>
+      <view class="admin-title">后台管理</view>
+      <view class="admin-desc">数据看板、AI 复核、食物库和配置管理</view>
+    </view>
+    <text class="admin-arr">›</text>
+  </view>
+
   <!-- Privacy Section -->
   <view class="privacy-section section-card">
     <view class="privacy-hd">数据与隐私</view>

@@ -67,7 +67,15 @@ Page({
       characterUrl = ''
     }
 
-    this.setData({ user: u, displayName, genderText, avatarUrl, avatarFallbackText, avatarLoadError: false, characterUrl })
+    this.setData({
+      user: { ...u, isAdmin: u.isAdmin === true },
+      displayName,
+      genderText,
+      avatarUrl,
+      avatarFallbackText,
+      avatarLoadError: false,
+      characterUrl
+    })
   },
 
   onAvatarError() {
@@ -80,6 +88,10 @@ Page({
 
   goEditProfile() {
     wx.navigateTo({ url: '/pages/onboarding/index?mode=edit' })
+  },
+
+  goAdmin() {
+    wx.navigateTo({ url: '/pages/admin/index' })
   },
 
   showSettingToast() {

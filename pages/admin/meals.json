@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "餐食记录",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
+}

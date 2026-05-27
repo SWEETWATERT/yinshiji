@@ -1,0 +1,31 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
+<view class="page page-container admin-page">
+  <brand-header></brand-header>
+
+  <view class="admin-header">
+    <view>
+      <view class="page-title">后台管理</view>
+      <view class="page-subtitle">v0.2 后台与人工复核骨架</view>
+    </view>
+    <view class="admin-badge">{{adminStatus}}</view>
+  </view>
+
+  <view class="section-card admin-summary">
+    <view class="summary-title">数据看板</view>
+    <view class="summary-desc">下一步接入 `adminApi.dashboard`，展示用户、餐食、分析日志、复核和反馈统计。</view>
+  </view>
+
+  <view class="admin-menu">
+    <block wx:for="{{menu}}" wx:key="title">
+      <view class="section-card admin-menu-item" data-url="{{item.url}}" bindtap="openMenu">
+        <view class="menu-copy">
+          <view class="menu-title">{{item.title}}</view>
+          <view class="menu-desc">{{item.desc}}</view>
+        </view>
+        <text class="menu-arrow">{{item.url ? '›' : '待接入'}}</text>
+      </view>
+    </block>
+  </view>
+</view>

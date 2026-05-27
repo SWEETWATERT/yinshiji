@@ -1,0 +1,12 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
+<view class="page page-container admin-sub-page">
+  <brand-header></brand-header>
+  <view class="page-title">{{title}}</view>
+  <view class="page-subtitle">{{desc}}</view>
+  <view class="section-card empty-card">
+    <view class="empty-title">食物列表待接入</view>
+    <view class="empty-desc">当前只保留后台页面骨架，后续统一通过 adminApi 拉取真实后台数据。</view>
+  </view>
+</view>

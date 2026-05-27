@@ -19,12 +19,39 @@ function normalizeAdminOpenids() {
 }
 
 async function isAdmin(openid) {
-  if (normalizeAdminOpenids().includes(openid)) return true
+  const info = await getAdminInfo(openid)
+  return info.isAdmin
+}
+
+async function getAdminInfo(openid) {
+  if (normalizeAdminOpenids().includes(openid)) {
+    return {
+      openid,
+      isAdmin: true,
+      roles: ['owner'],
+      message: '当前账号已通过 ADMIN_OPENIDS 白名单获得后台权限。'
+    }
+  }
+
   const { data } = await db.collection('admin_users')
     .where({ _openid: openid, status: 'active' })
     .limit(1)
     .get()
-  return data.length > 0
+  if (data.length > 0) {
+    return {
+      openid,
+      isAdmin: true,
+      roles: [data[0].role || 'admin'],
+      message: '当前账号已通过 admin_users 集合获得后台权限。'
+    }
+  }
+
+  return {
+    openid,
+    isAdmin: false,
+    roles: [],
+    message: '当前账号暂无后台权限。'
+  }
 }
 
 async function requireAdmin(openid) {
@@ -283,7 +310,7 @@ exports.main = async (event) => {
   const action = event.action || 'dashboard'
 
   if (action === 'whoami') {
-    return { openid: OPENID, isAdmin: await isAdmin(OPENID) }
+    return getAdminInfo(OPENID)
   }
 
   if (action === 'bootstrapAdmin') {

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "配置管理",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
+}

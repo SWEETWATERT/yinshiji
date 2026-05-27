@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "食物库",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
+}

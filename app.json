@@ -7,7 +7,14 @@
     "pages/diary/index",
     "pages/report/index",
     "pages/profile/index",
-    "pages/onboarding/index"
+    "pages/onboarding/index",
+    "pages/admin/index",
+    "pages/admin/users",
+    "pages/admin/meals",
+    "pages/admin/reviews",
+    "pages/admin/foods",
+    "pages/admin/feedback",
+    "pages/admin/config"
   ],
   "window": {
     "navigationBarTitleText": "健康饮食记",

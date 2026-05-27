@@ -1,0 +1,21 @@
+.admin-sub-page {
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+}
+
+.empty-card {
+  margin-top: 28rpx;
+  padding: 36rpx 30rpx;
+}
+
+.empty-title {
+  color: #25232A;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.empty-desc {
+  margin-top: 12rpx;
+  color: #807987;
+  font-size: 25rpx;
+  line-height: 1.55;
+}

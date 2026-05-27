@@ -232,6 +232,35 @@
   margin-top: 18rpx;
 }
 
+/* ── Admin Entry ── */
+.admin-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.admin-title {
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.admin-desc {
+  margin-top: 8rpx;
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.admin-arr {
+  color: #8B6CFF;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
 /* ── Privacy Section ── */
 .privacy-section {
   overflow: hidden;
