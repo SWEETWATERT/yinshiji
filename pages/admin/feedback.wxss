@@ -202,3 +202,44 @@
   font-weight: 600;
   text-align: right;
 }
+
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #F0ECE7;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160rpx;
+  height: 72rpx;
+  padding: 0 22rpx;
+  border-radius: 18rpx;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.primary-button {
+  color: #FFFFFF;
+  background: #8B6CFF;
+}
+
+.secondary-button {
+  color: #8B6CFF;
+  background: #EEE8FF;
+}
+
+.danger-button {
+  color: #D94B73;
+  background: #FFF0F4;
+  border: 1rpx solid #F0D6DC;
+}
+
+.action-button[disabled] {
+  opacity: 0.6;
+}

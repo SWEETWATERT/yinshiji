@@ -63,12 +63,16 @@ function normalizeFeedback(item) {
   return {
     id: source._id || source.id || `${source._openid || ''}-${source.createdAt || ''}`,
     content: pickContent(source),
+    status,
     typeText: TYPE_TEXT[type] || type || '未分类',
     statusText: STATUS_TEXT[status] || status || '未标记',
     contact: pickContact(source),
     maskedOpenid: maskOpenid(source._openid || source.openid),
     createdAt: formatDate(source.createdAt),
-    updatedAt: formatDate(source.updatedAt)
+    updatedAt: formatDate(source.updatedAt),
+    canMarkProcessing: status === 'open',
+    canResolve: status === 'open' || status === 'processing',
+    canClose: status !== 'closed'
   }
 }
 
@@ -85,7 +89,8 @@ Page({
     feedback: [],
     page: DEFAULT_PAGE,
     pageSize: DEFAULT_PAGE_SIZE,
-    total: 0
+    total: 0,
+    updatingFeedbackId: ''
   },
 
   onLoad() {
@@ -140,11 +145,85 @@ Page({
     this.loadFeedback()
   },
 
+  markProcessing(event) {
+    const feedbackId = event.currentTarget.dataset.id
+    this.updateFeedbackStatus(feedbackId, 'processing')
+  },
+
+  resolveFeedback(event) {
+    const feedbackId = event.currentTarget.dataset.id
+    this.updateFeedbackStatus(feedbackId, 'resolved')
+  },
+
+  closeFeedback(event) {
+    const feedbackId = event.currentTarget.dataset.id
+    wx.showModal({
+      title: '确认关闭',
+      content: '确认关闭这条用户反馈吗？',
+      confirmText: '关闭',
+      confirmColor: '#D94B73',
+      success: res => {
+        if (res.confirm) {
+          this.updateFeedbackStatus(feedbackId, 'closed')
+        }
+      }
+    })
+  },
+
+  updateFeedbackStatus(feedbackId, status) {
+    if (!feedbackId || this.data.updatingFeedbackId) return
+
+    const statusNote = {
+      processing: '管理员标记为处理中',
+      resolved: '管理员标记为已处理',
+      closed: '管理员关闭反馈'
+    }
+
+    this.setData({ updatingFeedbackId: feedbackId, error: '' })
+
+    wx.cloud.callFunction({
+      name: 'adminApi',
+      data: {
+        action: 'updateFeedbackStatus',
+        feedbackId,
+        status,
+        adminNote: statusNote[status] || '管理员更新反馈状态'
+      }
+    })
+      .then(res => {
+        const result = res.result || {}
+        if (result.isAdmin === false || result.code === 'NO_ADMIN_PERMISSION' || result.error === 'NO_ADMIN_PERMISSION') {
+          this.setNoPermission()
+          return
+        }
+
+        wx.showToast({
+          title: STATUS_TEXT[status] || '已更新',
+          icon: 'success'
+        })
+
+        this.setData({ updatingFeedbackId: '' })
+        this.loadFeedback()
+      })
+      .catch(err => {
+        if (this.isNoPermissionError(err)) {
+          this.setNoPermission()
+          return
+        }
+
+        this.setData({
+          updatingFeedbackId: '',
+          error: '反馈状态更新失败，请稍后重试。'
+        })
+      })
+  },
+
   setNoPermission() {
     this.setData({
       loading: false,
       feedback: [],
       total: 0,
+      updatingFeedbackId: '',
       error: '无后台权限'
     })
   },

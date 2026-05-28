@@ -371,20 +371,39 @@ async function listFeedback(event) {
 }
 
 async function updateFeedbackStatus(event, openid) {
-  if (!event.feedbackId) {
+  const feedbackId = event.feedbackId || event.id
+  if (!feedbackId) {
     const err = new Error('MISSING_FEEDBACK_ID')
     err.code = 'MISSING_FEEDBACK_ID'
     throw err
   }
-  await db.collection('user_feedback').doc(event.feedbackId).update({
+
+  const status = normalizeText(event.status || 'closed')
+  const allowedStatuses = ['open', 'processing', 'resolved', 'closed']
+  if (!allowedStatuses.includes(status)) {
+    const err = new Error('INVALID_FEEDBACK_STATUS')
+    err.code = 'INVALID_FEEDBACK_STATUS'
+    throw err
+  }
+
+  const now = new Date()
+  const data = {
+    status,
+    adminOpenid: openid,
+    adminNote: event.adminNote || '',
+    updatedAt: now
+  }
+
+  if (status === 'resolved' || status === 'closed') {
+    data.handledAt = now
+  }
+
+  await db.collection('user_feedback').doc(feedbackId).update({
     data: {
-      status: event.status || 'closed',
-      adminOpenid: openid,
-      adminNote: event.adminNote || '',
-      updatedAt: new Date()
+      ...data
     }
   })
-  return { ok: true, feedbackId: event.feedbackId }
+  return { ok: true, feedbackId, status }
 }
 
 async function getAppConfig(event) {

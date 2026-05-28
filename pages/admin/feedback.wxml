@@ -72,6 +72,36 @@
             <text class="meta-value">{{item.updatedAt}}</text>
           </view>
         </view>
+
+        <view wx:if="{{item.canMarkProcessing || item.canResolve || item.canClose}}" class="feedback-actions">
+          <button
+            wx:if="{{item.canMarkProcessing}}"
+            class="action-button secondary-button"
+            data-id="{{item.id}}"
+            bindtap="markProcessing"
+            disabled="{{updatingFeedbackId === item.id}}"
+          >
+            {{updatingFeedbackId === item.id ? '处理中' : '标记处理中'}}
+          </button>
+          <button
+            wx:if="{{item.canResolve}}"
+            class="action-button primary-button"
+            data-id="{{item.id}}"
+            bindtap="resolveFeedback"
+            disabled="{{updatingFeedbackId === item.id}}"
+          >
+            {{updatingFeedbackId === item.id ? '处理中' : '已处理'}}
+          </button>
+          <button
+            wx:if="{{item.canClose}}"
+            class="action-button danger-button"
+            data-id="{{item.id}}"
+            bindtap="closeFeedback"
+            disabled="{{updatingFeedbackId === item.id}}"
+          >
+            {{updatingFeedbackId === item.id ? '处理中' : '关闭'}}
+          </button>
+        </view>
       </view>
     </block>
   </view>
