@@ -1,12 +1,78 @@
 <view class="page-bg-layer">
   <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
 </view>
-<view class="page page-container admin-sub-page">
+
+<view class="page page-container admin-feedback-page">
   <brand-header></brand-header>
-  <view class="page-title">{{title}}</view>
-  <view class="page-subtitle">{{desc}}</view>
-  <view class="section-card empty-card">
-    <view class="empty-title">反馈列表待接入</view>
-    <view class="empty-desc">当前只保留后台页面骨架，后续统一通过 adminApi 拉取真实后台数据。</view>
+
+  <view class="feedback-header">
+    <view>
+      <view class="page-title">{{title}}</view>
+      <view class="page-subtitle">{{desc}}</view>
+    </view>
+    <button class="refresh-button" bindtap="refreshFeedback" disabled="{{loading}}">
+      {{loading ? '加载中' : '刷新'}}
+    </button>
+  </view>
+
+  <view class="section-card feedback-summary">
+    <view class="summary-label">总反馈数</view>
+    <view class="summary-value-row">
+      <text class="summary-value">{{total}}</text>
+      <text class="summary-unit">条</text>
+    </view>
+    <view class="summary-desc">当前显示第 {{page}} 页，每页 {{pageSize}} 条</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="section-card state-card">
+    <view class="state-title">加载中</view>
+    <view class="state-desc">正在读取 user_feedback 用户反馈。</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="section-card state-card error-card">
+    <view class="state-title">{{error}}</view>
+    <view class="state-desc">请确认当前账号有后台权限，且 adminApi 云函数已部署。</view>
+    <button class="retry-button" bindtap="refreshFeedback">重试</button>
+  </view>
+
+  <view wx:elif="{{feedback.length === 0}}" class="section-card state-card">
+    <view class="state-title">暂无用户反馈</view>
+    <view class="state-desc">user_feedback 集合暂时没有可展示的反馈。</view>
+  </view>
+
+  <view wx:else class="feedback-list">
+    <block wx:for="{{feedback}}" wx:key="id">
+      <view class="section-card feedback-card">
+        <view class="feedback-card-head">
+          <view>
+            <view class="feedback-type">{{item.typeText}}</view>
+            <view class="feedback-content">{{item.content}}</view>
+          </view>
+          <view class="status-pill">{{item.statusText}}</view>
+        </view>
+
+        <view class="feedback-grid">
+          <view class="feedback-field">
+            <text class="field-label">联系方式</text>
+            <text class="field-value">{{item.contact}}</text>
+          </view>
+          <view class="feedback-field">
+            <text class="field-label">用户</text>
+            <text class="field-value">{{item.maskedOpenid}}</text>
+          </view>
+        </view>
+
+        <view class="feedback-meta-list">
+          <view class="meta-row">
+            <text class="meta-label">创建时间</text>
+            <text class="meta-value">{{item.createdAt}}</text>
+          </view>
+          <view class="meta-row">
+            <text class="meta-label">更新时间</text>
+            <text class="meta-value">{{item.updatedAt}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
   </view>
 </view>

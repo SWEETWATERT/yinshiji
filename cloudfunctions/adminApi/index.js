@@ -343,7 +343,8 @@ async function listFeedback(event) {
     .limit(pageSize)
     .get()
   const count = await db.collection('user_feedback').where(where).count()
-  return { page, pageSize, total: count.total, records: res.data }
+  const feedback = res.data || []
+  return { page, pageSize, total: count.total, feedback, records: feedback }
 }
 
 async function updateFeedbackStatus(event, openid) {
