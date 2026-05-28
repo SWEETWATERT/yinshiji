@@ -249,7 +249,8 @@ async function listFoodItems(event) {
     .limit(pageSize)
     .get()
   const count = await db.collection('food_items').where(where).count()
-  return { page, pageSize, total: count.total, records: res.data }
+  const foods = res.data || []
+  return { page, pageSize, total: count.total, foods, records: foods }
 }
 
 function sanitizeFoodItem(data) {

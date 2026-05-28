@@ -1,12 +1,86 @@
 <view class="page-bg-layer">
   <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
 </view>
-<view class="page page-container admin-sub-page">
+
+<view class="page page-container admin-foods-page">
   <brand-header></brand-header>
-  <view class="page-title">{{title}}</view>
-  <view class="page-subtitle">{{desc}}</view>
-  <view class="section-card empty-card">
-    <view class="empty-title">食物列表待接入</view>
-    <view class="empty-desc">当前只保留后台页面骨架，后续统一通过 adminApi 拉取真实后台数据。</view>
+
+  <view class="foods-header">
+    <view>
+      <view class="page-title">{{title}}</view>
+      <view class="page-subtitle">{{desc}}</view>
+    </view>
+    <button class="refresh-button" bindtap="refreshFoods" disabled="{{loading}}">
+      {{loading ? '加载中' : '刷新'}}
+    </button>
+  </view>
+
+  <view class="section-card foods-summary">
+    <view class="summary-label">总食物数量</view>
+    <view class="summary-value-row">
+      <text class="summary-value">{{total}}</text>
+      <text class="summary-unit">项</text>
+    </view>
+    <view class="summary-desc">当前显示第 {{page}} 页，每页 {{pageSize}} 项</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="section-card state-card">
+    <view class="state-title">加载中</view>
+    <view class="state-desc">正在读取 food_items 食物库数据。</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="section-card state-card error-card">
+    <view class="state-title">{{error}}</view>
+    <view class="state-desc">请确认当前账号有后台权限，且 adminApi 云函数已部署。</view>
+    <button class="retry-button" bindtap="refreshFoods">重试</button>
+  </view>
+
+  <view wx:elif="{{foods.length === 0}}" class="section-card state-card">
+    <view class="state-title">暂无食物数据</view>
+    <view class="state-desc">food_items 集合暂时没有可展示的食物库数据。</view>
+  </view>
+
+  <view wx:else class="foods-list">
+    <block wx:for="{{foods}}" wx:key="id">
+      <view class="section-card food-card">
+        <view class="food-card-head">
+          <view class="food-icon">{{item.icon}}</view>
+          <view class="food-title-wrap">
+            <view class="food-name">{{item.name}}</view>
+            <view class="food-category">{{item.category}}</view>
+          </view>
+          <view class="status-pill">{{item.statusText}}</view>
+        </view>
+
+        <view class="kcal-row">
+          <view>
+            <view class="kcal-label">每 100g 热量</view>
+            <view class="kcal-value">{{item.kcalPer100g}}</view>
+          </view>
+        </view>
+
+        <view class="nutrition-grid">
+          <view class="nutrition-item">
+            <text class="nutrition-label">蛋白质</text>
+            <text class="nutrition-value">{{item.proteinPer100g}}</text>
+          </view>
+          <view class="nutrition-item">
+            <text class="nutrition-label">碳水</text>
+            <text class="nutrition-value">{{item.carbsPer100g}}</text>
+          </view>
+          <view class="nutrition-item">
+            <text class="nutrition-label">脂肪</text>
+            <text class="nutrition-value">{{item.fatPer100g}}</text>
+          </view>
+        </view>
+
+        <view class="food-meta-list">
+          <view class="meta-row">
+            <text class="meta-label">更新时间</text>
+            <text class="meta-value">{{item.updatedAt}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
   </view>
 </view>
