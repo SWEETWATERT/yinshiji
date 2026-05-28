@@ -228,7 +228,8 @@ async function listMeals(event) {
   let query = db.collection('meal_records').where(where)
   const res = await query.orderBy('createdAt', 'desc').skip(skip).limit(pageSize).get()
   const count = await db.collection('meal_records').where(where).count()
-  return { page, pageSize, total: count.total, records: res.data }
+  const meals = res.data || []
+  return { page, pageSize, total: count.total, meals, records: meals }
 }
 
 async function listFoodItems(event) {

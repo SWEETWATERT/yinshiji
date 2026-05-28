@@ -1,21 +1,238 @@
-.admin-sub-page {
+.admin-meals-page {
   padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
 }
 
-.empty-card {
-  margin-top: 28rpx;
-  padding: 36rpx 30rpx;
+.meals-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
 }
 
-.empty-title {
+.refresh-button,
+.retry-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 116rpx;
+  height: 60rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  color: #8B6CFF;
+  background: #EEE8FF;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.refresh-button[disabled] {
+  opacity: 0.6;
+}
+
+.meals-summary {
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+}
+
+.summary-label {
+  color: #807987;
+  font-size: 24rpx;
+}
+
+.summary-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  margin-top: 12rpx;
+}
+
+.summary-value {
+  color: #25232A;
+  font-size: 56rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.summary-unit {
+  color: #807987;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.summary-desc {
+  margin-top: 14rpx;
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.state-card {
+  padding: 34rpx 28rpx;
+  margin-top: 20rpx;
+}
+
+.error-card {
+  border-color: #F0D6DC;
+  background: #FFF8FA;
+}
+
+.state-title {
   color: #25232A;
   font-size: 30rpx;
   font-weight: 700;
 }
 
-.empty-desc {
+.error-card .state-title {
+  color: #D94B73;
+}
+
+.state-desc {
   margin-top: 12rpx;
   color: #807987;
-  font-size: 25rpx;
+  font-size: 24rpx;
   line-height: 1.55;
+}
+
+.retry-button {
+  width: 160rpx;
+  margin-top: 22rpx;
+}
+
+.meals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.meal-card {
+  padding: 26rpx;
+}
+
+.meal-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.meal-type {
+  color: #25232A;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.meal-summary {
+  margin-top: 8rpx;
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.image-pill,
+.ai-pill {
+  flex-shrink: 0;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.image-pill {
+  color: #8B6CFF;
+  background: #EEE8FF;
+}
+
+.meal-main-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-top: 24rpx;
+}
+
+.kcal-label {
+  color: #807987;
+  font-size: 22rpx;
+  line-height: 1.2;
+}
+
+.kcal-value {
+  margin-top: 8rpx;
+  color: #25232A;
+  font-size: 42rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ai-pill {
+  max-width: 260rpx;
+  color: #6E8C50;
+  background: #EEF6E9;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+
+.nutrition-item {
+  min-height: 88rpx;
+  padding: 16rpx 12rpx;
+  border-radius: 18rpx;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
+}
+
+.nutrition-label {
+  display: block;
+  color: #807987;
+  font-size: 22rpx;
+  line-height: 1.25;
+}
+
+.nutrition-value {
+  display: block;
+  margin-top: 10rpx;
+  color: #25232A;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.meal-meta-list {
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #F0ECE7;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  min-height: 44rpx;
+}
+
+.meta-row + .meta-row {
+  margin-top: 8rpx;
+}
+
+.meta-label {
+  flex-shrink: 0;
+  color: #807987;
+  font-size: 23rpx;
+}
+
+.meta-value {
+  color: #25232A;
+  font-size: 23rpx;
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
 }
