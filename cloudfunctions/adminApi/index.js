@@ -367,7 +367,17 @@ async function updateFeedbackStatus(event, openid) {
 async function getAppConfig(event) {
   const key = event.key || 'default'
   const res = await db.collection('app_config').where({ key }).limit(1).get()
-  return { key, config: res.data[0] || null }
+  const config = res.data[0] || null
+  return { key, config: config || {}, records: config ? [config] : [] }
+}
+
+async function listAppConfig() {
+  const res = await db.collection('app_config')
+    .orderBy('updatedAt', 'desc')
+    .limit(50)
+    .get()
+  const records = res.data || []
+  return { config: records[0] || {}, records }
 }
 
 async function setAppConfig(event, openid) {
@@ -408,6 +418,7 @@ exports.main = async (event) => {
     listFeedback,
     updateFeedbackStatus: (e) => updateFeedbackStatus(e, OPENID),
     getAppConfig,
+    listAppConfig,
     setAppConfig: (e) => setAppConfig(e, OPENID)
   }
 

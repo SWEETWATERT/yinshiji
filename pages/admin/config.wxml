@@ -1,12 +1,61 @@
 <view class="page-bg-layer">
   <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
 </view>
-<view class="page page-container admin-sub-page">
+
+<view class="page page-container admin-config-page">
   <brand-header></brand-header>
-  <view class="page-title">{{title}}</view>
-  <view class="page-subtitle">{{desc}}</view>
-  <view class="section-card empty-card">
-    <view class="empty-title">配置表单待接入</view>
-    <view class="empty-desc">当前只保留后台页面骨架，后续统一通过 adminApi 拉取真实后台数据。</view>
+
+  <view class="config-header">
+    <view>
+      <view class="page-title">{{title}}</view>
+      <view class="page-subtitle">{{desc}}</view>
+    </view>
+    <button class="refresh-button" bindtap="refreshConfig" disabled="{{loading}}">
+      {{loading ? '加载中' : '刷新'}}
+    </button>
+  </view>
+
+  <view class="section-card config-summary">
+    <view class="summary-label">配置记录</view>
+    <view class="summary-value-row">
+      <text class="summary-value">{{records.length}}</text>
+      <text class="summary-unit">条</text>
+    </view>
+    <view class="summary-desc">更新时间：{{updatedAt}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="section-card state-card">
+    <view class="state-title">加载中</view>
+    <view class="state-desc">正在读取 app_config 系统配置。</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="section-card state-card error-card">
+    <view class="state-title">{{error}}</view>
+    <view class="state-desc">请确认当前账号有后台权限，且 adminApi 云函数已部署。</view>
+    <button class="retry-button" bindtap="refreshConfig">重试</button>
+  </view>
+
+  <view wx:elif="{{records.length === 0}}" class="section-card state-card">
+    <view class="state-title">暂无系统配置</view>
+    <view class="state-desc">app_config 集合暂时没有 default 配置记录，页面先展示默认空态。</view>
+  </view>
+
+  <view wx:else>
+    <view class="section-card config-card">
+      <view class="card-title">基础配置</view>
+      <view class="config-list">
+        <block wx:for="{{configItems}}" wx:key="key">
+          <view class="config-row">
+            <text class="config-label">{{item.label}}</text>
+            <text class="config-value">{{item.value}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <view class="section-card raw-card">
+      <view class="card-title">原始配置 JSON</view>
+      <text class="raw-json">{{rawPreview}}</text>
+    </view>
   </view>
 </view>
