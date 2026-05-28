@@ -1,12 +1,100 @@
 <view class="page-bg-layer">
   <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
 </view>
-<view class="page page-container admin-sub-page">
+
+<view class="page page-container admin-reviews-page">
   <brand-header></brand-header>
-  <view class="page-title">{{title}}</view>
-  <view class="page-subtitle">{{desc}}</view>
-  <view class="section-card empty-card">
-    <view class="empty-title">复核任务待接入</view>
-    <view class="empty-desc">当前只保留后台页面骨架，后续统一通过 adminApi 拉取真实后台数据。</view>
+
+  <view class="reviews-header">
+    <view>
+      <view class="page-title">{{title}}</view>
+      <view class="page-subtitle">{{desc}}</view>
+    </view>
+    <button class="refresh-button" bindtap="refreshTasks" disabled="{{loading}}">
+      {{loading ? '加载中' : '刷新'}}
+    </button>
+  </view>
+
+  <view class="section-card reviews-summary">
+    <view class="summary-label">总任务数</view>
+    <view class="summary-value-row">
+      <text class="summary-value">{{total}}</text>
+      <text class="summary-unit">项</text>
+    </view>
+    <view class="summary-desc">当前筛选：{{currentStatusText}}</view>
+  </view>
+
+  <scroll-view class="status-scroll" scroll-x>
+    <view class="status-list">
+      <block wx:for="{{filters}}" wx:key="value">
+        <button
+          class="status-chip {{currentStatus === item.value ? 'status-chip-active' : ''}}"
+          data-status="{{item.value}}"
+          bindtap="changeStatus"
+        >
+          {{item.label}}
+        </button>
+      </block>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="section-card state-card">
+    <view class="state-title">加载中</view>
+    <view class="state-desc">正在读取 review_tasks 复核任务。</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="section-card state-card error-card">
+    <view class="state-title">{{error}}</view>
+    <view class="state-desc">请确认当前账号有后台权限，且 adminApi 云函数已部署。</view>
+    <button class="retry-button" bindtap="refreshTasks">重试</button>
+  </view>
+
+  <view wx:elif="{{tasks.length === 0}}" class="section-card state-card">
+    <view class="state-title">暂无复核任务</view>
+    <view class="state-desc">当前筛选下没有需要展示的 AI 复核任务。</view>
+  </view>
+
+  <view wx:else class="reviews-list">
+    <block wx:for="{{tasks}}" wx:key="id">
+      <view class="section-card review-card">
+        <view class="review-card-head">
+          <view>
+            <view class="review-status">{{item.statusText}}</view>
+            <view class="review-reason">{{item.reasonText}}</view>
+          </view>
+          <view class="meal-pill">{{item.mealTypeText}}</view>
+        </view>
+
+        <view class="review-main">
+          <image wx:if="{{item.hasImage}}" class="review-thumb" src="{{item.imageUrl}}" mode="aspectFill"></image>
+          <view class="review-copy">
+            <view class="food-summary">{{item.foodSummary}}</view>
+            <view class="food-kcal">{{item.kcalText}}</view>
+          </view>
+        </view>
+
+        <view class="review-grid">
+          <view class="review-field">
+            <text class="field-label">置信度</text>
+            <text class="field-value">{{item.confidenceText}}</text>
+          </view>
+          <view class="review-field">
+            <text class="field-label">用户</text>
+            <text class="field-value">{{item.maskedOpenid}}</text>
+          </view>
+        </view>
+
+        <view class="review-meta-list">
+          <view class="meta-row">
+            <text class="meta-label">创建时间</text>
+            <text class="meta-value">{{item.createdAt}}</text>
+          </view>
+          <view class="meta-row">
+            <text class="meta-label">更新时间</text>
+            <text class="meta-value">{{item.updatedAt}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
   </view>
 </view>

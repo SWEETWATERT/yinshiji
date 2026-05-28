@@ -307,7 +307,8 @@ async function listReviewTasks(event) {
     .limit(pageSize)
     .get()
   const count = await db.collection('review_tasks').where(where).count()
-  return { page, pageSize, total: count.total, records: res.data }
+  const tasks = res.data || []
+  return { page, pageSize, total: count.total, tasks, records: tasks }
 }
 
 async function resolveReviewTask(event, openid) {
