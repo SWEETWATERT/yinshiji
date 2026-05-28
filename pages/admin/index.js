@@ -27,7 +27,8 @@ Page({
     today: '',
     isAdmin: false,
     loading: true,
-    errorText: ''
+    errorText: '',
+    hasStats: false
   },
 
   onLoad() {
@@ -65,13 +66,16 @@ Page({
           return
         }
 
+        const cards = this.buildCards(dashboard.cards || {})
+
         this.setData({
           adminStatus: '管理员',
           adminFlagText: 'true',
           roleText: roles.length ? roles.join(' / ') : '--',
           isAdmin: true,
           today: dashboard.today || '',
-          cards: this.buildCards(dashboard.cards || {}),
+          cards,
+          hasStats: this.hasDashboardStats(cards),
           loading: false,
           errorText: ''
         })
@@ -90,6 +94,7 @@ Page({
           today: '',
           isAdmin: false,
           cards: EMPTY_CARDS,
+          hasStats: false,
           loading: false,
           errorText: '后台数据暂时无法加载，请稍后重试。'
         })
@@ -97,10 +102,15 @@ Page({
   },
 
   buildCards(cards) {
+    const safeCards = cards && typeof cards === 'object' ? cards : {}
     return EMPTY_CARDS.map(item => ({
       ...item,
-      value: Number(cards[item.key] || 0)
+      value: Number(safeCards[item.key] || 0)
     }))
+  },
+
+  hasDashboardStats(cards) {
+    return Array.isArray(cards) && cards.some(item => Number(item.value || 0) > 0)
   },
 
   isNoPermissionError(err) {
@@ -116,9 +126,14 @@ Page({
       today: '',
       isAdmin: false,
       cards: EMPTY_CARDS,
+      hasStats: false,
       loading: false,
       errorText: '当前账号暂无后台管理权限。'
     })
+  },
+
+  refreshDashboard() {
+    this.loadDashboard()
   },
 
   openMenu(event) {

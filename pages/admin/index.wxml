@@ -9,7 +9,12 @@
       <view class="page-title">后台管理</view>
       <view class="page-subtitle">数据概览与人工复核入口</view>
     </view>
-    <view class="admin-badge">{{adminStatus}}</view>
+    <view class="admin-header-actions">
+      <view class="admin-badge">{{adminStatus}}</view>
+      <button class="refresh-button" bindtap="refreshDashboard" disabled="{{loading}}">
+        {{loading ? '刷新中' : '刷新'}}
+      </button>
+    </view>
   </view>
 
   <view class="section-card admin-identity">
@@ -43,6 +48,10 @@
         <view class="summary-desc">{{today ? today : '今日'}} 后台统计</view>
       </view>
       <view wx:if="{{loading}}" class="loading-text">加载中</view>
+    </view>
+
+    <view wx:if="{{!loading && !errorText && !hasStats}}" class="empty-summary">
+      暂无后台统计数据
     </view>
 
     <view class="stats-grid">

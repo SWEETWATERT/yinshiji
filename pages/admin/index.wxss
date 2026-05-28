@@ -22,6 +22,33 @@
   text-align: center;
 }
 
+.admin-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.refresh-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 116rpx;
+  height: 58rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  color: #8B6CFF;
+  background: #FFFFFF;
+  border: 1rpx solid #E9E1D8;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.refresh-button[disabled] {
+  opacity: 0.6;
+}
+
 .admin-identity {
   padding: 24rpx 26rpx;
   margin-bottom: 20rpx;
@@ -107,6 +134,17 @@
   background: #EEE8FF;
   font-size: 22rpx;
   font-weight: 600;
+}
+
+.empty-summary {
+  margin-bottom: 20rpx;
+  padding: 22rpx;
+  border-radius: 20rpx;
+  color: #807987;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
+  font-size: 24rpx;
+  line-height: 1.5;
 }
 
 .stats-grid {
