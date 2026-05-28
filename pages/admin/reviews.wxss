@@ -268,3 +268,37 @@
   text-align: right;
   word-break: break-all;
 }
+
+.review-actions {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #F0ECE7;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 72rpx;
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.approve-button {
+  color: #FFFFFF;
+  background: #8B6CFF;
+}
+
+.reject-button {
+  color: #D94B73;
+  background: #FFF0F4;
+  border: 1rpx solid #F0D6DC;
+}
+
+.action-button[disabled] {
+  opacity: 0.6;
+}

@@ -94,6 +94,25 @@
             <text class="meta-value">{{item.updatedAt}}</text>
           </view>
         </view>
+
+        <view wx:if="{{item.canReview}}" class="review-actions">
+          <button
+            class="action-button approve-button"
+            data-id="{{item.id}}"
+            bindtap="approveTask"
+            disabled="{{reviewingTaskId === item.id}}"
+          >
+            {{reviewingTaskId === item.id ? '处理中' : '通过'}}
+          </button>
+          <button
+            class="action-button reject-button"
+            data-id="{{item.id}}"
+            bindtap="rejectTask"
+            disabled="{{reviewingTaskId === item.id}}"
+          >
+            {{reviewingTaskId === item.id ? '处理中' : '拒绝'}}
+          </button>
+        </view>
       </view>
     </block>
   </view>

@@ -129,7 +129,8 @@ function normalizeTask(task) {
     imageUrl,
     hasImage: Boolean(imageUrl),
     foodSummary: getFoodSummary(source),
-    kcalText: getTotalKcal(source)
+    kcalText: getTotalKcal(source),
+    canReview: status === 'pending'
   }
 }
 
@@ -149,7 +150,8 @@ Page({
     tasks: [],
     page: DEFAULT_PAGE,
     pageSize: DEFAULT_PAGE_SIZE,
-    total: 0
+    total: 0,
+    reviewingTaskId: ''
   },
 
   onLoad() {
@@ -218,11 +220,75 @@ Page({
     this.loadTasks()
   },
 
+  approveTask(event) {
+    const taskId = event.currentTarget.dataset.id
+    this.updateTaskStatus(taskId, 'resolved')
+  },
+
+  rejectTask(event) {
+    const taskId = event.currentTarget.dataset.id
+    wx.showModal({
+      title: '确认拒绝',
+      content: '确认将这条复核任务标记为已拒绝吗？',
+      confirmText: '拒绝',
+      confirmColor: '#D94B73',
+      success: res => {
+        if (res.confirm) {
+          this.updateTaskStatus(taskId, 'rejected')
+        }
+      }
+    })
+  },
+
+  updateTaskStatus(taskId, status) {
+    if (!taskId || this.data.reviewingTaskId) return
+
+    const adminNote = status === 'resolved' ? '管理员通过复核' : '管理员拒绝复核'
+    this.setData({ reviewingTaskId: taskId, error: '' })
+
+    wx.cloud.callFunction({
+      name: 'adminApi',
+      data: {
+        action: 'updateReviewTask',
+        taskId,
+        status,
+        adminNote
+      }
+    })
+      .then(res => {
+        const result = res.result || {}
+        if (result.isAdmin === false || result.code === 'NO_ADMIN_PERMISSION' || result.error === 'NO_ADMIN_PERMISSION') {
+          this.setNoPermission()
+          return
+        }
+
+        wx.showToast({
+          title: status === 'resolved' ? '已通过' : '已拒绝',
+          icon: 'success'
+        })
+
+        this.setData({ reviewingTaskId: '' })
+        this.loadTasks()
+      })
+      .catch(err => {
+        if (this.isNoPermissionError(err)) {
+          this.setNoPermission()
+          return
+        }
+
+        this.setData({
+          reviewingTaskId: '',
+          error: '复核任务处理失败，请稍后重试。'
+        })
+      })
+  },
+
   setNoPermission() {
     this.setData({
       loading: false,
       tasks: [],
       total: 0,
+      reviewingTaskId: '',
       error: '无后台权限'
     })
   },

@@ -312,23 +312,46 @@ async function listReviewTasks(event) {
   return { page, pageSize, total: count.total, tasks, records: tasks }
 }
 
-async function resolveReviewTask(event, openid) {
-  if (!event.taskId) {
+function normalizeReviewStatus(status) {
+  const value = normalizeText(status)
+  if (value === 'resolved' || value === 'rejected') return value
+
+  const err = new Error('INVALID_REVIEW_STATUS')
+  err.code = 'INVALID_REVIEW_STATUS'
+  throw err
+}
+
+async function updateReviewTask(event, openid) {
+  const taskId = event.taskId || event.reviewTaskId || event.id
+  if (!taskId) {
     const err = new Error('MISSING_TASK_ID')
     err.code = 'MISSING_TASK_ID'
     throw err
   }
-  await db.collection('review_tasks').doc(event.taskId).update({
-    data: {
-      status: event.status || 'resolved',
-      reviewerOpenid: openid,
-      resolutionNote: event.resolutionNote || '',
-      correctedFoods: event.correctedFoods || [],
-      updatedAt: new Date(),
-      resolvedAt: new Date()
-    }
-  })
-  return { ok: true, taskId: event.taskId }
+
+  const status = normalizeReviewStatus(event.status || 'resolved')
+  const now = new Date()
+  const data = {
+    status,
+    reviewedAt: now,
+    reviewerOpenid: openid,
+    adminNote: event.adminNote || '',
+    updatedAt: now
+  }
+
+  if (event.resolutionNote !== undefined) data.resolutionNote = event.resolutionNote || ''
+  if (Array.isArray(event.correctedFoods)) data.correctedFoods = event.correctedFoods
+
+  await db.collection('review_tasks').doc(taskId).update({ data })
+  return { ok: true, taskId, status }
+}
+
+async function resolveReviewTask(event, openid) {
+  return updateReviewTask({ ...event, status: event.status || 'resolved' }, openid)
+}
+
+async function rejectReviewTask(event, openid) {
+  return updateReviewTask({ ...event, status: 'rejected' }, openid)
 }
 
 async function listFeedback(event) {
@@ -414,7 +437,9 @@ exports.main = async (event) => {
     listFoodItems,
     upsertFoodItem,
     listReviewTasks,
+    updateReviewTask: (e) => updateReviewTask(e, OPENID),
     resolveReviewTask: (e) => resolveReviewTask(e, OPENID),
+    rejectReviewTask: (e) => rejectReviewTask(e, OPENID),
     listFeedback,
     updateFeedbackStatus: (e) => updateFeedbackStatus(e, OPENID),
     getAppConfig,
