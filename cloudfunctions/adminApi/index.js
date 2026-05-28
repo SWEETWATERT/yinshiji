@@ -214,7 +214,8 @@ async function listUsers(event) {
     .limit(pageSize)
     .get()
   const count = await db.collection('users').count()
-  return { page, pageSize, total: count.total, records: res.data }
+  const users = res.data || []
+  return { page, pageSize, total: count.total, users, records: users }
 }
 
 async function listMeals(event) {
