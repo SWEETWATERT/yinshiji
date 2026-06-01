@@ -105,7 +105,8 @@ function extractMatches(note) {
         keyword: rule.keyword,
         foodId: rule.foodId,
         nameCn: rule.nameCn,
-        weightG: rule.weightG
+        weightG: inferWeightG(note, rule.keyword, rule.weightG),
+        matchField: 'alias_rule'
       })
       usedIds.add(rule.foodId)
     }
@@ -114,15 +115,65 @@ function extractMatches(note) {
     if (usedIds.has(mapping.id)) continue
     const matchedKw = mapping.kws.find(kw => note.includes(kw))
     if (matchedKw) {
-      matches.push({ keyword: matchedKw, foodId: mapping.id, weightG: mapping.wg })
+      matches.push({
+        keyword: matchedKw,
+        foodId: mapping.id,
+        weightG: inferWeightG(note, matchedKw, mapping.wg),
+        matchField: 'keyword_map'
+      })
       usedIds.add(mapping.id)
     }
   }
   const vegKws = ['蔬菜', '绿叶菜', '青菜', '时蔬', '素菜']
   if (vegKws.some(kw => note.includes(kw)) && !matches.some(m => isVegetable(m.foodId))) {
-    matches.push({ keyword: '青菜', foodId: 'dish_stir_greens', weightG: 150 })
+    matches.push({ keyword: '青菜', foodId: 'dish_stir_greens', weightG: 150, matchField: 'keyword_map' })
   }
   return matches
+}
+
+function normalizeTextValue(value) {
+  return String(value || '').trim()
+}
+
+function normalizeSearchText(value) {
+  return normalizeTextValue(value).toLowerCase()
+}
+
+function getFoodDocId(doc) {
+  return doc.foodId || doc.id || doc._id || ''
+}
+
+function isFoodDocEnabled(doc) {
+  if (!doc) return false
+  const status = normalizeSearchText(doc.status)
+  return doc.enabled !== false && doc.disabled !== true && status !== 'disabled'
+}
+
+function getFoodSearchTerms(doc) {
+  const aliases = Array.isArray(doc.aliases)
+    ? doc.aliases
+    : (typeof doc.aliases === 'string' ? doc.aliases.split(/[,，、\s]+/) : [])
+  return [
+    { value: doc.nameCn, field: 'nameCn' },
+    { value: doc.name, field: 'name' },
+    { value: doc.foodName, field: 'foodName' },
+    { value: doc.title, field: 'title' },
+    { value: doc.category, field: 'category' },
+    ...aliases.map(alias => ({ value: alias, field: 'aliases' }))
+  ]
+    .map(term => ({ value: normalizeTextValue(term.value), field: term.field }))
+    .filter(term => term.value)
+}
+
+function inferWeightG(note, keyword, defaultWeightG) {
+  const fallbackWeight = Number(defaultWeightG || 100)
+  if (!note || !keyword) return fallbackWeight
+  const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = new RegExp(`${escapedKeyword}\\s*(\\d{1,4})\\s*(克|g|G)`)
+  const matched = note.match(pattern)
+  if (!matched) return fallbackWeight
+  const weight = Number(matched[1])
+  return weight > 0 ? weight : fallbackWeight
 }
 
 function extractFoodItemMatches(note, foodDocs, existingMatches) {
@@ -130,18 +181,19 @@ function extractFoodItemMatches(note, foodDocs, existingMatches) {
   const usedIds = new Set((existingMatches || []).map(match => match.foodId))
   const matches = []
   for (const doc of foodDocs || []) {
-    if (!doc || !doc.foodId || usedIds.has(doc.foodId)) continue
-    const aliases = Array.isArray(doc.aliases) ? doc.aliases : []
-    const keywords = [doc.nameCn, doc.name, doc.foodName, ...aliases].filter(Boolean)
-    const matchedKw = keywords.find(keyword => note.includes(keyword))
-    if (matchedKw) {
+    const foodId = getFoodDocId(doc)
+    if (!doc || !foodId || usedIds.has(foodId) || !isFoodDocEnabled(doc)) continue
+    const matchedTerm = getFoodSearchTerms(doc).find(term => note.includes(term.value))
+    if (matchedTerm) {
+      const defaultWeightG = Number(doc.defaultWeightG || 100)
       matches.push({
-        keyword: matchedKw,
-        foodId: doc.foodId,
+        keyword: matchedTerm.value,
+        matchField: matchedTerm.field,
+        foodId,
         nameCn: doc.nameCn || doc.name || doc.foodName,
-        weightG: Number(doc.defaultWeightG || 100)
+        weightG: inferWeightG(note, matchedTerm.value, defaultWeightG)
       })
-      usedIds.add(doc.foodId)
+      usedIds.add(foodId)
     }
   }
   return matches
@@ -164,17 +216,23 @@ async function getAllFoodItems() {
 function r1(n) { return Math.round(n * 10) / 10 }
 
 function confidenceFromKeyword(keyword, foodDoc) {
-  const exactNames = [foodDoc.nameCn, foodDoc.name, foodDoc.foodName].filter(Boolean)
+  const exactNames = [foodDoc.nameCn, foodDoc.name, foodDoc.foodName, foodDoc.title].filter(Boolean)
   if (exactNames.includes(keyword)) return { value: 0.7, label: '中等' }
-  if ((foodDoc.aliases || []).includes(keyword)) return { value: 0.62, label: '中等' }
+  const aliases = Array.isArray(foodDoc.aliases)
+    ? foodDoc.aliases
+    : (typeof foodDoc.aliases === 'string' ? foodDoc.aliases.split(/[,，、\s]+/) : [])
+  if (aliases.includes(keyword)) return { value: 0.62, label: '中等' }
+  if (foodDoc.category === keyword) return { value: 0.45, label: '较低' }
   return { value: 0.55, label: '较低' }
 }
 
 function normalizeFoodDoc(foodDoc) {
   return {
-    foodId: foodDoc.foodId || '',
+    foodId: getFoodDocId(foodDoc),
     nameCn: foodDoc.nameCn || foodDoc.name || foodDoc.foodName || '',
     name: foodDoc.name || foodDoc.nameCn || foodDoc.foodName || '',
+    foodName: foodDoc.foodName || foodDoc.nameCn || foodDoc.name || '',
+    category: foodDoc.category || '',
     kcalPer100g: Number(foodDoc.kcalPer100g || 0),
     proteinPer100g: Number(foodDoc.proteinPer100g || 0),
     carbsPer100g: Number(foodDoc.carbsPer100g || 0),
@@ -189,6 +247,7 @@ function buildCandidate(foodDoc, match) {
   return {
     ...normalized,
     matchedKeyword: match.keyword,
+    matchField: match.matchField || '',
     weightG: match.weightG,
     confidence: confidence.value,
     confidenceLabel: confidence.label,
@@ -229,6 +288,8 @@ function buildFoodItem(foodDoc, match) {
     foodId: normalized.foodId,
     nameCn: normalized.nameCn,
     name: normalized.name,
+    foodName: normalized.foodName,
+    category: normalized.category,
     icon: foodDoc.icon || '🍽️',
     weightG,
     kcal: Math.round(normalized.kcalPer100g * ratio),
@@ -243,6 +304,7 @@ function buildFoodItem(foodDoc, match) {
     needUserConfirm: true,
     source: 'keyword_match',
     recognitionSource: RECOGNITION_SOURCE,
+    matchField: match.matchField || '',
     estimateNote: '食物来自备注关键词匹配，份量为常见默认值，请按实际情况确认。',
     _kcalPer100g: normalized.kcalPer100g,
     _proteinPer100g: normalized.proteinPer100g,
@@ -422,7 +484,9 @@ exports.main = async (event) => {
 
   const foodMap = {}
   for (const doc of foodDocs) {
-    foodMap[doc.foodId] = doc
+    if (!isFoodDocEnabled(doc)) continue
+    const foodId = getFoodDocId(doc)
+    if (foodId) foodMap[foodId] = doc
   }
 
   const detectedFoods = []
