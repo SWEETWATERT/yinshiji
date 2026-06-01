@@ -10,9 +10,12 @@
       <view class="page-title">{{title}}</view>
       <view class="page-subtitle">{{desc}}</view>
     </view>
-    <button class="refresh-button" bindtap="refreshFoods" disabled="{{loading}}">
-      {{loading ? '加载中' : '刷新'}}
-    </button>
+    <view class="header-actions">
+      <button class="add-button" bindtap="showCreateForm" disabled="{{loading || saving}}">新增食物</button>
+      <button class="refresh-button" bindtap="refreshFoods" disabled="{{loading}}">
+        {{loading ? '加载中' : '刷新'}}
+      </button>
+    </view>
   </view>
 
   <view class="section-card foods-summary">
@@ -21,7 +24,78 @@
       <text class="summary-value">{{total}}</text>
       <text class="summary-unit">项</text>
     </view>
-    <view class="summary-desc">当前显示第 {{page}} 页，每页 {{pageSize}} 项</view>
+    <view class="summary-desc">当前显示第 {{page}} / {{totalPages}} 页，每页 {{pageSize}} 项</view>
+  </view>
+
+  <view class="section-card search-card">
+    <view class="search-row">
+      <input
+        class="search-input"
+        value="{{searchValue}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+        bindconfirm="searchFoods"
+        placeholder="搜索食物名称/分类"
+      />
+      <button class="search-button" bindtap="searchFoods" disabled="{{loading}}">搜索</button>
+    </view>
+    <view wx:if="{{keyword}}" class="search-meta">
+      <text>当前搜索：{{keyword}}</text>
+      <button class="clear-button" bindtap="clearSearch" disabled="{{loading}}">清空</button>
+    </view>
+  </view>
+
+  <view wx:if="{{showForm}}" class="section-card food-form-card">
+    <view class="form-head">
+      <view>
+        <view class="form-title">{{formMode === 'edit' ? '编辑食物' : '新增食物'}}</view>
+        <view class="form-desc">维护每 100g 的基础营养估算数据</view>
+      </view>
+      <button class="form-close" bindtap="hideForm" disabled="{{saving}}">取消</button>
+    </view>
+
+    <view class="form-grid">
+      <view class="form-field form-field-full">
+        <text class="form-label">食物名称</text>
+        <input class="form-input" value="{{form.name}}" data-field="name" bindinput="onFormInput" placeholder="例如 鸡胸肉" />
+      </view>
+      <view class="form-field">
+        <text class="form-label">分类</text>
+        <input class="form-input" value="{{form.category}}" data-field="category" bindinput="onFormInput" placeholder="例如 蛋白质" />
+      </view>
+      <view class="form-field">
+        <text class="form-label">热量 kcal/100g</text>
+        <input class="form-input" type="digit" value="{{form.kcalPer100g}}" data-field="kcalPer100g" bindinput="onFormInput" placeholder="0" />
+      </view>
+      <view class="form-field">
+        <text class="form-label">蛋白质 g</text>
+        <input class="form-input" type="digit" value="{{form.protein}}" data-field="protein" bindinput="onFormInput" placeholder="0" />
+      </view>
+      <view class="form-field">
+        <text class="form-label">碳水 g</text>
+        <input class="form-input" type="digit" value="{{form.carbs}}" data-field="carbs" bindinput="onFormInput" placeholder="0" />
+      </view>
+      <view class="form-field">
+        <text class="form-label">脂肪 g</text>
+        <input class="form-input" type="digit" value="{{form.fat}}" data-field="fat" bindinput="onFormInput" placeholder="0" />
+      </view>
+      <view class="form-field">
+        <text class="form-label">纤维 g</text>
+        <input class="form-input" type="digit" value="{{form.fiber}}" data-field="fiber" bindinput="onFormInput" placeholder="0" />
+      </view>
+    </view>
+
+    <view class="enabled-row">
+      <view>
+        <view class="enabled-title">启用状态</view>
+        <view class="enabled-desc">停用后不会作为可用食物数据展示</view>
+      </view>
+      <switch checked="{{form.enabled}}" bindchange="onEnabledChange" color="#8B6CFF" />
+    </view>
+
+    <button class="submit-button" bindtap="submitFoodForm" disabled="{{saving}}">
+      {{saving ? '保存中' : (formMode === 'edit' ? '保存修改' : '新增食物')}}
+    </button>
   </view>
 
   <view wx:if="{{loading}}" class="section-card state-card">
@@ -37,7 +111,7 @@
 
   <view wx:elif="{{foods.length === 0}}" class="section-card state-card">
     <view class="state-title">暂无食物数据</view>
-    <view class="state-desc">food_items 集合暂时没有可展示的食物库数据。</view>
+    <view class="state-desc">{{keyword ? '当前关键词没有匹配的食物，请换个关键词搜索。' : 'food_items 集合暂时没有可展示的食物库数据。'}}</view>
   </view>
 
   <view wx:else class="foods-list">
@@ -72,6 +146,10 @@
             <text class="nutrition-label">脂肪</text>
             <text class="nutrition-value">{{item.fatPer100g}}</text>
           </view>
+          <view class="nutrition-item">
+            <text class="nutrition-label">纤维</text>
+            <text class="nutrition-value">{{item.fiberPer100g}}</text>
+          </view>
         </view>
 
         <view class="food-meta-list">
@@ -80,7 +158,28 @@
             <text class="meta-value">{{item.updatedAt}}</text>
           </view>
         </view>
+
+        <view class="food-actions">
+          <button class="action-button secondary-button" data-id="{{item.id}}" bindtap="editFood" disabled="{{saving || updatingFoodId === item.id}}">
+            编辑
+          </button>
+          <button
+            class="action-button {{item.enabled ? 'danger-button' : 'primary-button'}}"
+            data-id="{{item.id}}"
+            data-enabled="{{item.enabled}}"
+            bindtap="toggleFoodStatus"
+            disabled="{{updatingFoodId === item.id}}"
+          >
+            {{updatingFoodId === item.id ? '处理中' : (item.enabled ? '停用' : '启用')}}
+          </button>
+        </view>
       </view>
     </block>
+  </view>
+
+  <view wx:if="{{!loading && !error && total > 0}}" class="section-card pager-card">
+    <button class="pager-button" bindtap="prevPage" disabled="{{page <= 1 || loading}}">上一页</button>
+    <view class="pager-text">第 {{page}} / {{totalPages}} 页</view>
+    <button class="pager-button" bindtap="nextPage" disabled="{{page >= totalPages || loading}}">下一页</button>
   </view>
 </view>

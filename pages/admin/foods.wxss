@@ -10,6 +10,15 @@
   margin-bottom: 24rpx;
 }
 
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.add-button,
 .refresh-button,
 .retry-button {
   display: flex;
@@ -26,6 +35,11 @@
   font-weight: 700;
 }
 
+.add-button {
+  color: #FFFFFF;
+  background: #8B6CFF;
+}
+
 .refresh-button[disabled] {
   opacity: 0.6;
 }
@@ -33,6 +47,175 @@
 .foods-summary {
   padding: 26rpx;
   margin-bottom: 20rpx;
+}
+
+.search-card {
+  padding: 22rpx;
+  margin-bottom: 20rpx;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 72rpx;
+  padding: 0 20rpx;
+  border-radius: 18rpx;
+  color: #25232A;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
+  font-size: 25rpx;
+  box-sizing: border-box;
+}
+
+.search-button,
+.clear-button,
+.pager-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 72rpx;
+  padding: 0 24rpx;
+  border-radius: 18rpx;
+  color: #8B6CFF;
+  background: #EEE8FF;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.search-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  color: #807987;
+  font-size: 24rpx;
+}
+
+.clear-button {
+  height: 56rpx;
+  padding: 0 18rpx;
+  color: #807987;
+  background: #FAF8F5;
+  font-size: 23rpx;
+}
+
+.food-form-card {
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+}
+
+.form-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 22rpx;
+}
+
+.form-title {
+  color: #25232A;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.form-desc {
+  margin-top: 8rpx;
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.form-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 104rpx;
+  height: 56rpx;
+  padding: 0 20rpx;
+  border-radius: 999rpx;
+  color: #807987;
+  background: #FAF8F5;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.form-field {
+  min-width: 0;
+}
+
+.form-field-full {
+  grid-column: span 2;
+}
+
+.form-label {
+  display: block;
+  color: #807987;
+  font-size: 23rpx;
+  line-height: 1.35;
+  margin-bottom: 10rpx;
+}
+
+.form-input {
+  height: 76rpx;
+  padding: 0 20rpx;
+  border-radius: 18rpx;
+  color: #25232A;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
+  font-size: 25rpx;
+  box-sizing: border-box;
+}
+
+.enabled-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 22rpx;
+  padding: 18rpx 0;
+  border-top: 1rpx solid #F0ECE7;
+}
+
+.enabled-title {
+  color: #25232A;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.enabled-desc {
+  margin-top: 6rpx;
+  color: #807987;
+  font-size: 23rpx;
+  line-height: 1.4;
+}
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 78rpx;
+  margin-top: 8rpx;
+  border-radius: 20rpx;
+  color: #FFFFFF;
+  background: #8B6CFF;
+  font-size: 27rpx;
+  font-weight: 700;
 }
 
 .summary-label {
@@ -177,7 +360,7 @@
 
 .nutrition-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12rpx;
   margin-top: 24rpx;
 }
@@ -231,4 +414,65 @@
   font-size: 23rpx;
   font-weight: 600;
   text-align: right;
+}
+
+.food-actions {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #F0ECE7;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 72rpx;
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.primary-button {
+  color: #FFFFFF;
+  background: #8B6CFF;
+}
+
+.secondary-button {
+  color: #8B6CFF;
+  background: #EEE8FF;
+}
+
+.danger-button {
+  color: #D94B73;
+  background: #FFF0F4;
+  border: 1rpx solid #F0D6DC;
+}
+
+.action-button[disabled],
+.submit-button[disabled],
+.add-button[disabled],
+.search-button[disabled],
+.clear-button[disabled],
+.pager-button[disabled] {
+  opacity: 0.6;
+}
+
+.pager-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 22rpx;
+  margin-top: 18rpx;
+}
+
+.pager-text {
+  flex: 1;
+  color: #807987;
+  font-size: 25rpx;
+  font-weight: 700;
+  text-align: center;
 }

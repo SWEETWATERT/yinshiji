@@ -234,51 +234,73 @@ async function listMeals(event) {
 
 async function listFoodItems(event) {
   const { page, pageSize, skip } = pageArgs(event)
+  const keyword = String(event.keyword || '').trim()
   const where = {}
   if (event.category) where.category = event.category
-  if (event.keyword) {
-    where.nameCn = db.RegExp({
-      regexp: event.keyword,
+
+  let query = db.collection('food_items').where(where)
+  let countQuery = db.collection('food_items').where(where)
+
+  if (keyword) {
+    const keywordRegExp = db.RegExp({
+      regexp: keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
       options: 'i'
     })
+    const keywordWhere = _.or([
+      { nameCn: keywordRegExp },
+      { name: keywordRegExp },
+      { foodName: keywordRegExp },
+      { title: keywordRegExp },
+      { category: keywordRegExp }
+    ])
+    query = db.collection('food_items').where(keywordWhere)
+    countQuery = db.collection('food_items').where(keywordWhere)
   }
-  const res = await db.collection('food_items')
-    .where(where)
+
+  const res = await query
     .orderBy('category', 'asc')
     .skip(skip)
     .limit(pageSize)
     .get()
-  const count = await db.collection('food_items').where(where).count()
+  const count = await countQuery.count()
   const foods = res.data || []
   return { page, pageSize, total: count.total, foods, records: foods }
 }
 
 function sanitizeFoodItem(data) {
+  const source = data || {}
+  const foodName = source.nameCn || source.name || source.foodName
+  const foodId = source.foodId || source.id || `food_${Date.now()}`
+  const normalized = {
+    foodId: String(foodId),
+    nameCn: String(foodName || ''),
+    name: String(foodName || ''),
+    category: String(source.category || '未分类'),
+    aliases: Array.isArray(source.aliases) ? source.aliases : [],
+    kcalPer100g: Number(source.kcalPer100g || source.kcal || source.calories || 0),
+    proteinPer100g: Number(source.proteinPer100g || source.protein || 0),
+    carbsPer100g: Number(source.carbsPer100g || source.carbs || 0),
+    fatPer100g: Number(source.fatPer100g || source.fat || 0),
+    fiberPer100g: Number(source.fiberPer100g || source.fiber || 0),
+    icon: source.icon || '🍽️',
+    defaultWeightG: Number(source.defaultWeightG || 100),
+    enabled: source.enabled !== false,
+    verified: source.verified !== false && source.enabled !== false,
+    status: source.status || (source.enabled === false ? 'disabled' : 'enabled'),
+    dataSource: source.dataSource || 'admin',
+    dataSourceNote: source.dataSourceNote || '后台人工维护数据。',
+    updatedAt: new Date()
+  }
+
   const required = ['foodId', 'nameCn', 'category', 'kcalPer100g', 'proteinPer100g', 'carbsPer100g', 'fatPer100g']
   for (const key of required) {
-    if (data[key] === undefined || data[key] === '') {
+    if (normalized[key] === undefined || normalized[key] === '' || Number.isNaN(normalized[key])) {
       const err = new Error(`MISSING_${key}`)
       err.code = 'INVALID_FOOD_ITEM'
       throw err
     }
   }
-  return {
-    foodId: String(data.foodId),
-    nameCn: String(data.nameCn),
-    category: String(data.category),
-    aliases: Array.isArray(data.aliases) ? data.aliases : [],
-    kcalPer100g: Number(data.kcalPer100g),
-    proteinPer100g: Number(data.proteinPer100g),
-    carbsPer100g: Number(data.carbsPer100g),
-    fatPer100g: Number(data.fatPer100g),
-    fiberPer100g: Number(data.fiberPer100g || 0),
-    icon: data.icon || '🍽️',
-    defaultWeightG: Number(data.defaultWeightG || 100),
-    verified: data.verified !== false,
-    dataSource: data.dataSource || 'admin',
-    dataSourceNote: data.dataSourceNote || '后台人工维护数据。',
-    updatedAt: new Date()
-  }
+  return normalized
 }
 
 async function upsertFoodItem(event) {
@@ -295,6 +317,62 @@ async function upsertFoodItem(event) {
 
   await db.collection('food_items').add({ data: { ...item, createdAt: new Date() } })
   return { ok: true, action: 'created', foodId: item.foodId }
+}
+
+async function createFoodItem(event) {
+  const item = sanitizeFoodItem(event.data || event.food || {})
+  await db.collection('food_items').add({ data: { ...item, createdAt: new Date() } })
+  return { ok: true, action: 'created', foodId: item.foodId }
+}
+
+async function updateFoodItem(event) {
+  const foodItemId = event.foodItemId || event.id
+  const item = sanitizeFoodItem(event.data || event.food || {})
+
+  if (foodItemId) {
+    await db.collection('food_items').doc(foodItemId).update({ data: item })
+    return { ok: true, action: 'updated', foodItemId, foodId: item.foodId }
+  }
+
+  const existing = await db.collection('food_items')
+    .where({ foodId: item.foodId })
+    .limit(1)
+    .get()
+
+  if (!existing.data.length) {
+    const err = new Error('FOOD_ITEM_NOT_FOUND')
+    err.code = 'FOOD_ITEM_NOT_FOUND'
+    throw err
+  }
+
+  await db.collection('food_items').doc(existing.data[0]._id).update({ data: item })
+  return { ok: true, action: 'updated', foodId: item.foodId }
+}
+
+async function setFoodItemStatus(event) {
+  const foodItemId = event.foodItemId || event.id
+  if (!foodItemId) {
+    const err = new Error('MISSING_FOOD_ITEM_ID')
+    err.code = 'MISSING_FOOD_ITEM_ID'
+    throw err
+  }
+
+  const enabled = event.enabled !== false && normalizeText(event.status) !== 'disabled'
+  const status = enabled ? 'enabled' : 'disabled'
+  await db.collection('food_items').doc(foodItemId).update({
+    data: {
+      enabled,
+      verified: enabled,
+      status,
+      updatedAt: new Date()
+    }
+  })
+
+  return { ok: true, foodItemId, enabled, status }
+}
+
+async function toggleFoodItemStatus(event) {
+  return setFoodItemStatus(event)
 }
 
 async function listReviewTasks(event) {
@@ -455,6 +533,10 @@ exports.main = async (event) => {
     listMeals,
     listFoodItems,
     upsertFoodItem,
+    createFoodItem,
+    updateFoodItem,
+    setFoodItemStatus,
+    toggleFoodItemStatus,
     listReviewTasks,
     updateReviewTask: (e) => updateReviewTask(e, OPENID),
     resolveReviewTask: (e) => resolveReviewTask(e, OPENID),
