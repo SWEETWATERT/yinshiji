@@ -2,6 +2,10 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+const RECOGNITION_SOURCE = 'keyword_fallback'
+const MODEL_PROVIDER = 'mock_keyword'
+const MODEL_VERSION = 'v0.4.0-step2'
+
 const KEYWORD_FOOD_MAP = [
   { kws: ['番茄炒蛋', '西红柿炒鸡蛋', '蕃茄炒蛋'],   id: 'dish_tomato_egg',     wg: 200 },
   { kws: ['清炒青菜', '素炒青菜', '炒青菜', '时蔬'],   id: 'dish_stir_greens',    wg: 150 },
@@ -128,13 +132,13 @@ function extractFoodItemMatches(note, foodDocs, existingMatches) {
   for (const doc of foodDocs || []) {
     if (!doc || !doc.foodId || usedIds.has(doc.foodId)) continue
     const aliases = Array.isArray(doc.aliases) ? doc.aliases : []
-    const keywords = [doc.nameCn, ...aliases].filter(Boolean)
+    const keywords = [doc.nameCn, doc.name, doc.foodName, ...aliases].filter(Boolean)
     const matchedKw = keywords.find(keyword => note.includes(keyword))
     if (matchedKw) {
       matches.push({
         keyword: matchedKw,
         foodId: doc.foodId,
-        nameCn: doc.nameCn,
+        nameCn: doc.nameCn || doc.name || doc.foodName,
         weightG: Number(doc.defaultWeightG || 100)
       })
       usedIds.add(doc.foodId)
@@ -160,39 +164,91 @@ async function getAllFoodItems() {
 function r1(n) { return Math.round(n * 10) / 10 }
 
 function confidenceFromKeyword(keyword, foodDoc) {
-  if (keyword === foodDoc.nameCn) return { value: 0.82, label: '较高' }
-  if ((foodDoc.aliases || []).includes(keyword)) return { value: 0.76, label: '中等' }
-  return { value: 0.68, label: '中等' }
+  const exactNames = [foodDoc.nameCn, foodDoc.name, foodDoc.foodName].filter(Boolean)
+  if (exactNames.includes(keyword)) return { value: 0.7, label: '中等' }
+  if ((foodDoc.aliases || []).includes(keyword)) return { value: 0.62, label: '中等' }
+  return { value: 0.55, label: '较低' }
+}
+
+function normalizeFoodDoc(foodDoc) {
+  return {
+    foodId: foodDoc.foodId || '',
+    nameCn: foodDoc.nameCn || foodDoc.name || foodDoc.foodName || '',
+    name: foodDoc.name || foodDoc.nameCn || foodDoc.foodName || '',
+    kcalPer100g: Number(foodDoc.kcalPer100g || 0),
+    proteinPer100g: Number(foodDoc.proteinPer100g || 0),
+    carbsPer100g: Number(foodDoc.carbsPer100g || 0),
+    fatPer100g: Number(foodDoc.fatPer100g || 0),
+    fiberPer100g: Number(foodDoc.fiberPer100g || 0)
+  }
+}
+
+function buildCandidate(foodDoc, match) {
+  const normalized = normalizeFoodDoc(foodDoc)
+  const confidence = confidenceFromKeyword(match.keyword, foodDoc)
+  return {
+    ...normalized,
+    matchedKeyword: match.keyword,
+    weightG: match.weightG,
+    confidence: confidence.value,
+    confidenceLabel: confidence.label,
+    recognitionSource: RECOGNITION_SOURCE
+  }
+}
+
+function buildRecognitionMeta(detectedFoods) {
+  if (!detectedFoods.length) {
+    return {
+      recognitionSource: RECOGNITION_SOURCE,
+      modelProvider: MODEL_PROVIDER,
+      modelVersion: MODEL_VERSION,
+      confidence: 0.3,
+      needReview: true
+    }
+  }
+
+  const avg = detectedFoods.reduce((sum, food) => sum + Number(food.confidence || 0), 0) / detectedFoods.length
+  const confidence = Math.max(0.3, Math.min(0.7, r1(avg)))
+  return {
+    recognitionSource: RECOGNITION_SOURCE,
+    modelProvider: MODEL_PROVIDER,
+    modelVersion: MODEL_VERSION,
+    confidence,
+    needReview: confidence < 0.6
+  }
 }
 
 function buildFoodItem(foodDoc, match) {
+  const normalized = normalizeFoodDoc(foodDoc)
   const weightG = match.weightG
   const ratio = weightG / 100
-  const uid = foodDoc.foodId + '_' + Date.now() + '_' + Math.floor(Math.random() * 10000)
+  const uid = normalized.foodId + '_' + Date.now() + '_' + Math.floor(Math.random() * 10000)
   const confidence = confidenceFromKeyword(match.keyword, foodDoc)
   return {
     uid,
-    foodId: foodDoc.foodId,
-    nameCn: foodDoc.nameCn,
+    foodId: normalized.foodId,
+    nameCn: normalized.nameCn,
+    name: normalized.name,
     icon: foodDoc.icon || '🍽️',
     weightG,
-    kcal: Math.round(foodDoc.kcalPer100g * ratio),
-    proteinG: r1(foodDoc.proteinPer100g * ratio),
-    carbsG: r1(foodDoc.carbsPer100g * ratio),
-    fatG: r1(foodDoc.fatPer100g * ratio),
-    fiberG: r1(foodDoc.fiberPer100g * ratio),
+    kcal: Math.round(normalized.kcalPer100g * ratio),
+    proteinG: r1(normalized.proteinPer100g * ratio),
+    carbsG: r1(normalized.carbsPer100g * ratio),
+    fatG: r1(normalized.fatPer100g * ratio),
+    fiberG: r1(normalized.fiberPer100g * ratio),
     matchedKeyword: match.keyword,
     confidence: confidence.value,
     confidenceLabel: confidence.label,
     weightConfidence: 'low',
     needUserConfirm: true,
     source: 'keyword_match',
+    recognitionSource: RECOGNITION_SOURCE,
     estimateNote: '食物来自备注关键词匹配，份量为常见默认值，请按实际情况确认。',
-    _kcalPer100g: foodDoc.kcalPer100g,
-    _proteinPer100g: foodDoc.proteinPer100g,
-    _carbsPer100g: foodDoc.carbsPer100g,
-    _fatPer100g: foodDoc.fatPer100g,
-    _fiberPer100g: foodDoc.fiberPer100g
+    _kcalPer100g: normalized.kcalPer100g,
+    _proteinPer100g: normalized.proteinPer100g,
+    _carbsPer100g: normalized.carbsPer100g,
+    _fatPer100g: normalized.fatPer100g,
+    _fiberPer100g: normalized.fiberPer100g
   }
 }
 
@@ -258,14 +314,20 @@ async function saveAnalysisLog(openid, result, input, status) {
         total: result.total || {},
         warnings: result.warnings || [],
         aiAdvice: result.aiAdvice || '',
+        recognitionSource: result.recognitionSource || RECOGNITION_SOURCE,
+        modelProvider: result.modelProvider || MODEL_PROVIDER,
+        modelVersion: result.modelVersion || MODEL_VERSION,
+        confidence: Number(result.confidence || 0),
+        needReview: Boolean(result.needReview),
+        candidates: result.candidates || [],
         status,
-        modelProvider: 'mock_keyword',
-        modelVersion: 'nutrition_estimate_v1',
         confidenceSummary: {
           foodCount: (result.detectedFoods || []).length,
           hasImage: Boolean(input.imageFileID),
           hasNote: Boolean(input.note),
-          needUserConfirm: (result.detectedFoods || []).some(food => food.needUserConfirm)
+          needUserConfirm: (result.detectedFoods || []).some(food => food.needUserConfirm),
+          confidence: Number(result.confidence || 0),
+          needReview: Boolean(result.needReview)
         },
         createdAt: new Date()
       }
@@ -278,6 +340,7 @@ async function saveAnalysisLog(openid, result, input, status) {
 async function createReviewTaskIfNeeded(openid, result, input, reason) {
   const shouldReview =
     reason ||
+    result.needReview ||
     (input.imageFileID && !(result.detectedFoods || []).length) ||
     (result.detectedFoods || []).some(food => food.source === 'keyword_match' || food.needUserConfirm)
 
@@ -294,6 +357,12 @@ async function createReviewTaskIfNeeded(openid, result, input, reason) {
         note: input.note || '',
         detectedFoods: result.detectedFoods || [],
         total: result.total || {},
+        candidates: result.candidates || [],
+        recognitionSource: result.recognitionSource || RECOGNITION_SOURCE,
+        modelProvider: result.modelProvider || MODEL_PROVIDER,
+        modelVersion: result.modelVersion || MODEL_VERSION,
+        confidence: Number(result.confidence || 0),
+        needReview: Boolean(result.needReview),
         reason: reason || 'estimated_result_needs_confirmation',
         status: 'pending',
         priority: (result.detectedFoods || []).length ? 'normal' : 'high',
@@ -334,6 +403,7 @@ exports.main = async (event) => {
   const matches = [...keywordMatches, ...foodItemMatches]
 
   if (matches.length === 0) {
+    const meta = buildRecognitionMeta([])
     const result = {
       analysisId,
       imageUrl: imageFileID || '',
@@ -341,6 +411,8 @@ exports.main = async (event) => {
       total: { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0, fiberG: 0 },
       warnings: buildWarnings([], imageFileID).concat('未从备注中识别到具体食物。请在备注中输入您吃了什么（如：苹果、白米饭、鸡胸肉），系统将自动匹配营养数据。'),
       aiAdvice: '',
+      candidates: [],
+      ...meta,
       debugInput
     }
     await saveAnalysisLog(OPENID, result, request, 'empty')
@@ -354,14 +426,17 @@ exports.main = async (event) => {
   }
 
   const detectedFoods = []
+  const candidates = []
   for (const match of matches) {
     const doc = foodMap[match.foodId]
     if (doc) {
+      candidates.push(buildCandidate(doc, match))
       detectedFoods.push(buildFoodItem(doc, match))
     }
   }
 
   const total = calcTotals(detectedFoods)
+  const meta = buildRecognitionMeta(detectedFoods)
 
   const result = {
     analysisId,
@@ -370,6 +445,8 @@ exports.main = async (event) => {
     total,
     warnings: buildWarnings(detectedFoods, imageFileID),
     aiAdvice: buildAdvice(detectedFoods, total),
+    candidates,
+    ...meta,
     debugInput
   }
 
