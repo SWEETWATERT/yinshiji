@@ -72,6 +72,97 @@ function normalizeTotal(total = {}, foods = []) {
   }), { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 })
 }
 
+function shouldCreateReviewTask(record) {
+  return Boolean(
+    record.needReview ||
+    (record.confidence > 0 && record.confidence < 0.6) ||
+    (record.imageFileID && !record.confirmedFoods.length)
+  )
+}
+
+function getReviewReason(record) {
+  if (record.needReview) return 'analysis_marked_need_review'
+  if (record.confidence > 0 && record.confidence < 0.6) return 'low_confidence_analysis'
+  if (record.imageFileID && !record.confirmedFoods.length) return 'image_without_detected_foods'
+  return 'estimated_result_needs_confirmation'
+}
+
+function reviewTaskPayload(record, mealRecordId, openid) {
+  const now = new Date()
+  return {
+    _openid: openid,
+    source: 'meal_save',
+    analysisId: record.analysisId || '',
+    mealRecordId,
+    mealType: record.mealType || '',
+    date: record.date || '',
+    time: record.time || '',
+    imageFileID: record.imageFileID || '',
+    note: record.note || '',
+    detectedFoods: record.detectedFoods || [],
+    confirmedFoods: record.confirmedFoods || [],
+    total: record.total || {},
+    totalNutrition: record.totalNutrition || {},
+    candidates: record.candidates || [],
+    visionResult: record.visionResult || null,
+    recognitionSource: record.recognitionSource || '',
+    modelProvider: record.modelProvider || '',
+    modelVersion: record.modelVersion || '',
+    confidence: record.confidence || 0,
+    needReview: Boolean(record.needReview),
+    reason: getReviewReason(record),
+    status: 'pending',
+    priority: record.confirmedFoods.length ? 'normal' : 'high',
+    updatedAt: now
+  }
+}
+
+async function upsertReviewTaskIfNeeded(record, mealRecordId, openid) {
+  if (!shouldCreateReviewTask(record)) return { created: false, skipped: true }
+
+  const data = reviewTaskPayload(record, mealRecordId, openid)
+  const mergeExistingStatus = (existing) => {
+    const status = String(existing && existing.status || '').trim()
+    return status && status !== 'pending'
+      ? { ...data, status }
+      : data
+  }
+
+  if (record.analysisId) {
+    const existingByAnalysis = await db.collection('review_tasks')
+      .where({ analysisId: record.analysisId })
+      .limit(1)
+      .get()
+
+    if (existingByAnalysis.data && existingByAnalysis.data[0]) {
+      await db.collection('review_tasks').doc(existingByAnalysis.data[0]._id).update({
+        data: mergeExistingStatus(existingByAnalysis.data[0])
+      })
+      return { created: false, updated: true, reviewTaskId: existingByAnalysis.data[0]._id }
+    }
+  }
+
+  const existingByMeal = await db.collection('review_tasks')
+    .where({ mealRecordId })
+    .limit(1)
+    .get()
+
+  if (existingByMeal.data && existingByMeal.data[0]) {
+    await db.collection('review_tasks').doc(existingByMeal.data[0]._id).update({
+      data: mergeExistingStatus(existingByMeal.data[0])
+    })
+    return { created: false, updated: true, reviewTaskId: existingByMeal.data[0]._id }
+  }
+
+  const { _id } = await db.collection('review_tasks').add({
+    data: {
+      ...data,
+      createdAt: new Date()
+    }
+  })
+  return { created: true, updated: false, reviewTaskId: _id }
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext()
   const rawEvent = event || {}
@@ -150,5 +241,11 @@ exports.main = async (event) => {
     ])
   }
 
-  return { recordId: _id, mealRecordId: _id, totalNutrition, foods: confirmedFoods }
+  const reviewTaskResult = await upsertReviewTaskIfNeeded(record, _id, OPENID).catch(err => ({
+    created: false,
+    updated: false,
+    error: err.message || String(err)
+  }))
+
+  return { recordId: _id, mealRecordId: _id, totalNutrition, foods: confirmedFoods, reviewTask: reviewTaskResult }
 }
