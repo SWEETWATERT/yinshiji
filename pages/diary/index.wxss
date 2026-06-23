@@ -310,3 +310,146 @@
   color: #E4A543;
   background: #FFF4DF;
 }
+
+/* ── Meal Details ── */
+.detail-state {
+  padding: 28rpx 30rpx;
+  margin-bottom: 22rpx;
+}
+
+.detail-state-title {
+  display: block;
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.detail-state-text {
+  display: block;
+  margin-top: 8rpx;
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.55;
+}
+
+.detail-error {
+  border: 1rpx solid #ffd6df;
+  background: #fff7f9;
+}
+
+.meal-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.meal-detail-card {
+  padding: 24rpx 26rpx;
+}
+
+.meal-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.meal-detail-title {
+  display: block;
+  color: #25232A;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.meal-detail-time {
+  display: block;
+  margin-top: 4rpx;
+  color: #807987;
+  font-size: 23rpx;
+}
+
+.meal-detail-kcal {
+  flex: 0 0 auto;
+  min-height: 52rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  background: #8B6CFF;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 52rpx;
+}
+
+.meal-macro-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 18rpx;
+  color: #5f576a;
+  font-size: 24rpx;
+}
+
+.meal-macro-row text {
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #F7F2EA;
+}
+
+.meal-source-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 16rpx;
+}
+
+.meal-source,
+.meal-review {
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  background: #EEE8FF;
+  color: #8B6CFF;
+}
+
+.meal-review {
+  background: #FFF4DF;
+  color: #B87A00;
+}
+
+.food-chip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.food-detail-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 16rpx;
+  background: #FAF7F8;
+}
+
+.food-detail-name {
+  color: #25232A;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.food-detail-meta {
+  color: #807987;
+  font-size: 23rpx;
+}
+
+.meal-no-foods {
+  margin-top: 18rpx;
+  padding: 16rpx;
+  border-radius: 16rpx;
+  color: #807987;
+  background: #FAF7F8;
+  font-size: 24rpx;
+}

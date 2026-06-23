@@ -90,6 +90,54 @@
     </view>
   </view>
 
+
+  <!-- Meal Details -->
+  <view class="module-title">餐食明细</view>
+  <view wx:if="{{loading}}" class="detail-state section-card">
+    <text class="detail-state-title">正在读取日记…</text>
+    <text class="detail-state-text">稍等一下，正在整理这一天的餐食。</text>
+  </view>
+  <view wx:elif="{{errorMessage}}" class="detail-state section-card detail-error">
+    <text class="detail-state-title">读取失败</text>
+    <text class="detail-state-text">{{errorMessage}}</text>
+  </view>
+  <view wx:elif="{{displayMeals.length === 0}}" class="detail-state section-card" bindtap="goRecord">
+    <text class="detail-state-title">暂无餐食明细</text>
+    <text class="detail-state-text">记录一餐后，这里会显示食物、克数和营养估算。</text>
+  </view>
+  <view wx:else class="meal-detail-list">
+    <block wx:for="{{displayMeals}}" wx:key="id">
+      <view class="meal-detail-card section-card">
+        <view class="meal-detail-head">
+          <view>
+            <text class="meal-detail-title">{{item.mealName}}</text>
+            <text class="meal-detail-time">{{item.time || '未记录时间'}}</text>
+          </view>
+          <view class="meal-detail-kcal">{{item.nutrition.kcal}} kcal</view>
+        </view>
+        <view class="meal-macro-row">
+          <text>蛋白 {{item.nutrition.protein}}g</text>
+          <text>碳水 {{item.nutrition.carbs}}g</text>
+          <text>脂肪 {{item.nutrition.fat}}g</text>
+        </view>
+        <view class="meal-source-row">
+          <text class="meal-source">{{item.recognitionText}}</text>
+          <text wx:if="{{item.confidencePercent}}" class="meal-source">置信度 {{item.confidencePercent}}%</text>
+          <text wx:if="{{item.needReview}}" class="meal-review">需复核</text>
+        </view>
+        <view wx:if="{{item.hasFoods}}" class="food-chip-list">
+          <block wx:for="{{item.foods}}" wx:for-item="food" wx:key="id">
+            <view class="food-detail-chip">
+              <text class="food-detail-name">{{food.name}}</text>
+              <text class="food-detail-meta">{{food.weight}}g · {{food.kcal}}kcal</text>
+            </view>
+          </block>
+        </view>
+        <view wx:else class="meal-no-foods">这条记录暂无食物明细，仅保留总营养。</view>
+      </view>
+    </block>
+  </view>
+
   <!-- AI Summary -->
   <view wx:if="{{meals.length > 0}}" class="summary-card section-card">
     <view class="summary-hd">

@@ -52,6 +52,67 @@ function getMealImage(meal) {
   return meal.imageFileID || meal.imageUrl || ''
 }
 
+function r1(value) {
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0
+}
+
+function getMealNutrition(meal) {
+  const total = meal.totalNutrition || meal.total || {}
+  return {
+    kcal: Math.round(Number(total.kcal || meal.kcal || 0)),
+    protein: r1(total.protein || total.proteinG),
+    carbs: r1(total.carbs || total.carbsG),
+    fat: r1(total.fat || total.fatG),
+    fiber: r1(total.fiber || total.fiberG)
+  }
+}
+
+function getFoods(meal) {
+  const foods = meal.confirmedFoods || meal.foods || meal.detectedFoods || []
+  return foods.map((food, index) => {
+    const name = food.nameCn || food.name || food.foodName || food.title || `食物${index + 1}`
+    const weight = Number(food.weightG || food.weight || food.amount || food.estimatedWeightG || 0)
+    return {
+      id: food.id || food.uid || food.foodId || `${meal._id || 'meal'}_${index}`,
+      name,
+      weight: Math.round(weight),
+      kcal: Math.round(Number(food.kcal || 0)),
+      source: food.recognitionSource || food.source || '',
+      matchedKeyword: food.matchedKeyword || ''
+    }
+  })
+}
+
+function getRecognitionText(meal) {
+  if (meal.recognitionSource === 'vision_placeholder') return '图片占位识别'
+  if (meal.recognitionSource === 'keyword_fallback') return '关键词/食物库估算'
+  if (meal.recognitionSource) return meal.recognitionSource
+  return meal.analysisId ? 'AI估算' : '手动记录'
+}
+
+function buildDisplayMeals(meals) {
+  return meals.map((meal, index) => {
+    const type = normalizeMealType(meal.mealType)
+    const nutrition = getMealNutrition(meal)
+    const foods = getFoods(meal)
+    return {
+      id: meal._id || meal.id || `${meal.mealType || 'meal'}_${index}`,
+      mealType: type,
+      mealName: (MEAL_META.find(item => item.type === type) || {}).name || meal.mealType || '餐食',
+      time: meal.time || '',
+      imageUrl: getMealImage(meal),
+      nutrition,
+      foods,
+      hasFoods: foods.length > 0,
+      recognitionText: getRecognitionText(meal),
+      confidencePercent: Math.round(Number(meal.confidence || 0) * 100),
+      needReview: Boolean(meal.needReview),
+      suggestion: meal.suggestion || ''
+    }
+  })
+}
+
 Page({
   data: {
     dates: [],
@@ -59,7 +120,10 @@ Page({
     selectedMood: '开心',
     moods: ['开心', '一般', '疲惫', '满足'],
     states: ['轻盈', '有饱腹感', '不困', '想散步'],
+    loading: false,
+    errorMessage: '',
     meals: [],
+    displayMeals: [],
     mealCards: MEAL_META.map(m => ({
       ...m, recorded: false, kcal: 0, imageUrl: ''
     })),
@@ -92,6 +156,7 @@ Page({
 
   loadMeals() {
     const date = this.data.selectedDate
+    this.setData({ loading: true, errorMessage: '' })
     wx.cloud.callFunction({
       name: 'getMealRecords',
       data: { date }
@@ -108,11 +173,14 @@ Page({
             imageUrl: meal ? getMealImage(meal) : ''
           }
         })
-        this.setData({ meals, mealCards })
+        this.setData({ meals, displayMeals: buildDisplayMeals(meals), mealCards, loading: false })
       })
       .catch(() => {
         this.setData({
+          loading: false,
+          errorMessage: '日记读取失败，请稍后重试',
           meals: [],
+          displayMeals: [],
           mealCards: MEAL_META.map(m => ({
             ...m, recorded: false, kcal: 0, imageUrl: ''
           }))
