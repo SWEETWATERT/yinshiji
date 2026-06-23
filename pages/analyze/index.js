@@ -128,7 +128,9 @@ Page({
     visionResult: null,
     showSearch: false,
     searchKeyword: '',
-    searchResults: []
+    searchResults: [],
+    searchLoading: false,
+    searchError: ''
   },
 
   onLoad(query) {
@@ -255,7 +257,7 @@ Page({
   },
 
   openSearch() {
-    this.setData({ showSearch: true, searchKeyword: '', searchResults: [] })
+    this.setData({ showSearch: true, searchKeyword: '', searchResults: [], searchError: '' })
   },
 
   closeSearch() {
@@ -265,19 +267,42 @@ Page({
   onSearchInput(e) {
     const kw = e.detail.value
     if (!kw.trim()) {
-      this.setData({ searchKeyword: kw, searchResults: [] })
+      this.setData({ searchKeyword: kw, searchResults: [], searchError: '' })
       return
     }
     this.setData({ searchKeyword: kw })
-    const db = wx.cloud.database()
-    db.collection('food_items')
-      .where({ nameCn: db.RegExp({ regexp: kw, options: 'i' }) })
-      .limit(10)
-      .get()
+  },
+
+  searchFoodItems() {
+    const keyword = String(this.data.searchKeyword || '').trim()
+    if (!keyword) {
+      wx.showToast({ title: '请输入食物名称', icon: 'none' })
+      return
+    }
+
+    this.setData({ searchLoading: true, searchError: '' })
+    wx.cloud.callFunction({
+      name: 'searchFoodItems',
+      data: {
+        keyword,
+        page: 1,
+        pageSize: 10
+      }
+    })
       .then(res => {
-        if (this.data.searchKeyword === kw) {
-          this.setData({ searchResults: res.data || [] })
+        const result = res.result || {}
+        const foods = result.foods || result.records || []
+        if (this.data.searchKeyword.trim() === keyword) {
+          this.setData({ searchResults: foods, searchLoading: false })
         }
+      })
+      .catch(err => {
+        console.error('search food items failed', err)
+        this.setData({
+          searchLoading: false,
+          searchResults: [],
+          searchError: '食物库搜索失败，请确认 searchFoodItems 云函数已部署。'
+        })
       })
   },
 
@@ -321,7 +346,8 @@ Page({
       total: _calcTotals(detectedFoods),
       showSearch: false,
       searchKeyword: '',
-      searchResults: []
+      searchResults: [],
+      searchError: ''
     })
     wx.showToast({ title: `已添加 ${newItem.nameCn || '食物'}`, icon: 'none' })
   },

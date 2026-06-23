@@ -160,10 +160,18 @@
       placeholder-class="search-placeholder"
       value="{{searchKeyword}}"
       bindinput="onSearchInput"
+      bindconfirm="searchFoodItems"
+      confirm-type="search"
       focus
     />
+    <button class="search-submit" loading="{{searchLoading}}" disabled="{{searchLoading}}" bindtap="searchFoodItems">
+      {{searchLoading ? '搜索中' : '搜索'}}
+    </button>
     <view class="search-results">
-      <view wx:if="{{searchKeyword && searchResults.length === 0}}" class="search-empty">
+      <view wx:if="{{searchError}}" class="search-empty search-error">
+        {{searchError}}
+      </view>
+      <view wx:elif="{{searchKeyword && !searchLoading && searchResults.length === 0}}" class="search-empty">
         未找到「{{searchKeyword}}」，可返回后手动添加
       </view>
       <block wx:for="{{searchResults}}" wx:key="foodId">
