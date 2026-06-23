@@ -36,6 +36,9 @@
         <view wx:if="{{meal.healthScore}}" class="score-pill">{{meal.healthScore}} 分</view>
       </view>
       <view wx:if="{{meal.note}}" class="note-box">备注：{{meal.note}}</view>
+      <view class="hero-actions">
+        <button class="edit-meal-btn" bindtap="editMeal">编辑这餐</button>
+      </view>
     </view>
 
     <view class="summary-card section-card">

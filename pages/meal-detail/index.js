@@ -92,6 +92,7 @@ Page({
     id: '',
     date: '',
     loading: true,
+    hasLoaded: false,
     errorMessage: '',
     meal: null
   },
@@ -102,11 +103,18 @@ Page({
     this.setData({ id, date }, () => this.loadMeal())
   },
 
+  onShow() {
+    if (this.data.hasLoaded && this.data.id && this.data.date) {
+      this.loadMeal()
+    }
+  },
+
   loadMeal() {
     const { id, date } = this.data
     if (!id || !date) {
       this.setData({
         loading: false,
+        hasLoaded: true,
         errorMessage: '缺少餐食记录参数，请从日记页重新进入。'
       })
       return
@@ -123,16 +131,18 @@ Page({
         if (!meal) {
           this.setData({
             loading: false,
+            hasLoaded: true,
             meal: null,
             errorMessage: '没有找到这条餐食记录，可能已被删除或日期不匹配。'
           })
           return
         }
-        this.setData({ loading: false, meal: normalizeMeal(meal) })
+        this.setData({ loading: false, hasLoaded: true, meal: normalizeMeal(meal) })
       })
       .catch(() => {
         this.setData({
           loading: false,
+          hasLoaded: true,
           errorMessage: '餐食详情读取失败，请稍后重试。'
         })
       })
@@ -140,6 +150,14 @@ Page({
 
   retry() {
     this.loadMeal()
+  },
+
+  editMeal() {
+    const { id, date } = this.data
+    if (!id || !date) return
+    wx.navigateTo({
+      url: `/pages/analyze/index?mode=edit&recordId=${encodeURIComponent(id)}&date=${encodeURIComponent(date)}`
+    })
   },
 
   goBack() {

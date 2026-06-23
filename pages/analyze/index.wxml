@@ -5,7 +5,7 @@
 
   <view class="analyze-nav">
     <button class="nav-back-btn" bindtap="goBack">‹ 返回</button>
-    <view class="analyze-title">确认识别结果</view>
+    <view class="analyze-title">{{mode === 'edit' ? '编辑餐食' : '确认识别结果'}}</view>
   </view>
 
   <view wx:if="{{loading}}" class="loading-state">
@@ -145,7 +145,7 @@
   </block>
 
   <view class="save-bar fixed-bottom-button">
-    <button class="primary-button save-button" bindtap="confirmSave">确认并保存</button>
+    <button class="primary-button save-button" bindtap="confirmSave">{{mode === 'edit' ? '确认更新' : '确认并保存'}}</button>
   </view>
 
   <view wx:if="{{showSearch}}" class="search-mask" bindtap="closeSearch"></view>

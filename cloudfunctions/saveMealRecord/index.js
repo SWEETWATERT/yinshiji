@@ -178,6 +178,7 @@ exports.main = async (event) => {
   const needReview = Boolean(input.needReview)
   const candidates = Array.isArray(input.candidates) ? input.candidates : []
   const visionResult = input.visionResult || null
+  const recordId = String(input.recordId || input.mealRecordId || input.id || '').trim()
 
   const record = {
     _openid: OPENID,
@@ -217,13 +218,37 @@ exports.main = async (event) => {
     updatedAt: new Date()
   }
 
-  const { _id } = await db.collection('meal_records').add({ data: record })
+  let mealRecordId = recordId
+  let isUpdate = false
+
+  if (recordId) {
+    const existing = await db.collection('meal_records').doc(recordId).get().catch(() => null)
+    if (!existing || !existing.data) {
+      const err = new Error('MEAL_RECORD_NOT_FOUND')
+      err.code = 'MEAL_RECORD_NOT_FOUND'
+      throw err
+    }
+    if (existing.data._openid !== OPENID) {
+      const err = new Error('NO_RECORD_PERMISSION')
+      err.code = 'NO_RECORD_PERMISSION'
+      throw err
+    }
+
+    const updateData = { ...record }
+    delete updateData._openid
+    delete updateData.createdAt
+    await db.collection('meal_records').doc(recordId).update({ data: updateData })
+    isUpdate = true
+  } else {
+    const { _id } = await db.collection('meal_records').add({ data: record })
+    mealRecordId = _id
+  }
 
   if (analysisId) {
     await Promise.all([
       db.collection('analysis_logs').where({ analysisId }).update({
         data: {
-          mealRecordId: _id,
+          mealRecordId,
           confirmedFoods,
           totalNutrition,
           savedAt: new Date(),
@@ -232,7 +257,7 @@ exports.main = async (event) => {
       }).catch(() => null),
       db.collection('review_tasks').where({ analysisId }).update({
         data: {
-          mealRecordId: _id,
+          mealRecordId,
           confirmedFoods,
           totalNutrition,
           updatedAt: new Date()
@@ -241,11 +266,11 @@ exports.main = async (event) => {
     ])
   }
 
-  const reviewTaskResult = await upsertReviewTaskIfNeeded(record, _id, OPENID).catch(err => ({
+  const reviewTaskResult = await upsertReviewTaskIfNeeded(record, mealRecordId, OPENID).catch(err => ({
     created: false,
     updated: false,
     error: err.message || String(err)
   }))
 
-  return { recordId: _id, mealRecordId: _id, totalNutrition, foods: confirmedFoods, reviewTask: reviewTaskResult }
+  return { recordId: mealRecordId, mealRecordId, updated: isUpdate, totalNutrition, foods: confirmedFoods, reviewTask: reviewTaskResult }
 }

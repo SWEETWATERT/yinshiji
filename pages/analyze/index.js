@@ -110,6 +110,10 @@ Page({
     imageUrl: '',
     mealType: 'lunch',
     note: '',
+    mode: 'create',
+    recordId: '',
+    recordDate: '',
+    recordTime: '',
     loading: true,
     errorMessage: '',
     analysisId: '',
@@ -134,11 +138,75 @@ Page({
   },
 
   onLoad(query) {
+    const mode = query.mode || 'create'
+    const recordId = decodeURIComponent(query.recordId || query.mealRecordId || '')
+    const recordDate = decodeURIComponent(query.date || '')
+    if (mode === 'edit' && recordId && recordDate) {
+      this.setData({ mode, recordId, recordDate })
+      this._loadExistingMeal(recordId, recordDate)
+      return
+    }
+
     const imageFileID = decodeURIComponent(query.imageFileID || query.imagePath || query.imageUrl || '')
     const mealType = query.mealType || 'lunch'
     const note = decodeURIComponent(query.note || '')
-    this.setData({ imageUrl: imageFileID, mealType, note })
+    this.setData({ imageUrl: imageFileID, mealType, note, mode: 'create' })
     this._doAnalyze(imageFileID, mealType, note)
+  },
+
+  _loadExistingMeal(recordId, date) {
+    this.setData({ loading: true, errorMessage: '' })
+    wx.cloud.callFunction({
+      name: 'getMealRecords',
+      data: { date }
+    })
+      .then(res => {
+        const records = (res.result && res.result.records) || []
+        const meal = records.find(item => (item._id || item.id) === recordId)
+        if (!meal) {
+          this.setData({
+            loading: false,
+            errorMessage: '没有找到要编辑的餐食记录，请从日记页重新进入。'
+          })
+          return
+        }
+        const detectedFoods = (meal.confirmedFoods || meal.foods || meal.detectedFoods || []).map(normalizeFood)
+        const total = detectedFoods.length ? _calcTotals(detectedFoods) : this._normalizeTotal(meal.totalNutrition || meal.total || {})
+        const confidence = _num(meal.confidence)
+        const recognitionSource = meal.recognitionSource || 'manual_edit'
+        const modelProvider = meal.modelProvider || ''
+
+        this.setData({
+          loading: false,
+          mode: 'edit',
+          recordId,
+          recordDate: meal.date || date,
+          recordTime: meal.time || '',
+          imageUrl: meal.imageFileID || meal.imageUrl || '',
+          mealType: meal.mealType || 'lunch',
+          note: meal.note || '',
+          analysisId: meal.analysisId || '',
+          detectedFoods,
+          candidates: meal.candidates || [],
+          total,
+          warnings: [],
+          aiAdvice: meal.suggestion || meal.aiAdvice || '',
+          recognitionSource,
+          recognitionLabel: getRecognitionLabel(recognitionSource, modelProvider),
+          modelProvider,
+          modelVersion: meal.modelVersion || meal.analysisVersion || '',
+          confidence,
+          confidencePercent: Math.round(confidence * 100),
+          needReview: Boolean(meal.needReview),
+          visionResult: meal.visionResult || null
+        })
+      })
+      .catch(() => {
+        this.setData({
+          loading: false,
+          errorMessage: '餐食记录读取失败，请稍后重试。'
+        })
+      })
   },
 
   _doAnalyze(imageFileID, mealType, note) {
@@ -355,7 +423,8 @@ Page({
   confirmSave() {
     const {
       detectedFoods, total, mealType, imageUrl, note, aiAdvice, analysisId,
-      recognitionSource, modelProvider, modelVersion, confidence, needReview, candidates, visionResult
+      recognitionSource, modelProvider, modelVersion, confidence, needReview, candidates, visionResult,
+      mode, recordId, recordDate, recordTime
     } = this.data
     if (!detectedFoods.length) {
       wx.showToast({ title: '请先添加食物', icon: 'none' })
@@ -363,8 +432,10 @@ Page({
     }
 
     const now = new Date()
-    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    const date = mode === 'edit' && recordDate ? recordDate : today
+    const time = mode === 'edit' && recordTime ? recordTime : currentTime
     const foods = detectedFoods.map(f => ({
       id: f.uid,
       foodId: f.foodId,
@@ -400,6 +471,7 @@ Page({
     wx.cloud.callFunction({
       name: 'saveMealRecord',
       data: {
+        recordId: mode === 'edit' ? recordId : '',
         mealType,
         date,
         time,
@@ -434,8 +506,14 @@ Page({
       }
     })
       .then(() => {
-        wx.showToast({ title: '已保存', icon: 'success' })
-        setTimeout(() => wx.switchTab({ url: '/pages/home/index' }), 500)
+        wx.showToast({ title: mode === 'edit' ? '已更新' : '已保存', icon: 'success' })
+        setTimeout(() => {
+          if (mode === 'edit') {
+            wx.navigateBack()
+          } else {
+            wx.switchTab({ url: '/pages/home/index' })
+          }
+        }, 500)
       })
       .catch(() => {
         wx.showToast({ title: '保存失败，请重试', icon: 'none' })
