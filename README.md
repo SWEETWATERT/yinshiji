@@ -15,14 +15,16 @@ yinshiji-miniprogram/
 ├── app.js                         # 应用入口：云初始化、登录、onboarding 守卫
 ├── app.json                       # 页面路由、窗口配置、tabBar 配置
 ├── app.wxss                       # 全局样式（设计系统、通用组件类）
-├── pages/                         # 7 个页面
+├── pages/                         # 用户端页面 + 小程序内后台页面
 │   ├── home/                      # 首页仪表盘
 │   ├── record/                    # 拍照/选图记录饮食
 │   ├── analyze/                   # 食物识别与营养编辑
 │   ├── diary/                     # 7 天饮食日记
+│   ├── meal-detail/               # 餐食详情、编辑、删除入口
 │   ├── report/                    # 周报分析
 │   ├── profile/                   # 我的（个人资料）
-│   └── onboarding/                # 首次身体资料填写
+│   ├── onboarding/                # 首次身体资料填写
+│   └── admin/                     # 小程序内后台管理
 ├── components/                    # 公共组件
 │   ├── BrandHeader/               # 品牌标题头
 │   ├── meal-card/                 # 餐次卡片
@@ -42,8 +44,10 @@ yinshiji-miniprogram/
 ├── cloudfunctions/                # 云函数
 │   ├── login/                     # 登录 & 用户创建
 │   ├── userProfile/               # 资料更新
-│   ├── analyzeMeal/               # 食物关键词匹配
-│   ├── saveMealRecord/            # 保存饮食记录
+│   ├── analyzeMeal/               # 食物库/关键词匹配和视觉占位层
+│   ├── searchFoodItems/           # 用户端食物库搜索
+│   ├── saveMealRecord/            # 保存或更新饮食记录
+│   ├── deleteMealRecord/          # 删除本人饮食记录
 │   ├── getMealRecords/            # 查询饮食记录
 │   ├── getWeeklyReport/           # 周营养报告统计
 │   ├── submitFeedback/            # 用户反馈与复核任务
@@ -104,12 +108,19 @@ App.onLaunch
   └── 开始分析 → 上传图片到云存储 → 跳转 analyze 页
             │
 分析页（analyze）
-  ├── callFunction('analyzeMeal') → 关键词匹配食物
-  ├── 展示识别结果列表，用户可调整重量
-  ├── 实时重算营养数据（热量 / 蛋白质 / 碳水 / 脂肪）
+  ├── callFunction('analyzeMeal') → 食物库 + 关键词匹配
+  ├── 可通过 searchFoodItems 从食物库手动添加食物
+  ├── 展示识别结果列表，用户可调整重量、删除或新增食物
+  ├── 实时重算营养数据（热量 / 蛋白质 / 碳水 / 脂肪 / 纤维）
   └── 确认保存 → callFunction('saveMealRecord')
             │
             └── 写入 meal_records 集合（含 _openid 隔离）
+            │
+日记页（diary）
+  └── 点击餐食明细 → 餐食详情页（meal-detail）
+        ├── 查看图片、食物明细、营养汇总、识别信息
+        ├── 编辑这餐 → analyze 编辑模式 → saveMealRecord 更新本人记录
+        └── 删除记录 → deleteMealRecord 删除本人记录
 ```
 
 ### 4. 首页仪表盘
@@ -133,8 +144,10 @@ App.onLaunch
 | `login` | 启动时自动 | — | `{user}` | 静默登录，新用户自动创建 |
 | `userProfile` | `{action:'get'}` | — | `{user}` | 获取当前用户资料 |
 | `userProfile` | `{action:'update', data:{...}}` | gender, age, heightCm 等 | `{user}` | 更新资料，自动设 profileCompleted:true |
-| `analyzeMeal` | `{mealType, note, imageFileID}` | 餐次类型、备注、图片 ID | `{detectedFoods,total,warnings}` | 关键词匹配食物数据库，写入识别日志，不确定时生成复核任务 |
-| `saveMealRecord` | `{mealType, date, ...}` | 完整餐次数据 | `{recordId}` | 保存饮食记录 |
+| `analyzeMeal` | `{mealType, note, imageFileID}` | 餐次类型、备注、图片 ID | `{detectedFoods,total,warnings,confidence,needReview,candidates}` | 食物库/关键词匹配，写入识别日志，不确定时生成复核任务 |
+| `searchFoodItems` | `{keyword,page,pageSize}` | 食物关键词 | `{foods,total}` | 用户端只读搜索食物库，用于分析页手动添加 |
+| `saveMealRecord` | `{mealType,date,foods,totalNutrition,...}` | 完整餐次数据 | `{recordId,updated}` | 新增饮食记录；传 `recordId` 时更新本人已有记录 |
+| `deleteMealRecord` | `{recordId}` | 餐食记录 ID | `{ok,deleted}` | 删除本人餐食记录，并取消关联复核任务 |
 | `getMealRecords` | `{date}` 或 `{startDate, endDate}` | 日期 | `{records:[]}` | 按日期查询 |
 | `getWeeklyReport` | `{days:7}` | 最近天数 | 周报统计 | 统计热量、蛋白质、蔬菜、含糖饮料、外食、夜宵 |
 | `submitFeedback` | `{type,message,...}` | 反馈内容 | `{feedbackId,reviewTaskId}` | 用户反馈，必要时生成复核任务 |
@@ -184,6 +197,12 @@ App.onLaunch
       weightConfidence: "user_confirmed", source: "keyword_match" }
   ],
   totalNutrition: { kcal: 520, protein: 22, carbs: 65, fat: 12 },
+  recognitionSource: "keyword_fallback",
+  modelProvider: "mock_keyword",
+  modelVersion: "v0.4.0-step2",
+  confidence: 0.64,
+  needReview: false,
+  candidates: [],
   healthScore: 78,
   suggestion: "建议增加蔬菜摄入",
   uncertainty: {
@@ -371,11 +390,13 @@ wx.cloud.callFunction({
 6. 上传并部署 `getMealRecords`
 7. 上传并部署 `getWeeklyReport`
 8. 上传并部署 `submitFeedback`
-9. 上传并部署 `adminApi`
+9. 上传并部署 `searchFoodItems`
+10. 上传并部署 `deleteMealRecord`
+11. 上传并部署 `adminApi`
 
 ### 后台页面下一步
 
-第一阶段先完成云开发后端。下一阶段可以做一个轻量 Web 管理端，直接调用这些云函数或通过后端 API 展示：
+当前后台是在小程序内完成的管理模块，管理员从「我的」页进入。已包含：
 
 - 数据看板
 - 用户管理
@@ -445,14 +466,27 @@ wx.cloud.callFunction({
 cloudfunctions/login
 cloudfunctions/userProfile
 cloudfunctions/analyzeMeal
+cloudfunctions/searchFoodItems
 cloudfunctions/saveMealRecord
+cloudfunctions/deleteMealRecord
 cloudfunctions/getMealRecords
+cloudfunctions/getWeeklyReport
+cloudfunctions/submitFeedback
 cloudfunctions/seedFoodItems
+cloudfunctions/adminApi
 ```
 
 ### 数据库初始化
 
-1. 云开发控制台 → 数据库 → 新建集合：`users`、`meal_records`、`food_items`
+1. 云开发控制台 → 数据库 → 新建集合：
+   - `users`
+   - `meal_records`
+   - `food_items`
+   - `analysis_logs`
+   - `review_tasks`
+   - `user_feedback`
+   - `admin_users`
+   - `app_config`
 2. 调用 `seedFoodItems` 云函数导入食物数据（按 foodId 去重，可重复调用）
 
 ### 本地密钥
