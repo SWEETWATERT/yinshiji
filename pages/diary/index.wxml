@@ -107,7 +107,7 @@
   </view>
   <view wx:else class="meal-detail-list">
     <block wx:for="{{displayMeals}}" wx:key="id">
-      <view class="meal-detail-card section-card">
+      <view class="meal-detail-card section-card" data-id="{{item.id}}" data-date="{{selectedDate}}" bindtap="goMealDetail">
         <view class="meal-detail-head">
           <view>
             <text class="meal-detail-title">{{item.mealName}}</text>

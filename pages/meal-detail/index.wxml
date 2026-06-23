@@ -1,0 +1,120 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
+
+<view class="page page-container meal-detail-page">
+  <brand-header></brand-header>
+
+  <view class="detail-nav">
+    <button class="nav-back-btn" bindtap="goBack">‹ 返回</button>
+    <view>
+      <view class="page-title">餐食详情</view>
+      <view class="page-subtitle">确认保存后的食物和营养估算</view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state-card section-card">
+    <text class="state-title">正在读取餐食…</text>
+    <text class="state-text">稍等一下，正在整理这条记录。</text>
+  </view>
+
+  <view wx:elif="{{errorMessage}}" class="state-card section-card error-card">
+    <text class="state-title">读取失败</text>
+    <text class="state-text">{{errorMessage}}</text>
+    <button class="mini-primary" bindtap="retry">重试</button>
+  </view>
+
+  <block wx:elif="{{meal}}">
+    <view class="hero-card section-card">
+      <image wx:if="{{meal.imageUrl}}" class="meal-image" src="{{meal.imageUrl}}" mode="aspectFit"></image>
+      <view wx:else class="meal-image-empty">🍽️</view>
+      <view class="hero-info">
+        <view>
+          <text class="meal-name">{{meal.mealName}}</text>
+          <text class="meal-date">{{meal.date}} {{meal.time || ''}}</text>
+        </view>
+        <view wx:if="{{meal.healthScore}}" class="score-pill">{{meal.healthScore}} 分</view>
+      </view>
+      <view wx:if="{{meal.note}}" class="note-box">备注：{{meal.note}}</view>
+    </view>
+
+    <view class="summary-card section-card">
+      <view class="summary-head">
+        <view class="card-title">营养汇总</view>
+        <view class="kcal-main">{{meal.total.kcal}} kcal</view>
+      </view>
+      <view class="macro-grid">
+        <view class="macro-item">
+          <text class="macro-label">蛋白质</text>
+          <text class="macro-value">{{meal.total.protein}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">碳水</text>
+          <text class="macro-value">{{meal.total.carbs}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">脂肪</text>
+          <text class="macro-value">{{meal.total.fat}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">纤维</text>
+          <text class="macro-value">{{meal.total.fiber}}g</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-title">食物明细</view>
+    <view wx:if="{{!meal.hasFoods}}" class="state-card section-card">
+      <text class="state-title">暂无食物明细</text>
+      <text class="state-text">这条记录只保留了总营养，未保存具体食物项。</text>
+    </view>
+    <view wx:else class="food-list">
+      <block wx:for="{{meal.foods}}" wx:key="id">
+        <view class="food-card section-card">
+          <view class="food-main-row">
+            <view class="food-icon">{{item.icon}}</view>
+            <view class="food-info">
+              <text class="food-name">{{item.name}}</text>
+              <text class="food-meta">{{item.weight}}g · {{item.kcal}} kcal</text>
+            </view>
+          </view>
+          <view class="food-macros">
+            <text>蛋白 {{item.protein}}g</text>
+            <text>碳水 {{item.carbs}}g</text>
+            <text>脂肪 {{item.fat}}g</text>
+            <text wx:if="{{item.fiber}}">纤维 {{item.fiber}}g</text>
+          </view>
+          <view class="food-source" wx:if="{{item.matchedKeyword || item.foodId || item.source}}">
+            {{item.matchedKeyword ? '匹配：' + item.matchedKeyword : (item.foodId || item.source)}}
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view class="meta-card section-card">
+      <view class="card-title">识别信息</view>
+      <view class="meta-row">
+        <text class="meta-label">识别方式</text>
+        <text class="meta-value">{{meal.recognitionText}}</text>
+      </view>
+      <view class="meta-row" wx:if="{{meal.confidencePercent}}">
+        <text class="meta-label">置信度</text>
+        <text class="meta-value">{{meal.confidencePercent}}%</text>
+      </view>
+      <view class="meta-row" wx:if="{{meal.modelProvider || meal.modelVersion}}">
+        <text class="meta-label">模型</text>
+        <text class="meta-value">{{meal.modelProvider || '本地估算'}} {{meal.modelVersion}}</text>
+      </view>
+      <view class="meta-row" wx:if="{{meal.candidatesCount}}">
+        <text class="meta-label">候选食物</text>
+        <text class="meta-value">{{meal.candidatesCount}} 个</text>
+      </view>
+      <view wx:if="{{meal.needReview}}" class="review-tip">这条记录已进入后台复核队列，营养估算仅供生活方式参考。</view>
+    </view>
+
+    <view wx:if="{{meal.suggestion}}" class="advice-card section-card">
+      <view class="card-title">营养建议</view>
+      <text class="advice-text">{{meal.suggestion}}</text>
+    </view>
+  </block>
+</view>

@@ -5,6 +5,7 @@
     "pages/record/index",
     "pages/analyze/index",
     "pages/diary/index",
+    "pages/meal-detail/index",
     "pages/report/index",
     "pages/profile/index",
     "pages/onboarding/index",

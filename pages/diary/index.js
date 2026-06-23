@@ -194,5 +194,13 @@ Page({
 
   goRecord() {
     wx.switchTab({ url: '/pages/record/index' })
+  },
+
+  goMealDetail(event) {
+    const { id, date } = event.currentTarget.dataset
+    if (!id || !date) return
+    wx.navigateTo({
+      url: `/pages/meal-detail/index?id=${encodeURIComponent(id)}&date=${encodeURIComponent(date)}`
+    })
   }
 })
