@@ -2,6 +2,22 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+let analyzeImageWithVision
+try {
+  ;({ analyzeImageWithVision } = require('./visionAnalyze'))
+} catch (err) {
+  analyzeImageWithVision = async () => ({
+    ok: false,
+    recognitionSource: 'keyword_fallback',
+    modelProvider: 'placeholder',
+    modelVersion: 'v0.4.0-step4',
+    confidence: 0,
+    detectedFoods: [],
+    candidates: [],
+    warnings: ['视觉识别占位服务未随云函数包加载，已自动降级为关键词和食物库匹配。']
+  })
+}
+
 const RECOGNITION_SOURCE = 'keyword_fallback'
 const MODEL_PROVIDER = 'mock_keyword'
 const MODEL_VERSION = 'v0.4.0-step2'
@@ -382,6 +398,7 @@ async function saveAnalysisLog(openid, result, input, status) {
         confidence: Number(result.confidence || 0),
         needReview: Boolean(result.needReview),
         candidates: result.candidates || [],
+        visionResult: result.visionResult || null,
         status,
         confidenceSummary: {
           foodCount: (result.detectedFoods || []).length,
@@ -420,6 +437,7 @@ async function createReviewTaskIfNeeded(openid, result, input, reason) {
         detectedFoods: result.detectedFoods || [],
         total: result.total || {},
         candidates: result.candidates || [],
+        visionResult: result.visionResult || null,
         recognitionSource: result.recognitionSource || RECOGNITION_SOURCE,
         modelProvider: result.modelProvider || MODEL_PROVIDER,
         modelVersion: result.modelVersion || MODEL_VERSION,
@@ -448,7 +466,8 @@ exports.main = async (event) => {
 
   const note = String(input.note || '').trim()
   const mealType = String(input.mealType || '').trim()
-  const imageFileID = String(input.imageFileID || input.imageUrl || '').trim()
+  const imageUrl = String(input.imageUrl || '').trim()
+  const imageFileID = String(input.imageFileID || imageUrl).trim()
   const debugInput = {
     rawEventKeys: Object.keys(event || {}),
     rawDataKeys: Object.keys((event && event.data) || {}),
@@ -456,8 +475,15 @@ exports.main = async (event) => {
     mealType,
     imageFileID
   }
-  const request = { note, mealType, imageFileID, debugInput }
+  const request = { note, mealType, imageFileID, imageUrl, debugInput }
   const analysisId = 'ana_' + Date.now()
+  const visionResult = await analyzeImageWithVision({
+    imageFileID,
+    imageUrl,
+    note,
+    mealType,
+    env: cloud.DYNAMIC_CURRENT_ENV
+  })
 
   const foodDocs = note ? await getAllFoodItems() : []
   const keywordMatches = extractMatches(note)
@@ -474,6 +500,7 @@ exports.main = async (event) => {
       warnings: buildWarnings([], imageFileID).concat('未从备注中识别到具体食物。请在备注中输入您吃了什么（如：苹果、白米饭、鸡胸肉），系统将自动匹配营养数据。'),
       aiAdvice: '',
       candidates: [],
+      visionResult,
       ...meta,
       debugInput
     }
@@ -510,6 +537,7 @@ exports.main = async (event) => {
     warnings: buildWarnings(detectedFoods, imageFileID),
     aiAdvice: buildAdvice(detectedFoods, total),
     candidates,
+    visionResult,
     ...meta,
     debugInput
   }

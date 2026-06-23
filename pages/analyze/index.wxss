@@ -523,3 +523,140 @@
   line-height: 48rpx;
   text-align: center;
 }
+
+
+/* ── v0.4 confirmation additions ── */
+.error-card {
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid #ffd6df;
+  background: #fff7f9;
+}
+
+.error-title {
+  display: block;
+  color: #2f2936;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.error-text {
+  display: block;
+  margin-top: 10rpx;
+  color: #8c4b5a;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.recognition-card {
+  padding: 24rpx 26rpx;
+  margin-bottom: 18rpx;
+}
+
+.recognition-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 8rpx 0;
+}
+
+.recognition-row.subtle {
+  opacity: 0.82;
+}
+
+.recognition-label {
+  color: #8c8498;
+  font-size: 24rpx;
+}
+
+.recognition-value {
+  color: #2f2936;
+  font-size: 25rpx;
+  font-weight: 600;
+  text-align: right;
+}
+
+.review-tip {
+  margin-top: 14rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  color: #8a5d00;
+  background: #fff6dc;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 0 0 auto;
+}
+
+.add-food-btn.ghost {
+  color: #7b66d9;
+  background: #f1ecff;
+}
+
+.mini-primary {
+  margin-top: 18rpx;
+  min-width: 220rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  border-radius: 999rpx;
+  padding: 0 28rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #e36fb0 0%, #8b6cff 100%);
+  font-size: 24rpx;
+  font-weight: 600;
+  border: none;
+  box-shadow: none;
+}
+
+.food-name-input {
+  width: 100%;
+  min-height: 44rpx;
+  color: #2f2936;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.food-placeholder {
+  color: #b9b2c3;
+  font-weight: 500;
+}
+
+.nutrition-missing {
+  margin-top: 16rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 14rpx;
+  color: #8a5d00;
+  background: #fff6dc;
+  font-size: 22rpx;
+  line-height: 1.45;
+}
+
+.weight-label {
+  margin-right: auto;
+  color: #8c8498;
+  font-size: 24rpx;
+}
+
+.weight-input {
+  width: 108rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  color: #2f2936;
+  font-size: 26rpx;
+  font-weight: 700;
+  text-align: center;
+  border: 1rpx solid #ece6f2;
+}
+
+.weight-unit {
+  color: #8c8498;
+  font-size: 24rpx;
+  margin-left: -12rpx;
+}
