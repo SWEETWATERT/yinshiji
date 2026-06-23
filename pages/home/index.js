@@ -25,15 +25,38 @@ function normalizeMealType(mealType) {
   return typeMap[mealType] || mealType
 }
 
+function safeNum(value) {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : 0
+}
+
+function r1(value) {
+  return Math.round(safeNum(value) * 10) / 10
+}
+
+function sumFoodsNutrition(foods) {
+  return (foods || []).reduce((acc, food) => ({
+    kcal: acc.kcal + safeNum(food.kcal),
+    protein: r1(acc.protein + safeNum(food.protein || food.proteinG)),
+    carbs: r1(acc.carbs + safeNum(food.carbs || food.carbsG)),
+    fat: r1(acc.fat + safeNum(food.fat || food.fatG)),
+    fiber: r1(acc.fiber + safeNum(food.fiber || food.fiberG))
+  }), { ...EMPTY_TOTALS })
+}
+
 function getMealNutrition(meal) {
   const total = meal.totalNutrition || meal.total || {}
-  return {
-    kcal: Number(total.kcal || meal.kcal || 0),
-    protein: Number(total.protein || total.proteinG || 0),
-    carbs: Number(total.carbs || total.carbsG || 0),
-    fat: Number(total.fat || total.fatG || 0),
-    fiber: Number(total.fiber || total.fiberG || 0)
+  const fromTotal = {
+    kcal: safeNum(total.kcal || meal.kcal),
+    protein: safeNum(total.protein || total.proteinG),
+    carbs: safeNum(total.carbs || total.carbsG),
+    fat: safeNum(total.fat || total.fatG),
+    fiber: safeNum(total.fiber || total.fiberG)
   }
+  if (fromTotal.kcal || fromTotal.protein || fromTotal.carbs || fromTotal.fat || fromTotal.fiber) {
+    return fromTotal
+  }
+  return sumFoodsNutrition(meal.confirmedFoods || meal.foods || meal.detectedFoods || [])
 }
 
 function sumMealNutrition(meals) {
@@ -41,13 +64,17 @@ function sumMealNutrition(meals) {
     const current = getMealNutrition(meal)
     return {
       kcal: acc.kcal + current.kcal,
-      protein: acc.protein + current.protein,
-      carbs: acc.carbs + current.carbs,
-      fat: acc.fat + current.fat,
-      fiber: acc.fiber + current.fiber
+      protein: r1(acc.protein + current.protein),
+      carbs: r1(acc.carbs + current.carbs),
+      fat: r1(acc.fat + current.fat),
+      fiber: r1(acc.fiber + current.fiber)
     }
   }, { ...EMPTY_TOTALS })
   return calculateTotals([{ ...totals }])
+}
+
+function sumMealsByType(meals, type) {
+  return sumMealNutrition(meals.filter(item => normalizeMealType(item.mealType) === type))
 }
 
 function getMealImage(meal) {
@@ -117,13 +144,14 @@ Page({
         const fiberPct = hasMeals ? Math.min(100, Math.round((totals.fiber / 25) * 100)) : 0
 
         const mealCards = MEAL_META.map(meta => {
-          const meal = meals.find(item => normalizeMealType(item.mealType) === meta.type)
-          const nutrition = meal ? getMealNutrition(meal) : EMPTY_TOTALS
+          const typeMeals = meals.filter(item => normalizeMealType(item.mealType) === meta.type)
+          const latestMeal = typeMeals[0]
+          const nutrition = typeMeals.length ? sumMealsByType(meals, meta.type) : EMPTY_TOTALS
           return {
             ...meta,
-            recorded: Boolean(meal),
+            recorded: typeMeals.length > 0,
             kcal: nutrition.kcal,
-            imageUrl: meal ? getMealImage(meal) : ''
+            imageUrl: latestMeal ? getMealImage(latestMeal) : ''
           }
         })
 
