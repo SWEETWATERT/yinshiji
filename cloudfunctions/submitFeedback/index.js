@@ -8,15 +8,18 @@ function shouldCreateReview(type) {
 
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext()
-  const type = event.type || 'general'
+  const rawEvent = event || {}
+  const rawData = rawEvent.data || {}
+  const input = { ...rawEvent, ...rawData }
+  const type = input.type || 'general'
   const feedback = {
     _openid: OPENID,
     type,
-    message: event.message || '',
-    mealRecordId: event.mealRecordId || '',
-    analysisId: event.analysisId || '',
-    imageFileID: event.imageFileID || '',
-    payload: event.payload || {},
+    message: input.message || '',
+    mealRecordId: input.mealRecordId || '',
+    analysisId: input.analysisId || '',
+    imageFileID: input.imageFileID || '',
+    payload: input.payload || {},
     status: 'open',
     createdAt: new Date(),
     updatedAt: new Date()
@@ -31,13 +34,13 @@ exports.main = async (event) => {
         _openid: OPENID,
         source: 'user_feedback',
         feedbackId: _id,
-        mealRecordId: event.mealRecordId || '',
-        analysisId: event.analysisId || '',
-        imageFileID: event.imageFileID || '',
+        mealRecordId: input.mealRecordId || '',
+        analysisId: input.analysisId || '',
+        imageFileID: input.imageFileID || '',
         reason: type,
         status: 'pending',
         priority: type === 'image_unclear' ? 'low' : 'normal',
-        payload: event.payload || {},
+        payload: input.payload || {},
         createdAt: new Date(),
         updatedAt: new Date()
       }

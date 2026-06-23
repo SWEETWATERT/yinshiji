@@ -77,6 +77,8 @@ function normalizeMeal(meal) {
     healthScore: Math.round(num(meal.healthScore)),
     recognitionText: recognitionText(meal),
     recognitionSource: meal.recognitionSource || '',
+    analysisId: meal.analysisId || '',
+    imageFileID: meal.imageFileID || meal.imageUrl || '',
     modelProvider: meal.modelProvider || '',
     modelVersion: meal.modelVersion || meal.analysisVersion || '',
     confidencePercent: Math.round(num(meal.confidence) * 100),
@@ -184,6 +186,54 @@ Page({
           .catch(() => {
             wx.hideLoading()
             wx.showToast({ title: '删除失败，请重试', icon: 'none' })
+          })
+      }
+    })
+  },
+
+  reportMealIssue() {
+    const { meal } = this.data
+    if (!meal) return
+    const options = [
+      { label: '识别结果不准确', type: 'recognition_wrong', message: '用户反馈：识别结果不准确' },
+      { label: '营养估算不准确', type: 'nutrition_wrong', message: '用户反馈：营养估算不准确' },
+      { label: '份量估算不准确', type: 'weight_wrong', message: '用户反馈：份量估算不准确' },
+      { label: '图片不清楚', type: 'image_unclear', message: '用户反馈：图片不清楚' },
+      { label: '其他问题', type: 'general', message: '用户反馈：餐食记录存在其他问题' }
+    ]
+
+    wx.showActionSheet({
+      itemList: options.map(item => item.label),
+      success: ({ tapIndex }) => {
+        const selected = options[tapIndex]
+        if (!selected) return
+        wx.showLoading({ title: '正在提交' })
+        wx.cloud.callFunction({
+          name: 'submitFeedback',
+          data: {
+            type: selected.type,
+            message: selected.message,
+            mealRecordId: meal.id,
+            analysisId: meal.analysisId || '',
+            imageFileID: meal.imageFileID || '',
+            payload: {
+              mealType: meal.mealType,
+              date: meal.date,
+              time: meal.time,
+              total: meal.total,
+              foods: meal.foods,
+              recognitionSource: meal.recognitionSource,
+              confidencePercent: meal.confidencePercent
+            }
+          }
+        })
+          .then(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '已提交反馈', icon: 'success' })
+          })
+          .catch(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '反馈提交失败', icon: 'none' })
           })
       }
     })
