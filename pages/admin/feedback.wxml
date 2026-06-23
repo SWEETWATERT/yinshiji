@@ -21,8 +21,22 @@
       <text class="summary-value">{{total}}</text>
       <text class="summary-unit">条</text>
     </view>
-    <view class="summary-desc">当前显示第 {{page}} 页，每页 {{pageSize}} 条</view>
+    <view class="summary-desc">当前筛选：{{currentStatusText}} · 第 {{page}} / {{totalPages}} 页，每页 {{pageSize}} 条</view>
   </view>
+
+  <scroll-view class="status-scroll" scroll-x>
+    <view class="status-list">
+      <block wx:for="{{filters}}" wx:key="value">
+        <button
+          class="status-chip {{currentStatus === item.value ? 'status-chip-active' : ''}}"
+          data-status="{{item.value}}"
+          bindtap="changeStatus"
+        >
+          {{item.label}}
+        </button>
+      </block>
+    </view>
+  </scroll-view>
 
   <view wx:if="{{loading}}" class="section-card state-card">
     <view class="state-title">加载中</view>
@@ -131,5 +145,11 @@
         </view>
       </view>
     </block>
+
+    <view class="pager-card">
+      <button class="pager-button" bindtap="prevPage" disabled="{{loading || page <= 1}}">上一页</button>
+      <view class="pager-text">第 {{page}} / {{totalPages}} 页</view>
+      <button class="pager-button" bindtap="nextPage" disabled="{{loading || page >= totalPages}}">下一页</button>
+    </view>
   </view>
 </view>

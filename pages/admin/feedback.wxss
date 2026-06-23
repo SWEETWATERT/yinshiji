@@ -67,6 +67,38 @@
   line-height: 1.45;
 }
 
+.status-scroll {
+  width: 100%;
+  margin-bottom: 20rpx;
+  white-space: nowrap;
+}
+
+.status-list {
+  display: inline-flex;
+  gap: 14rpx;
+  min-width: 100%;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 60rpx;
+  padding: 0 26rpx;
+  border-radius: 999rpx;
+  color: #807987;
+  background: #FFFFFF;
+  border: 1rpx solid #E9E1D8;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.status-chip-active {
+  color: #FFFFFF;
+  background: #8B6CFF;
+  border-color: #8B6CFF;
+}
+
 .state-card {
   padding: 34rpx 28rpx;
   margin-top: 20rpx;
@@ -307,4 +339,39 @@
 
 .action-button[disabled] {
   opacity: 0.6;
+}
+
+.pager-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-top: 4rpx;
+  padding: 18rpx 0 8rpx;
+}
+
+.pager-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150rpx;
+  height: 64rpx;
+  padding: 0 22rpx;
+  border-radius: 18rpx;
+  color: #8B6CFF;
+  background: #EEE8FF;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.pager-button[disabled] {
+  color: #B8B1C2;
+  background: #F1EFF4;
+}
+
+.pager-text {
+  color: #807987;
+  font-size: 24rpx;
+  font-weight: 600;
+  text-align: center;
 }

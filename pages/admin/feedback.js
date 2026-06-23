@@ -1,6 +1,14 @@
 const DEFAULT_PAGE = 1
 const DEFAULT_PAGE_SIZE = 20
 
+const STATUS_FILTERS = [
+  { label: '全部', value: '' },
+  { label: '待处理', value: 'open' },
+  { label: '处理中', value: 'processing' },
+  { label: '已处理', value: 'resolved' },
+  { label: '已关闭', value: 'closed' }
+]
+
 const TYPE_TEXT = {
   general: '普通反馈',
   recognition_wrong: '识别错误',
@@ -153,12 +161,16 @@ Page({
   data: {
     title: '用户反馈',
     desc: '查看用户提交的识别错误、营养估算和产品反馈。',
+    filters: STATUS_FILTERS,
+    currentStatus: '',
+    currentStatusText: '全部',
     loading: false,
     error: '',
     feedback: [],
     page: DEFAULT_PAGE,
     pageSize: DEFAULT_PAGE_SIZE,
     total: 0,
+    totalPages: 1,
     updatingFeedbackId: ''
   },
 
@@ -167,16 +179,19 @@ Page({
   },
 
   loadFeedback() {
-    const { page, pageSize } = this.data
+    const { page, pageSize, currentStatus } = this.data
+    const data = {
+      action: 'listFeedback',
+      page,
+      pageSize
+    }
+    if (currentStatus) data.status = currentStatus
+
     this.setData({ loading: true, error: '' })
 
     wx.cloud.callFunction({
       name: 'adminApi',
-      data: {
-        action: 'listFeedback',
-        page,
-        pageSize
-      }
+      data
     })
       .then(res => {
         const result = res.result || {}
@@ -193,6 +208,7 @@ Page({
           total: Number(result.total || feedback.length || 0),
           page: Number(result.page || page),
           pageSize: Number(result.pageSize || pageSize),
+          totalPages: Math.max(1, Math.ceil(Number(result.total || feedback.length || 0) / Number(result.pageSize || pageSize || DEFAULT_PAGE_SIZE))),
           loading: false,
           error: ''
         })
@@ -211,6 +227,29 @@ Page({
   },
 
   refreshFeedback() {
+    this.loadFeedback()
+  },
+
+  changeStatus(event) {
+    const status = event.currentTarget.dataset.status || ''
+    const current = STATUS_FILTERS.find(item => item.value === status) || STATUS_FILTERS[0]
+    this.setData({
+      currentStatus: status,
+      currentStatusText: current.label,
+      page: DEFAULT_PAGE
+    })
+    this.loadFeedback()
+  },
+
+  prevPage() {
+    if (this.data.loading || this.data.page <= 1) return
+    this.setData({ page: this.data.page - 1 })
+    this.loadFeedback()
+  },
+
+  nextPage() {
+    if (this.data.loading || this.data.page >= this.data.totalPages) return
+    this.setData({ page: this.data.page + 1 })
     this.loadFeedback()
   },
 
@@ -292,6 +331,7 @@ Page({
       loading: false,
       feedback: [],
       total: 0,
+      totalPages: 1,
       updatingFeedbackId: '',
       error: '无后台权限'
     })
