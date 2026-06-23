@@ -59,7 +59,7 @@
       <view class="section-card review-card">
         <view class="review-card-head">
           <view>
-            <view class="review-status">{{item.statusText}}</view>
+            <view class="review-status {{item.statusClass}}">{{item.statusText}}</view>
             <view class="review-reason">{{item.reasonText}}</view>
           </view>
           <view class="meal-pill">{{item.mealTypeText}}</view>
@@ -94,6 +94,8 @@
             <text class="meta-value">{{item.updatedAt}}</text>
           </view>
         </view>
+
+        <view wx:if="{{item.handledText}}" class="review-handled-note">{{item.handledText}}</view>
 
         <view wx:if="{{item.canReview}}" class="review-actions">
           <button

@@ -5,13 +5,15 @@ const STATUS_FILTERS = [
   { label: '全部', value: '' },
   { label: '待复核', value: 'pending' },
   { label: '已处理', value: 'resolved' },
-  { label: '已拒绝', value: 'rejected' }
+  { label: '已拒绝', value: 'rejected' },
+  { label: '已取消', value: 'cancelled' }
 ]
 
 const STATUS_TEXT = {
   pending: '待复核',
   resolved: '已处理',
   rejected: '已拒绝',
+  cancelled: '已取消',
   ignored: '已忽略'
 }
 
@@ -120,6 +122,7 @@ function normalizeTask(task) {
     id: source._id || source.id || `${source._openid || ''}-${source.createdAt || ''}`,
     status,
     statusText: STATUS_TEXT[status] || status || '未标记',
+    statusClass: `status-${status || 'unknown'}`,
     mealTypeText: MEAL_TYPE_TEXT[source.mealType] || source.mealType || '未分类',
     reasonText: REASON_TEXT[source.reason] || source.reason || '待人工确认',
     confidenceText: getConfidence(source),
@@ -130,7 +133,8 @@ function normalizeTask(task) {
     hasImage: Boolean(imageUrl),
     foodSummary: getFoodSummary(source),
     kcalText: getTotalKcal(source),
-    canReview: status === 'pending'
+    canReview: status === 'pending',
+    handledText: status === 'cancelled' ? '关联餐食已删除，任务已自动取消' : ''
   }
 }
 

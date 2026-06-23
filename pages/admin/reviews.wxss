@@ -155,6 +155,18 @@
   line-height: 1.3;
 }
 
+.status-cancelled {
+  color: #807987;
+}
+
+.status-resolved {
+  color: #6DAA70;
+}
+
+.status-rejected {
+  color: #D94B73;
+}
+
 .review-reason {
   margin-top: 8rpx;
   color: #807987;
@@ -241,6 +253,16 @@
   margin-top: 22rpx;
   padding-top: 18rpx;
   border-top: 1rpx solid #F0ECE7;
+}
+
+.review-handled-note {
+  margin-top: 20rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
+  color: #807987;
+  background: #FAF8F5;
+  font-size: 24rpx;
+  line-height: 1.45;
 }
 
 .meta-row {
