@@ -38,6 +38,7 @@
       <view wx:if="{{meal.note}}" class="note-box">备注：{{meal.note}}</view>
       <view class="hero-actions">
         <button class="edit-meal-btn" bindtap="editMeal">编辑这餐</button>
+        <button class="delete-meal-btn" bindtap="deleteMeal">删除记录</button>
       </view>
     </view>
 

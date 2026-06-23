@@ -160,6 +160,35 @@ Page({
     })
   },
 
+  deleteMeal() {
+    const { id } = this.data
+    if (!id) return
+
+    wx.showModal({
+      title: '删除这餐？',
+      content: '删除后首页和日记统计会同步更新，此操作不能撤回。',
+      confirmText: '删除',
+      confirmColor: '#d85b73',
+      success: (modalRes) => {
+        if (!modalRes.confirm) return
+        wx.showLoading({ title: '正在删除' })
+        wx.cloud.callFunction({
+          name: 'deleteMealRecord',
+          data: { recordId: id }
+        })
+          .then(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '已删除', icon: 'success' })
+            setTimeout(() => wx.navigateBack(), 500)
+          })
+          .catch(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '删除失败，请重试', icon: 'none' })
+          })
+      }
+    })
+  },
+
   goBack() {
     wx.navigateBack()
   }
