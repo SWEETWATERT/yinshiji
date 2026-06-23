@@ -18,11 +18,26 @@ const STATUS_TEXT = {
   resolved: '已处理'
 }
 
+const MEAL_TYPE_TEXT = {
+  breakfast: '早餐',
+  lunch: '午餐',
+  dinner: '晚餐',
+  snack: '加餐',
+  drink: '饮品'
+}
+
 function maskOpenid(value) {
   const openid = String(value || '').trim()
   if (!openid) return '--'
   if (openid.length <= 10) return openid
   return `${openid.slice(0, 6)}****${openid.slice(-4)}`
+}
+
+function maskId(value) {
+  const id = String(value || '').trim()
+  if (!id) return '--'
+  if (id.length <= 12) return id
+  return `${id.slice(0, 6)}...${id.slice(-4)}`
 }
 
 function formatDate(value) {
@@ -55,10 +70,63 @@ function pickContact(item) {
   return item.contact || item.phone || item.email || (item.payload && (item.payload.contact || item.payload.phone || item.payload.email)) || '--'
 }
 
+function displayNumber(value, unit) {
+  const num = Number(value || 0)
+  if (!Number.isFinite(num) || num <= 0) return ''
+  const fixed = Math.round(num * 10) / 10
+  return unit ? `${fixed}${unit}` : String(fixed)
+}
+
+function buildMealContext(source) {
+  const payload = source.payload || {}
+  const total = payload.total || source.total || {}
+  const foods = Array.isArray(payload.foods)
+    ? payload.foods
+    : Array.isArray(source.foods)
+      ? source.foods
+      : []
+
+  const foodSummary = foods
+    .map(food => {
+      const name = food.nameCn || food.name || food.foodName || food.displayName
+      const weight = displayNumber(food.weightG || food.estimatedWeightG || food.amount, 'g')
+      return name ? `${name}${weight ? ` ${weight}` : ''}` : ''
+    })
+    .filter(Boolean)
+    .slice(0, 4)
+    .join('、')
+
+  const contextItems = []
+  const mealType = payload.mealType || source.mealType
+  const mealDate = payload.date || source.date
+  const mealTime = payload.time || source.time
+  const kcal = displayNumber(total.kcal || payload.kcal || source.kcal, 'kcal')
+  const confidence = payload.confidencePercent || source.confidencePercent || source.confidence
+  const recognitionSource = payload.recognitionSource || source.recognitionSource
+
+  if (mealType) contextItems.push({ label: '餐次', value: MEAL_TYPE_TEXT[mealType] || mealType })
+  if (mealDate || mealTime) contextItems.push({ label: '记录时间', value: [mealDate, mealTime].filter(Boolean).join(' ') })
+  if (kcal) contextItems.push({ label: '热量', value: kcal })
+  if (recognitionSource) contextItems.push({ label: '识别来源', value: recognitionSource })
+  if (confidence !== undefined && confidence !== null && confidence !== '') {
+    contextItems.push({ label: '置信度', value: String(confidence).includes('%') ? String(confidence) : `${confidence}%` })
+  }
+
+  return {
+    mealRecordIdText: maskId(source.mealRecordId),
+    analysisIdText: maskId(source.analysisId),
+    hasMealLink: Boolean(source.mealRecordId || source.analysisId || source.imageFileID || contextItems.length || foodSummary),
+    imageText: source.imageFileID ? '有图' : '无图',
+    foodSummary: foodSummary || '暂无食物明细',
+    contextItems
+  }
+}
+
 function normalizeFeedback(item) {
   const source = item || {}
   const type = source.type || source.category || 'general'
   const status = source.status || 'open'
+  const mealContext = buildMealContext(source)
 
   return {
     id: source._id || source.id || `${source._openid || ''}-${source.createdAt || ''}`,
@@ -70,6 +138,7 @@ function normalizeFeedback(item) {
     maskedOpenid: maskOpenid(source._openid || source.openid),
     createdAt: formatDate(source.createdAt),
     updatedAt: formatDate(source.updatedAt),
+    mealContext,
     canMarkProcessing: status === 'open',
     canResolve: status === 'open' || status === 'processing',
     canClose: status !== 'closed'

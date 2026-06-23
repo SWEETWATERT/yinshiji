@@ -172,6 +172,71 @@
   word-break: break-all;
 }
 
+.meal-context-card {
+  margin-top: 22rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
+}
+
+.meal-context-title {
+  color: #25232A;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.meal-context-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.meal-context-item {
+  min-width: 0;
+}
+
+.meal-food-summary {
+  margin-top: 16rpx;
+  color: #25232A;
+  font-size: 24rpx;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.meal-context-list {
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #EFE7DE;
+}
+
+.context-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18rpx;
+  min-height: 40rpx;
+}
+
+.context-row + .context-row {
+  margin-top: 8rpx;
+}
+
+.context-label {
+  flex-shrink: 0;
+  color: #807987;
+  font-size: 22rpx;
+}
+
+.context-value {
+  color: #25232A;
+  font-size: 22rpx;
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+}
+
 .feedback-meta-list {
   margin-top: 22rpx;
   padding-top: 18rpx;

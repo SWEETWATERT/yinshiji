@@ -62,6 +62,33 @@
           </view>
         </view>
 
+        <view wx:if="{{item.mealContext.hasMealLink}}" class="meal-context-card">
+          <view class="meal-context-title">关联餐食</view>
+          <view class="meal-context-grid">
+            <view class="meal-context-item">
+              <text class="field-label">餐食记录</text>
+              <text class="field-value">{{item.mealContext.mealRecordIdText}}</text>
+            </view>
+            <view class="meal-context-item">
+              <text class="field-label">分析记录</text>
+              <text class="field-value">{{item.mealContext.analysisIdText}}</text>
+            </view>
+            <view class="meal-context-item">
+              <text class="field-label">图片</text>
+              <text class="field-value">{{item.mealContext.imageText}}</text>
+            </view>
+          </view>
+          <view class="meal-food-summary">{{item.mealContext.foodSummary}}</view>
+          <view wx:if="{{item.mealContext.contextItems.length}}" class="meal-context-list">
+            <block wx:for="{{item.mealContext.contextItems}}" wx:key="label">
+              <view class="context-row">
+                <text class="context-label">{{item.label}}</text>
+                <text class="context-value">{{item.value}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+
         <view class="feedback-meta-list">
           <view class="meta-row">
             <text class="meta-label">创建时间</text>
