@@ -1,3 +1,5 @@
+const config = require('./services/config')
+
 App({
   globalData: {
     user: null,
@@ -7,10 +9,11 @@ App({
   },
 
   onLaunch() {
-    wx.cloud.init({
-      env: 'cloud1-d8g4goa7pa3308807',
-      traceUser: true
-    })
+    const cloudOptions = { traceUser: true }
+    if (config.CLOUD_ENV_ID) {
+      cloudOptions.env = config.CLOUD_ENV_ID
+    }
+    wx.cloud.init(cloudOptions)
 
     this.globalData.loginReady = new Promise((resolve) => {
       wx.cloud.callFunction({ name: 'login' })
@@ -20,7 +23,8 @@ App({
           this.globalData.calorieTarget = user.calorieTarget || 1800
           resolve()
         })
-        .catch(() => {
+        .catch(err => {
+          console.warn('login cloud call failed:', err)
           this.globalData.user = { nickName: '', calorieTarget: 1800, profileCompleted: false }
           resolve()
         })

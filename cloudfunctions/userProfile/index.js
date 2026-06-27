@@ -2,6 +2,7 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const ADMIN_ROLE_SET = ['owner', 'admin']
+const ENSURED_COLLECTIONS = {}
 
 function normalizeOpenid(value) {
   return String(value || '')
@@ -16,12 +17,34 @@ function normalizeText(value) {
 async function findUser(openid) {
   if (!openid || !String(openid).trim()) return null
 
+  await ensureCollection('users')
+
   const { data } = await db.collection('users')
     .where({ _openid: openid }).limit(1).get()
   if (data.length > 0) return data[0]
   const fallback = await db.collection('users')
     .where({ openid: openid }).limit(1).get()
   return fallback.data[0] || null
+}
+
+async function ensureCollection(name) {
+  if (ENSURED_COLLECTIONS[name]) return
+
+  try {
+    await db.createCollection(name)
+  } catch (err) {
+    const message = String((err && (err.errMsg || err.message || err.code)) || '')
+    const exists = message.indexOf('already exist') !== -1 ||
+      message.indexOf('already exists') !== -1 ||
+      message.indexOf('collection exists') !== -1 ||
+      message.indexOf('DATABASE_COLLECTION_ALREADY_EXISTS') !== -1 ||
+      message.indexOf('-502005') !== -1
+    if (!exists) {
+      throw err
+    }
+  }
+
+  ENSURED_COLLECTIONS[name] = true
 }
 
 function normalizeAdminOpenids() {
@@ -178,10 +201,11 @@ function buildProfileResponse(user, adminInfo, action) {
   }
 }
 
-exports.main = async (event) => {
+async function handleUserProfile(event) {
   const rawEvent = event || {}
   const wxContext = cloud.getWXContext()
-  const currentOpenid = normalizeOpenid(wxContext.OPENID || rawEvent.openid || rawEvent.data?.openid || '')
+  const rawData = rawEvent.data || {}
+  const currentOpenid = normalizeOpenid(wxContext.OPENID || rawEvent.openid || rawData.openid || '')
   const action = rawEvent.action || (rawEvent.data && rawEvent.data.action) || 'get'
   const data = rawEvent.data && rawEvent.data.data ? rawEvent.data.data : rawEvent.data
 
@@ -202,6 +226,8 @@ exports.main = async (event) => {
   }
 
   if (action === 'update' && data) {
+    await ensureCollection('users')
+
     const updateData = {
       ...data,
       profileCompleted: true,
@@ -232,4 +258,16 @@ exports.main = async (event) => {
   const user = await findUser(currentOpenid)
   const adminInfo = await getAdminInfo(currentOpenid)
   return buildProfileResponse(user, adminInfo, action)
+}
+
+exports.main = async (event) => {
+  try {
+    return await handleUserProfile(event)
+  } catch (err) {
+    return {
+      error: 'USER_PROFILE_SAVE_FAILED',
+      message: err && (err.errMsg || err.message) ? (err.errMsg || err.message) : '用户资料保存失败',
+      detail: err && err.code ? err.code : ''
+    }
+  }
 }

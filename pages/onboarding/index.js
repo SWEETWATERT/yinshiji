@@ -121,8 +121,15 @@ Page({
     })
       .then(res => {
         this.setData({ saving: false })
+        const result = res.result || {}
+        if (result.error) {
+          console.error('userProfile save failed:', result)
+          wx.showToast({ title: result.message || '保存失败，请重试', icon: 'none' })
+          return
+        }
+
         const app = getApp()
-        const saved = res.result && res.result.user
+        const saved = result.user
         if (saved) {
           app.globalData.user = saved
         }
@@ -137,7 +144,8 @@ Page({
           }
         }, 500)
       })
-      .catch(() => {
+      .catch(err => {
+        console.error('userProfile cloud call failed:', err)
         this.setData({ saving: false })
         wx.showToast({ title: '保存失败，请重试', icon: 'none' })
       })
