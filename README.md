@@ -3,7 +3,7 @@
 基于微信云开发的饮食记录与营养分析小程序 MVP。用户可拍照记录每日饮食，自动分析营养成分，追踪热量与宏量营养素摄入，生成周报。
 
 **AppID**: `wxaaf0b18d6aa69fcc`  
-**云环境**: `cloud1-d8g4goa7pa3308807`（个人版）  
+**云环境**: 默认使用微信开发者工具当前/默认云环境；如需固定环境，可在 `services/config.js` 配置 `CLOUD_ENV_ID`。  
 **框架版本**: 基础库 3.16.0
 
 ---
@@ -70,7 +70,7 @@ yinshiji-miniprogram/
 
 ```
 App.onLaunch
-  ├── wx.cloud.init()              // 初始化云开发
+  ├── wx.cloud.init()              // 初始化云开发，默认使用当前/默认云环境
   └── callFunction('login')        // 静默登录
         ├── 新用户 → 创建 users 记录（profileCompleted: false）
         └── 老用户 → 更新 lastLoginAt，返回完整 user 对象
@@ -456,7 +456,16 @@ wx.cloud.callFunction({
 
 1. 安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
 2. 导入项目目录，AppID 填 `wxaaf0b18d6aa69fcc`
-3. 开通云开发，选择 `cloud1` 环境
+3. 开通云开发，并在微信开发者工具里选择当前项目使用的云环境
+4. 默认情况下前端不写死云环境 ID，会使用开发者工具当前/默认云环境
+
+如果必须固定某个云环境，确认该 AppID 拥有该环境后再编辑 `services/config.js`：
+
+```js
+CLOUD_ENV_ID: '你的云环境ID'
+```
+
+如果填错环境 ID，云函数会报 `env not exists`，身体资料保存、登录、餐食保存等云函数调用都会失败。
 
 ### 云函数部署
 

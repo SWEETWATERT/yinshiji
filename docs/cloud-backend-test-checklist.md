@@ -8,9 +8,10 @@
 2. 打开项目 `yinshiji-miniprogram`。
 3. 看顶部工具栏，点击「云开发」。
 4. 如果提示开通云开发，先按提示开通。
-5. 确认当前环境是项目使用的环境，例如：`cloud1-d8g4goa7pa3308807`。
+5. 确认当前环境就是你部署云函数、创建数据库集合的同一个环境。
 
 如果环境选错，云函数和数据库会查不到数据。
+前端默认使用微信开发者工具当前/默认云环境；只有在 `services/config.js` 明确配置 `CLOUD_ENV_ID` 时，才会固定到指定环境。
 
 ## 2. 确认云环境已经开通
 
@@ -52,9 +53,11 @@
 - `seedFoodItems`
 - `analyzeMeal`
 - `saveMealRecord`
+- `deleteMealRecord`
 - `getMealRecords`
 - `getWeeklyReport`
 - `submitFeedback`
+- `searchFoodItems`
 - `adminApi`
 
 如果某个不存在，回到微信开发者工具左侧项目文件，右键对应 `cloudfunctions/函数名`，选择「上传并部署：云端安装依赖」。
@@ -460,8 +463,9 @@ ADMIN_OPENIDS=openid1,openid2,openid3
 处理：
 
 1. 在「云开发」顶部确认环境。
-2. 项目当前使用环境：`cloud1-d8g4goa7pa3308807`。
-3. 部署云函数、创建集合、测试数据都要在同一个环境里。
+2. 前端默认使用微信开发者工具当前/默认云环境；如果 `services/config.js` 里的 `CLOUD_ENV_ID` 为空，就不要再找固定环境 ID。
+3. 如果 `CLOUD_ENV_ID` 填了具体值，必须确认当前 AppID 拥有这个环境；否则会出现 `env not exists`。
+4. 部署云函数、创建集合、测试数据都要在同一个环境里。
 
 ### 云函数未部署依赖
 
