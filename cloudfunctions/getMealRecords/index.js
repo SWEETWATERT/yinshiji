@@ -3,9 +3,25 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name)
+  } catch (err) {
+    const message = String((err && (err.errMsg || err.message || err.code)) || '')
+    const exists = message.includes('already exist') ||
+      message.includes('already exists') ||
+      message.includes('collection exists') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXISTS') ||
+      message.includes('-502005') ||
+      message.includes('ResourceExist') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXIST') ||
+      message.includes('Table exist')
+    if (!exists) throw err
+  }
+}
+
 exports.main = async (event) => {
   const wxContext = cloud.getWXContext()
-  const OPENID = wxContext.OPENID
 
   const rawEvent = event || {}
   const rawData = rawEvent.data || {}
@@ -13,6 +29,7 @@ exports.main = async (event) => {
     ...rawEvent,
     ...rawData
   }
+  const OPENID = wxContext.OPENID || input.openid || 'cloud_recovery_openid'
 
   const date = String(input.date || '').trim()
   const startDate = String(input.startDate || '').trim()
@@ -29,6 +46,8 @@ exports.main = async (event) => {
   if (!OPENID) {
     return { records: [], debugInput, error: 'OPENID_EMPTY' }
   }
+
+  await ensureCollection('meal_records')
 
   const where = {
     _openid: OPENID

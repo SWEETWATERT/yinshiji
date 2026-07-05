@@ -3,6 +3,23 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name)
+  } catch (err) {
+    const message = String((err && (err.errMsg || err.message || err.code)) || '')
+    const exists = message.includes('already exist') ||
+      message.includes('already exists') ||
+      message.includes('collection exists') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXISTS') ||
+      message.includes('-502005') ||
+      message.includes('ResourceExist') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXIST') ||
+      message.includes('Table exist')
+    if (!exists) throw err
+  }
+}
+
 function formatDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
@@ -59,8 +76,13 @@ function buildSummary(avgScore, vegDays, sugaryDrinks, lateSnacks) {
 }
 
 exports.main = async (event) => {
-  const { OPENID } = cloud.getWXContext()
-  const days = Math.min(14, Math.max(7, Number(event.days || 7)))
+  await ensureCollection('meal_records')
+  const rawEvent = event || {}
+  const rawData = rawEvent.data || {}
+  const input = { ...rawEvent, ...rawData }
+  const { OPENID: wxOpenid } = cloud.getWXContext()
+  const OPENID = wxOpenid || input.openid || 'cloud_recovery_openid'
+  const days = Math.min(14, Math.max(7, Number(input.days || 7)))
   const { startDate, endDate, dates } = getDateRange(days)
 
   const { data: meals } = await db.collection('meal_records')

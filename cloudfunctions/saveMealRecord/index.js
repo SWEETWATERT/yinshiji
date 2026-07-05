@@ -1,6 +1,28 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const REQUIRED_COLLECTIONS = ['meal_records', 'analysis_logs', 'review_tasks']
+
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name)
+  } catch (err) {
+    const message = String((err && (err.errMsg || err.message || err.code)) || '')
+    const exists = message.includes('already exist') ||
+      message.includes('already exists') ||
+      message.includes('collection exists') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXISTS') ||
+      message.includes('-502005') ||
+      message.includes('ResourceExist') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXIST') ||
+      message.includes('Table exist')
+    if (!exists) throw err
+  }
+}
+
+async function ensureCollections(names = REQUIRED_COLLECTIONS) {
+  await Promise.all(names.map(name => ensureCollection(name)))
+}
 
 function num(value, fallback = 0) {
   const n = Number(value)
@@ -164,10 +186,12 @@ async function upsertReviewTaskIfNeeded(record, mealRecordId, openid) {
 }
 
 exports.main = async (event) => {
-  const { OPENID } = cloud.getWXContext()
+  await ensureCollections()
   const rawEvent = event || {}
   const rawData = rawEvent.data || {}
   const input = { ...rawEvent, ...rawData }
+  const { OPENID: wxOpenid } = cloud.getWXContext()
+  const OPENID = wxOpenid || input.openid || 'cloud_recovery_openid'
 
   const confirmedFoods = (input.confirmedFoods || input.foods || input.detectedFoods || [])
     .map((food, index) => normalizeFood(food, index))

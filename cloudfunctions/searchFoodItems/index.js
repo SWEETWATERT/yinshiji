@@ -5,6 +5,23 @@ const _ = db.command
 
 const MAX_PAGE_SIZE = 20
 
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name)
+  } catch (err) {
+    const message = String((err && (err.errMsg || err.message || err.code)) || '')
+    const exists = message.includes('already exist') ||
+      message.includes('already exists') ||
+      message.includes('collection exists') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXISTS') ||
+      message.includes('-502005') ||
+      message.includes('ResourceExist') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXIST') ||
+      message.includes('Table exist')
+    if (!exists) throw err
+  }
+}
+
 function normalizeText(value) {
   return String(value || '').trim()
 }
@@ -53,6 +70,8 @@ function normalizeFood(food) {
 }
 
 exports.main = async (event) => {
+  await ensureCollection('food_items')
+
   const rawEvent = event || {}
   const rawData = rawEvent.data || {}
   const input = { ...rawEvent, ...rawData }

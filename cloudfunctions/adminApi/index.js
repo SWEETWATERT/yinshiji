@@ -5,6 +5,48 @@ const _ = db.command
 
 const MAX_PAGE_SIZE = 50
 const ADMIN_ROLE_SET = ['owner', 'admin']
+const REQUIRED_COLLECTIONS = [
+  'meal_records',
+  'food_items',
+  'users',
+  'analysis_logs',
+  'review_tasks',
+  'feedback',
+  'app_config',
+  'admin_users'
+]
+const FEEDBACK_COLLECTIONS = ['feedback', 'user_feedback']
+
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name)
+  } catch (err) {
+    const message = String((err && (err.errMsg || err.message || err.code)) || '')
+    const exists = message.includes('already exist') ||
+      message.includes('already exists') ||
+      message.includes('collection exists') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXISTS') ||
+      message.includes('-502005') ||
+      message.includes('ResourceExist') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXIST') ||
+      message.includes('Table exist')
+    if (!exists) throw err
+  }
+}
+
+async function ensureCollections(names = REQUIRED_COLLECTIONS) {
+  await Promise.all(names.map(name => ensureCollection(name)))
+}
+
+async function countCollection(name, where) {
+  try {
+    const query = where ? db.collection(name).where(where) : db.collection(name)
+    const res = await query.count()
+    return Number(res.total || 0)
+  } catch (err) {
+    return 0
+  }
+}
 
 function pageArgs(event) {
   const page = Math.max(1, Number(event.page || 1))
@@ -171,6 +213,7 @@ async function bootstrapAdmin(event, openid) {
 }
 
 async function dashboard() {
+  await ensureCollections()
   const today = new Date()
   const todayText = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
@@ -189,8 +232,9 @@ async function dashboard() {
     db.collection('food_items').count(),
     db.collection('analysis_logs').count(),
     db.collection('review_tasks').where({ status: 'pending' }).count(),
-    db.collection('user_feedback').where({ status: _.neq('closed') }).count()
+    Promise.all(FEEDBACK_COLLECTIONS.map(name => countCollection(name, { status: _.neq('closed') })))
   ])
+  const openFeedbackTotal = openFeedback.reduce((sum, total) => sum + total, 0)
 
   return {
     today: todayText,
@@ -201,7 +245,7 @@ async function dashboard() {
       foodItems: foodItems.total,
       analysisLogs: analysisLogs.total,
       pendingReviews: pendingReviews.total,
-      openFeedback: openFeedback.total
+      openFeedback: openFeedbackTotal
     }
   }
 }
@@ -437,15 +481,34 @@ async function listFeedback(event) {
   const where = {}
   if (event.status) where.status = event.status
   if (event.type) where.type = event.type
-  const res = await db.collection('user_feedback')
-    .where(where)
-    .orderBy('createdAt', 'desc')
-    .skip(skip)
-    .limit(pageSize)
-    .get()
-  const count = await db.collection('user_feedback').where(where).count()
-  const feedback = res.data || []
-  return { page, pageSize, total: count.total, feedback, records: feedback }
+
+  await ensureCollections(['feedback', 'user_feedback'])
+
+  const results = await Promise.all(FEEDBACK_COLLECTIONS.map(async (collectionName) => {
+    try {
+      const res = await db.collection(collectionName)
+        .where(where)
+        .orderBy('createdAt', 'desc')
+        .limit(Math.min(MAX_PAGE_SIZE, pageSize + skip))
+        .get()
+      const count = await db.collection(collectionName).where(where).count()
+      return {
+        collectionName,
+        total: count.total,
+        records: (res.data || []).map(item => ({ ...item, collectionName }))
+      }
+    } catch (err) {
+      return { collectionName, total: 0, records: [] }
+    }
+  }))
+
+  const feedback = results
+    .flatMap(result => result.records)
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .slice(skip, skip + pageSize)
+  const total = results.reduce((sum, result) => sum + Number(result.total || 0), 0)
+
+  return { page, pageSize, total, feedback, records: feedback }
 }
 
 async function updateFeedbackStatus(event, openid) {
@@ -476,11 +539,27 @@ async function updateFeedbackStatus(event, openid) {
     data.handledAt = now
   }
 
-  await db.collection('user_feedback').doc(feedbackId).update({
-    data: {
-      ...data
+  let updated = false
+  for (const collectionName of FEEDBACK_COLLECTIONS) {
+    try {
+      await db.collection(collectionName).doc(feedbackId).update({
+        data: {
+          ...data
+        }
+      })
+      updated = true
+      break
+    } catch (err) {
+      // Try the compatibility collection next.
     }
-  })
+  }
+
+  if (!updated) {
+    const err = new Error('FEEDBACK_NOT_FOUND')
+    err.code = 'FEEDBACK_NOT_FOUND'
+    throw err
+  }
+
   return { ok: true, feedbackId, status }
 }
 
@@ -514,15 +593,25 @@ async function setAppConfig(event, openid) {
 }
 
 exports.main = async (event) => {
-  const { OPENID } = cloud.getWXContext()
-  const action = event.action || 'dashboard'
+  const rawEvent = event || {}
+  const rawData = rawEvent.data || {}
+  const input = { ...rawEvent, ...rawData }
+  const { OPENID: wxOpenid } = cloud.getWXContext()
+  const OPENID = normalizeOpenid(wxOpenid || input.openid || 'cloud_recovery_openid')
+  const action = input.action || 'dashboard'
+
+  await ensureCollections()
 
   if (action === 'whoami') {
     return getAdminInfo(OPENID)
   }
 
+  if (action === 'ensureCollections') {
+    return { ok: true, collections: REQUIRED_COLLECTIONS }
+  }
+
   if (action === 'bootstrapAdmin') {
-    return bootstrapAdmin(event, OPENID)
+    return bootstrapAdmin(input, OPENID)
   }
 
   await requireAdmin(OPENID)
@@ -554,5 +643,5 @@ exports.main = async (event) => {
     throw err
   }
 
-  return actions[action](event)
+  return actions[action](input)
 }

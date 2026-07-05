@@ -1,0 +1,106 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "cloud1-d1gv1x52j94783ad3",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "adminApi",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "userProfile",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "analyzeMeal",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 512,
+      "installDependency": true
+    },
+    {
+      "name": "saveMealRecord",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "login",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "getMealRecords",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "getWeeklyReport",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "seedFoodItems",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "searchFoodItems",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "submitFeedback",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "deleteMealRecord",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true
+    }
+  ]
+}

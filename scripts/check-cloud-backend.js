@@ -29,7 +29,7 @@ const requiredCollections = {
   deleteMealRecord: ['meal_records', 'analysis_logs', 'review_tasks'],
   getMealRecords: ['meal_records'],
   getWeeklyReport: ['meal_records'],
-  submitFeedback: ['user_feedback', 'review_tasks'],
+  submitFeedback: ['feedback', 'review_tasks'],
   searchFoodItems: ['food_items'],
   adminApi: ['admin_users']
 }

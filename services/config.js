@@ -1,8 +1,7 @@
 // Frontend-safe config only. Do not import local secret files in the mini-program bundle.
 const base = {
-  // Leave empty to use the current/default CloudBase environment selected in WeChat DevTools.
-  // Set this only when the AppID definitely owns that environment.
-  CLOUD_ENV_ID: '',
+  // Fixed CloudBase environment for the yinshiji AppID.
+  CLOUD_ENV_ID: 'cloud1-d1gv1x52j94783ad3',
   FATSECRET_CLIENT_ID:     '7a6120c809bb43bf97cdcd9d180ad3cb',
   FATSECRET_CLIENT_SECRET: ''
 }

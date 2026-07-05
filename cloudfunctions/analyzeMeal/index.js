@@ -21,6 +21,7 @@ try {
 const RECOGNITION_SOURCE = 'keyword_fallback'
 const MODEL_PROVIDER = 'mock_keyword'
 const MODEL_VERSION = 'v0.4.0-step2'
+const REQUIRED_COLLECTIONS = ['food_items', 'analysis_logs', 'review_tasks']
 
 const KEYWORD_FOOD_MAP = [
   { kws: ['番茄炒蛋', '西红柿炒鸡蛋', '蕃茄炒蛋'],   id: 'dish_tomato_egg',     wg: 200 },
@@ -97,6 +98,27 @@ const COMMON_ALIAS_RULES = [
   { keyword: '西蓝花', nameCn: '西兰花', foodId: 'veg_broccoli', weightG: 100 },
   { keyword: '西兰花', nameCn: '西兰花', foodId: 'veg_broccoli', weightG: 100 }
 ]
+
+async function ensureCollection(name) {
+  try {
+    await db.createCollection(name)
+  } catch (err) {
+    const message = String((err && (err.errMsg || err.message || err.code)) || '')
+    const exists = message.includes('already exist') ||
+      message.includes('already exists') ||
+      message.includes('collection exists') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXISTS') ||
+      message.includes('-502005') ||
+      message.includes('ResourceExist') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXIST') ||
+      message.includes('Table exist')
+    if (!exists) throw err
+  }
+}
+
+async function ensureCollections(names = REQUIRED_COLLECTIONS) {
+  await Promise.all(names.map(name => ensureCollection(name)))
+}
 
 function isVegetable(foodId) {
   return foodId.startsWith('veg_') || foodId === 'dish_stir_greens' || foodId === 'dish_chicken_salad'
@@ -216,6 +238,7 @@ function extractFoodItemMatches(note, foodDocs, existingMatches) {
 }
 
 async function getAllFoodItems() {
+  await ensureCollection('food_items')
   const all = []
   let batch
   do {
@@ -456,13 +479,15 @@ async function createReviewTaskIfNeeded(openid, result, input, reason) {
 }
 
 exports.main = async (event) => {
-  const { OPENID } = cloud.getWXContext()
+  await ensureCollections()
   const rawEvent = event || {}
   const rawData = rawEvent.data || {}
   const input = {
     ...rawEvent,
     ...rawData
   }
+  const { OPENID: wxOpenid } = cloud.getWXContext()
+  const OPENID = wxOpenid || input.openid || 'cloud_recovery_openid'
 
   const note = String(input.note || '').trim()
   const mealType = String(input.mealType || '').trim()

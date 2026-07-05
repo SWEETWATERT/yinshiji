@@ -34,11 +34,14 @@ async function ensureCollection(name) {
     await db.createCollection(name)
   } catch (err) {
     const message = String((err && (err.errMsg || err.message || err.code)) || '')
-    const exists = message.indexOf('already exist') !== -1 ||
-      message.indexOf('already exists') !== -1 ||
-      message.indexOf('collection exists') !== -1 ||
-      message.indexOf('DATABASE_COLLECTION_ALREADY_EXISTS') !== -1 ||
-      message.indexOf('-502005') !== -1
+    const exists = message.includes('already exist') ||
+      message.includes('already exists') ||
+      message.includes('collection exists') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXISTS') ||
+      message.includes('-502005') ||
+      message.includes('ResourceExist') ||
+      message.includes('DATABASE_COLLECTION_ALREADY_EXIST') ||
+      message.includes('Table exist')
     if (!exists) {
       throw err
     }
@@ -74,6 +77,8 @@ async function getAdminInfo(openid) {
   }
 
   if (!currentOpenid) return { isAdmin: false, roles: [], debugInput }
+
+  await ensureCollection('admin_users')
 
   if (normalizeAdminOpenids().includes(currentOpenid)) {
     debugInput.matchedAdminRecord = { source: 'ADMIN_OPENIDS' }
