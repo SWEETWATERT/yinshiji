@@ -177,6 +177,13 @@
   color: #25232A;
   font-size: 30rpx;
   font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.note-desc {
+  color: #807987;
+  font-size: 24rpx;
+  line-height: 1.45;
   margin-bottom: 16rpx;
 }
 

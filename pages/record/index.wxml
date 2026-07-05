@@ -48,22 +48,23 @@
 
   <!-- Note Section -->
   <view class="note-card section-card">
-    <view class="note-head">小备注</view>
+    <view class="note-head">食物与备注</view>
+    <view class="note-desc">写上食物名和大致份量，估算会更准。</view>
     <view class="note-chips">
       <block wx:for="{{noteTags}}" wx:key="*this">
         <view
-          class="chip {{note === item ? 'chip-active' : ''}}"
+          class="chip {{note.indexOf(item) !== -1 ? 'chip-active' : ''}}"
           data-note="{{item}}"
           bindtap="setNote"
         >{{item}}</view>
       </block>
     </view>
-    <view class="note-label">今天这餐有什么特别？</view>
+    <view class="note-label">吃了什么？</view>
     <textarea
       class="note-input"
       value="{{note}}"
       bindinput="onNoteInput"
-      placeholder="比如少油少盐、米饭半碗、无糖饮品…"
+      placeholder="例如：牛肉100克 白粥200克，少油"
       placeholder-class="note-placeholder"
       maxlength="100"
       auto-height
