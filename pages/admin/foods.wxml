@@ -19,12 +19,12 @@
   </view>
 
   <view class="section-card foods-summary">
-    <view class="summary-label">总食物数量</view>
+    <view class="summary-label">{{keyword ? '搜索结果' : '总食物数量'}}</view>
     <view class="summary-value-row">
       <text class="summary-value">{{total}}</text>
       <text class="summary-unit">项</text>
     </view>
-    <view class="summary-desc">当前显示第 {{page}} / {{totalPages}} 页，每页 {{pageSize}} 项</view>
+    <view class="summary-desc">当前第 {{page}} / {{totalPages}} 页，每页 {{pageSize}} 项，已加载 {{foods.length}} 项</view>
   </view>
 
   <view class="section-card search-card">
@@ -35,7 +35,7 @@
         bindinput="onSearchInput"
         confirm-type="search"
         bindconfirm="searchFoods"
-        placeholder="搜索食物名称/分类"
+        placeholder="搜索中文名 / 名称 / 别名 / 分类"
       />
       <button class="search-button" bindtap="searchFoods" disabled="{{loading}}">搜索</button>
     </view>
@@ -98,32 +98,37 @@
     </button>
   </view>
 
-  <view wx:if="{{loading}}" class="section-card state-card">
+  <view wx:if="{{loading && foods.length === 0}}" class="section-card state-card">
     <view class="state-title">加载中</view>
     <view class="state-desc">正在读取 food_items 食物库数据。</view>
   </view>
 
-  <view wx:elif="{{error}}" class="section-card state-card error-card">
+  <view wx:elif="{{error && foods.length === 0}}" class="section-card state-card error-card">
     <view class="state-title">{{error}}</view>
     <view class="state-desc">请确认当前账号有后台权限，且 adminApi 云函数已部署。</view>
     <button class="retry-button" bindtap="refreshFoods">重试</button>
   </view>
 
-  <view wx:elif="{{foods.length === 0}}" class="section-card state-card">
+  <view wx:elif="{{!loading && foods.length === 0}}" class="section-card state-card">
     <view class="state-title">暂无食物数据</view>
     <view class="state-desc">{{keyword ? '当前关键词没有匹配的食物，请换个关键词搜索。' : 'food_items 集合暂时没有可展示的食物库数据。'}}</view>
   </view>
 
   <view wx:else class="foods-list">
+    <view wx:if="{{error}}" class="section-card inline-error-card">
+      <view>{{error}}</view>
+      <button class="retry-button inline-retry-button" bindtap="refreshFoods">重试</button>
+    </view>
     <block wx:for="{{foods}}" wx:key="id">
-      <view class="section-card food-card">
+      <view class="section-card food-card {{item.enabled ? 'food-card-enabled' : 'food-card-disabled'}}">
         <view class="food-card-head">
           <view class="food-icon">{{item.icon}}</view>
           <view class="food-title-wrap">
-            <view class="food-name">{{item.name}}</view>
+            <view class="food-name">{{item.nameCn}}</view>
+            <view wx:if="{{item.secondaryName}}" class="food-secondary-name">{{item.secondaryName}}</view>
             <view class="food-category">{{item.category}}</view>
           </view>
-          <view class="status-pill">{{item.statusText}}</view>
+          <view class="status-pill {{item.enabled ? 'status-enabled' : 'status-disabled'}}">{{item.statusText}}</view>
         </view>
 
         <view class="kcal-row">
@@ -146,13 +151,13 @@
             <text class="nutrition-label">脂肪</text>
             <text class="nutrition-value">{{item.fatPer100g}}</text>
           </view>
-          <view class="nutrition-item">
-            <text class="nutrition-label">纤维</text>
-            <text class="nutrition-value">{{item.fiberPer100g}}</text>
-          </view>
         </view>
 
         <view class="food-meta-list">
+          <view wx:if="{{item.aliasesText}}" class="meta-row">
+            <text class="meta-label">别名</text>
+            <text class="meta-value">{{item.aliasesText}}</text>
+          </view>
           <view class="meta-row">
             <text class="meta-label">更新时间</text>
             <text class="meta-value">{{item.updatedAt}}</text>
@@ -178,8 +183,16 @@
   </view>
 
   <view wx:if="{{!loading && !error && total > 0}}" class="section-card pager-card">
-    <button class="pager-button" bindtap="prevPage" disabled="{{page <= 1 || loading}}">上一页</button>
-    <view class="pager-text">第 {{page}} / {{totalPages}} 页</view>
-    <button class="pager-button" bindtap="nextPage" disabled="{{page >= totalPages || loading}}">下一页</button>
+    <button class="pager-button" bindtap="prevPage" disabled="{{page <= 1 || loading || loadingMore}}">上一页</button>
+    <view class="pager-text">
+      <view>第 {{page}} / {{totalPages}} 页</view>
+      <view class="pager-subtext">{{hasMore ? '可继续加载下一页' : '已到最后一页'}}</view>
+    </view>
+    <button class="pager-button" bindtap="nextPage" disabled="{{page >= totalPages || loading || loadingMore}}">
+      {{loadingMore ? '加载中' : '下一页'}}
+    </button>
   </view>
+
+  <view wx:if="{{loadingMore}}" class="load-more-row">正在加载下一页</view>
+  <view wx:elif="{{!loading && !error && total > 0 && !hasMore}}" class="load-more-row">没有更多食物了</view>
 </view>

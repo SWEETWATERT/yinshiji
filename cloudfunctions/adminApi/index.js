@@ -293,6 +293,7 @@ async function listFoodItems(event) {
     const keywordWhere = _.or([
       { nameCn: keywordRegExp },
       { name: keywordRegExp },
+      { aliases: keywordRegExp },
       { foodName: keywordRegExp },
       { title: keywordRegExp },
       { category: keywordRegExp }

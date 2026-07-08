@@ -30,6 +30,12 @@ function displayNumber(value, unit) {
   return unit ? `${fixed}${unit}` : String(fixed)
 }
 
+function aliasesText(value) {
+  if (Array.isArray(value)) return value.filter(Boolean).slice(0, 4).join('、')
+  if (typeof value === 'string') return value
+  return ''
+}
+
 function getStatusText(food) {
   const status = String(food.status || '').trim()
   if (status === 'disabled') return '停用'
@@ -45,12 +51,18 @@ function isFoodEnabled(food) {
 
 function normalizeFood(food) {
   const source = food || {}
+  const nameCn = source.nameCn || source.name || source.foodName || '未命名食物'
+  const name = source.name || source.foodName || ''
+  const aliases = aliasesText(source.aliases)
 
   return {
     id: source._id || source.foodId || source.nameCn || source.name || 'unknown',
     foodId: source.foodId || '',
     icon: source.icon || '🍽️',
-    name: source.nameCn || source.name || source.foodName || '未命名食物',
+    name: nameCn,
+    nameCn,
+    secondaryName: name && name !== nameCn ? name : '',
+    aliasesText: aliases,
     category: source.category || '未分类',
     kcalValue: Number(source.kcalPer100g || source.kcal || source.calories || 0),
     proteinValue: Number(source.proteinPer100g || source.protein || 0),
@@ -74,15 +86,17 @@ function pickFoods(result) {
 
 Page({
   data: {
-    title: '食物库',
-    desc: '查看 food_items 集合里的食物营养数据，只读展示，不做编辑操作。',
+    title: '食物库管理',
+    desc: '后台维护工具，仅用于管理 food_items 基础营养数据。',
     loading: false,
+    loadingMore: false,
     error: '',
     foods: [],
     page: DEFAULT_PAGE,
     pageSize: DEFAULT_PAGE_SIZE,
     total: 0,
     totalPages: 1,
+    hasMore: false,
     keyword: '',
     searchValue: '',
     showForm: false,
@@ -107,13 +121,27 @@ Page({
     this.loadFoods()
   },
 
-  loadFoods() {
-    const { page, pageSize, keyword } = this.data
-    this.setData({ loading: true, error: '' })
+  onReachBottom() {
+    this.loadNextPage(true)
+  },
+
+  loadFoods(options = {}) {
+    const append = options.append === true
+    const targetPage = Number(options.page || (append ? this.data.page + 1 : this.data.page) || DEFAULT_PAGE)
+    const { pageSize } = this.data
+    const keyword = options.keyword !== undefined ? options.keyword : this.data.keyword
+    if (append && (this.data.loading || this.data.loadingMore || !this.data.hasMore)) return
+
+    this.requestSeq = (this.requestSeq || 0) + 1
+    const requestSeq = this.requestSeq
+
+    this.setData(append
+      ? { loadingMore: true, error: '' }
+      : { loading: true, loadingMore: false, error: '' })
 
     const data = {
       action: 'listFoodItems',
-      page,
+      page: targetPage,
       pageSize
     }
     if (keyword) data.keyword = keyword
@@ -123,6 +151,7 @@ Page({
       data
     })
       .then(res => {
+        if (requestSeq !== this.requestSeq) return
         const result = res.result || {}
         if (result.isAdmin === false || result.code === 'NO_ADMIN_PERMISSION' || result.error === 'NO_ADMIN_PERMISSION') {
           this.setNoPermission()
@@ -130,19 +159,27 @@ Page({
         }
 
         const rawFoods = pickFoods(result)
-        const foods = Array.isArray(rawFoods) ? rawFoods.map(normalizeFood) : []
+        const normalizedFoods = Array.isArray(rawFoods) ? rawFoods.map(normalizeFood) : []
+        const total = Number(result.total || normalizedFoods.length || 0)
+        const nextPageSize = Number(result.pageSize || pageSize)
+        const totalPages = this.getTotalPages(total, nextPageSize)
+        const nextPage = Math.min(totalPages, Number(result.page || targetPage))
+        const foods = append ? this.mergeFoods(this.data.foods, normalizedFoods) : normalizedFoods
 
         this.setData({
           foods,
-          total: Number(result.total || foods.length || 0),
-          page: Number(result.page || page),
-          pageSize: Number(result.pageSize || pageSize),
-          totalPages: this.getTotalPages(Number(result.total || foods.length || 0), Number(result.pageSize || pageSize)),
+          total,
+          page: nextPage,
+          pageSize: nextPageSize,
+          totalPages,
+          hasMore: nextPage < totalPages,
           loading: false,
+          loadingMore: false,
           error: ''
         })
       })
       .catch(err => {
+        if (requestSeq !== this.requestSeq) return
         if (this.isNoPermissionError(err)) {
           this.setNoPermission()
           return
@@ -150,13 +187,15 @@ Page({
 
         this.setData({
           loading: false,
+          loadingMore: false,
           error: '食物库加载失败，请稍后重试。'
         })
       })
   },
 
   refreshFoods() {
-    this.loadFoods()
+    this.setData({ page: DEFAULT_PAGE, foods: [] })
+    this.loadFoods({ page: DEFAULT_PAGE })
   },
 
   getTotalPages(total, pageSize) {
@@ -171,36 +210,60 @@ Page({
   },
 
   searchFoods() {
+    if (this.data.loading || this.data.loadingMore) return
+    const keyword = String(this.data.searchValue || '').trim()
     this.setData({
-      keyword: String(this.data.searchValue || '').trim(),
-      page: DEFAULT_PAGE
+      keyword,
+      page: DEFAULT_PAGE,
+      foods: []
     })
-    this.loadFoods()
+    this.loadFoods({ page: DEFAULT_PAGE, keyword })
   },
 
   clearSearch() {
+    if (this.data.loading || this.data.loadingMore) return
     this.setData({
       keyword: '',
       searchValue: '',
-      page: DEFAULT_PAGE
+      page: DEFAULT_PAGE,
+      foods: []
     })
-    this.loadFoods()
+    this.loadFoods({ page: DEFAULT_PAGE, keyword: '' })
   },
 
   prevPage() {
     if (this.data.loading || this.data.page <= 1) return
-    this.setData({
-      page: this.data.page - 1
-    })
-    this.loadFoods()
+    const page = this.data.page - 1
+    this.setData({ page, foods: [] })
+    this.loadFoods({ page })
   },
 
   nextPage() {
     if (this.data.loading || this.data.page >= this.data.totalPages) return
-    this.setData({
-      page: this.data.page + 1
+    const page = this.data.page + 1
+    this.setData({ page, foods: [] })
+    this.loadFoods({ page })
+  },
+
+  loadNextPage(append = false) {
+    if (this.data.loading || this.data.loadingMore || this.data.page >= this.data.totalPages) return
+    const page = this.data.page + 1
+    if (!append) {
+      this.setData({ page, foods: [] })
+    }
+    this.loadFoods({ page, append })
+  },
+
+  mergeFoods(currentFoods, incomingFoods) {
+    const seen = {}
+    const merged = []
+    ;(currentFoods || []).concat(incomingFoods || []).forEach(item => {
+      const id = item.id || item.foodId || item.nameCn || item.name
+      if (!id || seen[id]) return
+      seen[id] = true
+      merged.push(item)
     })
-    this.loadFoods()
+    return merged
   },
 
   showCreateForm() {
@@ -385,6 +448,8 @@ Page({
       foods: [],
       total: 0,
       totalPages: 1,
+      hasMore: false,
+      loadingMore: false,
       saving: false,
       updatingFoodId: '',
       error: '无后台权限'

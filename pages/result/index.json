@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "AI 分析结果",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
+}

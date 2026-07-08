@@ -4,6 +4,7 @@
     "pages/home/index",
     "pages/record/index",
     "pages/analyze/index",
+    "pages/result/index",
     "pages/diary/index",
     "pages/meal-detail/index",
     "pages/report/index",

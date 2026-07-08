@@ -1,4 +1,5 @@
 const { calculateHealthScore } = require('../../utils/nutrition')
+const { calculateAiScore } = require('../../services/aiScoreService')
 
 function _num(value, fallback = 0) {
   const n = Number(value)
@@ -13,6 +14,28 @@ function _safeWeight(food) {
 
 function _pickName(food) {
   return String(food.nameCn || food.name || food.foodName || food.title || '').trim()
+}
+
+function _formatConfidence(value) {
+  const confidence = Math.max(0, Math.min(1, _num(value)))
+  return Math.round(confidence * 100) + '%'
+}
+
+function _sourceType(source) {
+  const text = String(source || '').toLowerCase()
+  if (text.indexOf('vision') !== -1) return 'vision'
+  if (text.indexOf('keyword') !== -1) return 'keyword'
+  if (text.indexOf('manual') !== -1) return 'manual'
+  if (text.indexOf('fallback') !== -1) return 'fallback'
+  return text || 'fallback'
+}
+
+function _sourceLabel(source) {
+  const type = _sourceType(source)
+  if (type === 'vision') return '图片识别'
+  if (type === 'keyword') return '食物库/关键词'
+  if (type === 'manual') return '手动确认'
+  return '兜底估算'
 }
 
 function _per100(food, keys, totalValue, weightG) {
@@ -59,6 +82,8 @@ function recalcFoodWeight(food, newWeightG) {
 function normalizeFood(food = {}, index = 0) {
   const weightG = _safeWeight(food) || 100
   const name = _pickName(food)
+  const confidence = _num(food.confidence)
+  const recognitionSource = food.recognitionSource || food.source || ''
   const normalized = {
     ...food,
     uid: food.uid || food.id || food.foodId || `food_${Date.now()}_${index}_${Math.floor(Math.random() * 10000)}`,
@@ -76,12 +101,18 @@ function normalizeFood(food = {}, index = 0) {
     fatG: _r1(_num(food.fatG || food.fat)),
     fiberG: _r1(_num(food.fiberG || food.fiber)),
     matchedKeyword: food.matchedKeyword || '',
-    recognitionSource: food.recognitionSource || food.source || '',
-    confidence: _num(food.confidence),
+    recognitionSource,
+    confidence,
+    confidenceText: _formatConfidence(confidence),
     confidenceLabel: food.confidenceLabel || '',
     weightConfidence: food.weightConfidence || 'user_confirm_required',
     needUserConfirm: food.needUserConfirm !== false,
-    source: food.source || 'analysis_result'
+    source: food.source || 'analysis_result',
+    aiExpanded: false,
+    aiSourceType: _sourceType(recognitionSource),
+    aiSourceLabel: _sourceLabel(recognitionSource),
+    aiNeedReview: confidence < 0.6,
+    aiReasoning: []
   }
 
   normalized._kcalPer100g = _per100(food, ['_kcalPer100g', 'kcalPer100g'], normalized.kcal, weightG)
@@ -94,7 +125,11 @@ function normalizeFood(food = {}, index = 0) {
     normalized._fatPer100g || normalized._fiberPer100g
   )
 
-  return recalcFoodWeight(normalized, weightG)
+  const recalculated = recalcFoodWeight(normalized, weightG)
+  return {
+    ...recalculated,
+    aiReasoning: buildFoodReasoning(recalculated)
+  }
 }
 
 function getRecognitionLabel(source, provider) {
@@ -103,6 +138,122 @@ function getRecognitionLabel(source, provider) {
   if (source === 'keyword_fallback') return '食物库匹配'
   if (source) return source
   return '食物库匹配'
+}
+
+function normalizeCandidate(candidate = {}, index = 0) {
+  const name = _pickName(candidate) || `候选 ${index + 1}`
+  const confidence = _num(candidate.confidence)
+  return {
+    id: candidate.foodId || candidate.id || candidate._id || `${name}_${index}`,
+    name,
+    category: candidate.category || '未分类',
+    source: candidate.recognitionSource || candidate.source || candidate.matchField || '',
+    sourceType: _sourceType(candidate.recognitionSource || candidate.source || candidate.matchField),
+    confidence,
+    confidenceText: confidence ? _formatConfidence(confidence) : '--',
+    matchedKeyword: candidate.matchedKeyword || '',
+    weightG: _safeWeight(candidate),
+    kcalPer100g: _num(candidate.kcalPer100g || candidate.kcal)
+  }
+}
+
+function buildFoodReasoning(food) {
+  const name = _pickName(food) || '该食物'
+  const source = food.recognitionSource || food.source || ''
+  const sourceText = _sourceLabel(source)
+  const keyword = food.matchedKeyword ? `，命中关键词「${food.matchedKeyword}」` : ''
+  const confidence = food.confidence ? _formatConfidence(food.confidence) : '暂无'
+  const review = food.aiNeedReview || food.needUserConfirm ? '需要用户确认食物名称和克数。' : '当前置信度较稳定，保存前仍建议确认克数。'
+  return [
+    `系统先读取图片和备注信息，再进入食物库候选匹配。`,
+    `${name} 来自${sourceText}${keyword}，模型置信度 ${confidence}。`,
+    `营养值按食物库每 100g 数据和当前克数 ${_safeWeight(food)}g 估算。`,
+    review
+  ]
+}
+
+function buildAiExplanation(source) {
+  const label = _sourceLabel(source)
+  return `系统根据食物库匹配 + 图片识别综合判断。本次主要由${label}给出候选食物，再结合营养库数据估算热量和三大营养素。`
+}
+
+function buildAiResultPanel(params) {
+  const {
+    recognitionSource,
+    confidence,
+    candidates,
+    detectedFoods,
+    modelProvider,
+    modelVersion,
+    needReview,
+    warnings,
+    visionResult
+  } = params
+  const normalizedCandidates = (candidates || []).map(normalizeCandidate)
+  const keywordHits = normalizedCandidates
+    .filter(candidate => candidate.matchedKeyword)
+    .map(candidate => candidate.matchedKeyword)
+  const candidateNames = normalizedCandidates
+    .slice(0, 4)
+    .map(candidate => candidate.name)
+    .join('、')
+  const detectedFoodNames = (detectedFoods || []).map(food => ({
+    id: food.uid || food.foodId || food.nameCn,
+    name: food.nameCn || food.name || food.foodName || '未命名食物',
+    confidenceText: food.confidenceText || _formatConfidence(food.confidence),
+    source: food.aiSourceLabel || _sourceLabel(food.recognitionSource || food.source)
+  }))
+  const confidenceValue = _num(confidence)
+  const aiNeedReview = Boolean(needReview || confidenceValue < 0.6)
+  return {
+    recognitionSource: recognitionSource || 'fallback',
+    sourceType: _sourceType(recognitionSource),
+    sourceLabel: _sourceLabel(recognitionSource),
+    confidence: confidenceValue,
+    confidenceText: _formatConfidence(confidenceValue),
+    candidates: normalizedCandidates,
+    detectedFoods: detectedFoodNames,
+    modelProvider: modelProvider || (visionResult && visionResult.modelProvider) || 'local',
+    modelVersion: modelVersion || (visionResult && visionResult.modelVersion) || '',
+    needReview: aiNeedReview,
+    warnings: warnings || [],
+    explanation: buildAiExplanation(recognitionSource),
+    processSteps: [
+      {
+        title: 'keyword匹配',
+        text: keywordHits.length
+          ? `从备注或识别文本中命中关键词：${keywordHits.slice(0, 4).join('、')}。`
+          : '未命中明确关键词时，继续使用图片占位结果或默认候选进入下一步。'
+      },
+      {
+        title: 'food_items匹配',
+        text: candidateNames
+          ? `在 food_items 中匹配到候选：${candidateNames}，再按置信度和营养字段排序。`
+          : '当前没有稳定候选，营养值会优先来自用户手动确认或兜底估算。'
+      },
+      {
+        title: 'fallback逻辑',
+        text: aiNeedReview
+          ? '当置信度不足 0.6、图片识别不可用或营养字段不完整时，系统保留 keyword fallback 并标记需人工确认。'
+          : '识别结果达到展示阈值，仍保留 fallback 和人工确认入口，避免直接写入不可靠结果。'
+      }
+    ],
+    reasoningChain: [
+      '读取餐食图片、餐次和备注文本。',
+      '用图片识别结果和备注关键词生成候选食物。',
+      '在 food_items 食物库中匹配中文名、别名、分类和营养字段。',
+      '按候选置信度、默认克数和每 100g 营养值生成 detectedFoods。',
+      aiNeedReview ? '置信度低于阈值或存在不确定信息，标记为需人工确认。' : '置信度达到展示阈值，仍保留用户确认入口。'
+    ]
+  }
+}
+
+function buildMealAiScore(total, mealType) {
+  return calculateAiScore({
+    totals: total || {},
+    mealType: mealType || 'lunch',
+    scope: 'meal'
+  })
 }
 
 Page({
@@ -130,6 +281,9 @@ Page({
     confidencePercent: 0,
     needReview: false,
     visionResult: null,
+    aiResultPanel: buildAiResultPanel({}),
+    aiScore: buildMealAiScore({}, 'lunch'),
+    aiProcessExpanded: false,
     showSearch: false,
     searchKeyword: '',
     searchResults: [],
@@ -175,6 +329,22 @@ Page({
         const confidence = _num(meal.confidence)
         const recognitionSource = meal.recognitionSource || 'manual_edit'
         const modelProvider = meal.modelProvider || ''
+        const modelVersion = meal.modelVersion || meal.analysisVersion || ''
+        const candidates = meal.candidates || []
+        const warnings = meal.warnings || []
+        const visionResult = meal.visionResult || null
+        const aiResultPanel = buildAiResultPanel({
+          recognitionSource,
+          confidence,
+          candidates,
+          detectedFoods,
+          modelProvider,
+          modelVersion,
+          needReview: Boolean(meal.needReview),
+          warnings,
+          visionResult
+        })
+        const aiScore = buildMealAiScore(total, meal.mealType || 'lunch')
 
         this.setData({
           loading: false,
@@ -187,18 +357,44 @@ Page({
           note: meal.note || '',
           analysisId: meal.analysisId || '',
           detectedFoods,
-          candidates: meal.candidates || [],
+          candidates,
           total,
-          warnings: [],
+          warnings,
           aiAdvice: meal.suggestion || meal.aiAdvice || '',
           recognitionSource,
           recognitionLabel: getRecognitionLabel(recognitionSource, modelProvider),
           modelProvider,
-          modelVersion: meal.modelVersion || meal.analysisVersion || '',
+          modelVersion,
           confidence,
           confidencePercent: Math.round(confidence * 100),
           needReview: Boolean(meal.needReview),
-          visionResult: meal.visionResult || null
+          visionResult,
+          aiResultPanel,
+          aiScore
+        })
+        this._openResultPage({
+          mode: 'edit',
+          recordId,
+          recordDate: meal.date || date,
+          recordTime: meal.time || '',
+          imageUrl: meal.imageFileID || meal.imageUrl || '',
+          mealType: meal.mealType || 'lunch',
+          note: meal.note || '',
+          analysisId: meal.analysisId || '',
+          detectedFoods,
+          candidates,
+          total,
+          warnings,
+          aiAdvice: meal.suggestion || meal.aiAdvice || '',
+          recognitionSource,
+          recognitionLabel: getRecognitionLabel(recognitionSource, modelProvider),
+          modelProvider,
+          modelVersion,
+          confidence,
+          needReview: Boolean(meal.needReview),
+          visionResult,
+          aiResultPanel,
+          aiScore
         })
       })
       .catch(() => {
@@ -222,24 +418,64 @@ Page({
         const confidence = _num(result.confidence)
         const recognitionSource = result.recognitionSource || (result.visionResult && result.visionResult.recognitionSource) || 'keyword_fallback'
         const modelProvider = result.modelProvider || (result.visionResult && result.visionResult.modelProvider) || ''
+        const modelVersion = result.modelVersion || (result.visionResult && result.visionResult.modelVersion) || ''
+        const candidates = result.candidates || []
+        const warnings = result.warnings || []
+        const visionResult = result.visionResult || null
+        const needReview = Boolean(result.needReview)
+        const aiResultPanel = buildAiResultPanel({
+          recognitionSource,
+          confidence,
+          candidates,
+          detectedFoods,
+          modelProvider,
+          modelVersion,
+          needReview,
+          warnings,
+          visionResult
+        })
+        const aiScore = buildMealAiScore(total, mealType)
 
         this.setData({
           loading: false,
           analysisId: result.analysisId || '',
           imageUrl: result.imageUrl || imageFileID,
           detectedFoods,
-          candidates: result.candidates || [],
+          candidates,
           total,
-          warnings: result.warnings || [],
+          warnings,
           aiAdvice: result.aiAdvice || '',
           recognitionSource,
           recognitionLabel: getRecognitionLabel(recognitionSource, modelProvider),
           modelProvider,
-          modelVersion: result.modelVersion || (result.visionResult && result.visionResult.modelVersion) || '',
+          modelVersion,
           confidence,
           confidencePercent: Math.round(confidence * 100),
-          needReview: Boolean(result.needReview),
-          visionResult: result.visionResult || null
+          needReview,
+          visionResult,
+          aiResultPanel,
+          aiScore
+        })
+        this._openResultPage({
+          mode: 'create',
+          imageUrl: result.imageUrl || imageFileID,
+          mealType,
+          note,
+          analysisId: result.analysisId || '',
+          detectedFoods,
+          candidates,
+          total,
+          warnings,
+          aiAdvice: result.aiAdvice || '',
+          recognitionSource,
+          recognitionLabel: getRecognitionLabel(recognitionSource, modelProvider),
+          modelProvider,
+          modelVersion,
+          confidence,
+          needReview,
+          visionResult,
+          aiResultPanel,
+          aiScore
         })
       })
       .catch(() => {
@@ -259,7 +495,46 @@ Page({
   },
 
   _refreshTotals(detectedFoods) {
-    this.setData({ detectedFoods, total: _calcTotals(detectedFoods) })
+    const foods = detectedFoods.map(food => ({
+      ...food,
+      aiReasoning: buildFoodReasoning(food)
+    }))
+    const total = _calcTotals(foods)
+    this.setData({
+      detectedFoods: foods,
+      total,
+      aiResultPanel: this._buildAiPanel({ detectedFoods: foods }),
+      aiScore: buildMealAiScore(total, this.data.mealType)
+    })
+  },
+
+  _buildAiPanel(overrides = {}) {
+    return buildAiResultPanel({
+      recognitionSource: this.data.recognitionSource,
+      confidence: this.data.confidence,
+      candidates: this.data.candidates,
+      detectedFoods: this.data.detectedFoods,
+      modelProvider: this.data.modelProvider,
+      modelVersion: this.data.modelVersion,
+      needReview: this.data.needReview,
+      warnings: this.data.warnings,
+      visionResult: this.data.visionResult,
+      ...overrides
+    })
+  },
+
+  _openResultPage(payload) {
+    const app = getApp()
+    app.globalData.pendingAiResult = {
+      ...payload,
+      createdAt: Date.now()
+    }
+    wx.redirectTo({
+      url: '/pages/result/index',
+      fail: () => {
+        this.setData({ loading: false })
+      }
+    })
   },
 
   deleteFood(e) {
@@ -283,7 +558,8 @@ Page({
     const value = e.detail.value
     const detectedFoods = this.data.detectedFoods.map(f => {
       if (f.uid !== uid) return f
-      return recalcFoodWeight(f, value)
+      const next = recalcFoodWeight(f, value)
+      return { ...next, aiReasoning: buildFoodReasoning(next) }
     })
     this._refreshTotals(detectedFoods)
   },
@@ -293,9 +569,27 @@ Page({
     const name = String(e.detail.value || '').trim()
     const detectedFoods = this.data.detectedFoods.map(f => {
       if (f.uid !== uid) return f
-      return { ...f, nameCn: name, name, foodName: name }
+      const next = { ...f, nameCn: name, name, foodName: name }
+      return { ...next, aiReasoning: buildFoodReasoning(next) }
+    })
+    this.setData({
+      detectedFoods,
+      aiResultPanel: this._buildAiPanel({ detectedFoods })
+    })
+  },
+
+  toggleFoodAi(e) {
+    const uid = e.currentTarget.dataset.uid
+    const detectedFoods = this.data.detectedFoods.map(f => {
+      if (f.uid !== uid) return f
+      const next = { ...f, aiExpanded: !f.aiExpanded }
+      return { ...next, aiReasoning: buildFoodReasoning(next) }
     })
     this.setData({ detectedFoods })
+  },
+
+  toggleAiProcess() {
+    this.setData({ aiProcessExpanded: !this.data.aiProcessExpanded })
   },
 
   addManualFood() {
@@ -409,9 +703,8 @@ Page({
       _fiberPer100g: food.fiberPer100g
     }, this.data.detectedFoods.length)
     const detectedFoods = [...this.data.detectedFoods, newItem]
+    this._refreshTotals(detectedFoods)
     this.setData({
-      detectedFoods,
-      total: _calcTotals(detectedFoods),
       showSearch: false,
       searchKeyword: '',
       searchResults: [],

@@ -10,18 +10,23 @@
       <view class="page-title">{{title}}</view>
       <view class="page-subtitle">{{desc}}</view>
     </view>
-    <button class="refresh-button" bindtap="refreshConfig" disabled="{{loading}}">
-      {{loading ? '加载中' : '刷新'}}
-    </button>
+    <view class="header-actions">
+      <button class="refresh-button" bindtap="refreshConfig" disabled="{{loading || saving}}">
+        {{loading ? '加载中' : '刷新'}}
+      </button>
+      <button class="save-button" bindtap="saveConfig" disabled="{{loading || saving}}">
+        {{saving ? '保存中' : '保存'}}
+      </button>
+    </view>
   </view>
 
   <view class="section-card config-summary">
-    <view class="summary-label">配置记录</view>
+    <view class="summary-label">配置项</view>
     <view class="summary-value-row">
-      <text class="summary-value">{{records.length}}</text>
-      <text class="summary-unit">条</text>
+      <text class="summary-value">{{configFieldCount}}</text>
+      <text class="summary-unit">项</text>
     </view>
-    <view class="summary-desc">更新时间：{{updatedAt}}</view>
+    <view class="summary-desc">云端记录 {{records.length}} 条，更新时间：{{updatedAt}}</view>
   </view>
 
   <view wx:if="{{loading}}" class="section-card state-card">
@@ -35,26 +40,62 @@
     <button class="retry-button" bindtap="refreshConfig">重试</button>
   </view>
 
-  <view wx:elif="{{records.length === 0}}" class="section-card state-card">
-    <view class="state-title">暂无系统配置</view>
-    <view class="state-desc">app_config 集合暂时没有 default 配置记录，页面先展示默认空态。</view>
-  </view>
-
   <view wx:else>
-    <view class="section-card config-card">
-      <view class="card-title">基础配置</view>
-      <view class="config-list">
-        <block wx:for="{{configItems}}" wx:key="key">
-          <view class="config-row">
-            <text class="config-label">{{item.label}}</text>
-            <text class="config-value">{{item.value}}</text>
-          </view>
-        </block>
+    <view class="section-card config-tools">
+      <view>
+        <view class="tools-title">当前配置</view>
+        <view class="tools-desc">修改后点击保存写入 app_config.default。</view>
       </view>
+      <button class="reset-button" bindtap="resetDefaultConfig" disabled="{{saving}}">恢复默认</button>
     </view>
 
+    <block wx:for="{{sections}}" wx:key="title">
+      <view class="section-card config-section">
+        <view class="card-title">{{item.title}}</view>
+        <view class="card-desc">{{item.desc}}</view>
+
+        <view class="field-list">
+          <block wx:for="{{item.fields}}" wx:key="key" wx:for-item="field">
+            <view class="config-field {{field.isTextarea ? 'textarea-field' : ''}}">
+              <view class="field-main">
+                <text class="config-label">{{field.label}}</text>
+                <text wx:if="{{field.unit}}" class="config-unit">{{field.unit}}</text>
+              </view>
+
+              <switch
+                wx:if="{{field.isSwitch}}"
+                checked="{{field.value}}"
+                color="#8B6CFF"
+                data-key="{{field.key}}"
+                bindchange="onSwitchChange"
+              />
+
+              <textarea
+                wx:elif="{{field.isTextarea}}"
+                class="config-textarea"
+                value="{{field.value}}"
+                data-key="{{field.key}}"
+                bindinput="onFieldInput"
+                maxlength="240"
+                auto-height
+              />
+
+              <input
+                wx:else
+                class="config-input"
+                type="{{field.inputType}}"
+                value="{{field.value}}"
+                data-key="{{field.key}}"
+                bindinput="onFieldInput"
+              />
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+
     <view class="section-card raw-card">
-      <view class="card-title">原始配置 JSON</view>
+      <view class="card-title">即将保存的 JSON</view>
       <text class="raw-json">{{rawPreview}}</text>
     </view>
   </view>

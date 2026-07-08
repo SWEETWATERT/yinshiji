@@ -1,0 +1,96 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
+
+<view class="page page-container result-page">
+  <brand-header></brand-header>
+
+  <view wx:if="{{missing}}" class="state-card section-card">
+    <view class="state-title">暂无AI分析结果</view>
+    <view class="state-text">请从首页点击“开始AI饮食分析”。</view>
+    <button class="secondary-action" bindtap="goHome">返回首页</button>
+  </view>
+
+  <block wx:else>
+    <view class="result-hero section-card">
+      <view class="result-head">
+        <view>
+          <view class="result-kicker">AI输出</view>
+          <view class="result-title">本餐分析结果</view>
+        </view>
+        <view class="result-grade">{{result.grade}}</view>
+      </view>
+
+      <view class="result-score-row">
+        <text class="result-score">{{result.score}}</text>
+        <text class="result-score-unit">分</text>
+      </view>
+      <view class="result-explanation">{{result.explanation}}</view>
+
+      <view class="confidence-row">
+        <text>置信度 {{result.confidencePercent}}%</text>
+        <text>{{result.modelText}}</text>
+      </view>
+    </view>
+
+    <view class="advice-card section-card">
+      <view class="card-title">AI建议</view>
+      <view class="advice-text">{{result.aiAdvice}}</view>
+    </view>
+
+    <view class="summary-card section-card">
+      <view class="summary-head">
+        <view class="card-title">营养结构</view>
+        <view class="kcal-pill">{{result.total.kcal}} kcal</view>
+      </view>
+      <view class="macro-grid">
+        <view class="macro-item">
+          <text class="macro-label">蛋白</text>
+          <text class="macro-value">{{result.total.proteinG}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">碳水</text>
+          <text class="macro-value">{{result.total.carbsG}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">脂肪</text>
+          <text class="macro-value">{{result.total.fatG}}g</text>
+        </view>
+        <view class="macro-item">
+          <text class="macro-label">纤维</text>
+          <text class="macro-value">{{result.total.fiberG}}g</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="foods-card section-card">
+      <view class="card-title">detectedFoods</view>
+      <view wx:if="{{!result.hasFoods}}" class="empty-foods">AI没有识别到具体食物，请返回后补充食物名称或上传餐食照片。</view>
+      <block wx:else>
+        <block wx:for="{{result.detectedFoods}}" wx:key="uid">
+          <view class="food-row">
+            <view class="food-icon">{{item.icon}}</view>
+            <view class="food-copy">
+              <view class="food-name">{{item.nameCn}}</view>
+              <view class="food-meta">{{item.weightG}}g · {{item.kcal}} kcal · 置信度 {{item.confidenceText}}</view>
+            </view>
+          </view>
+        </block>
+      </block>
+    </view>
+
+    <view wx:if="{{result.warnings.length}}" class="warning-card section-card">
+      <view class="card-title">AI提示</view>
+      <block wx:for="{{result.warnings}}" wx:key="*this">
+        <view class="warning-line">{{item}}</view>
+      </block>
+    </view>
+
+    <view class="result-actions">
+      <button class="primary-action" loading="{{saving}}" disabled="{{saving || !result.hasFoods}}" bindtap="saveRecord">
+        {{saving ? '保存中' : '保存记录'}}
+      </button>
+      <button class="secondary-action" bindtap="goHome">返回首页</button>
+    </view>
+  </block>
+</view>

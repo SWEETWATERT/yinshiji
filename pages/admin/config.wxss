@@ -10,8 +10,18 @@
   margin-bottom: 24rpx;
 }
 
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
 .refresh-button,
-.retry-button {
+.retry-button,
+.save-button,
+.reset-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,7 +36,20 @@
   font-weight: 700;
 }
 
-.refresh-button[disabled] {
+.save-button {
+  color: #FFFFFF;
+  background: #8B6CFF;
+}
+
+.reset-button {
+  min-width: 132rpx;
+  color: #807987;
+  background: #FAF8F5;
+}
+
+.refresh-button[disabled],
+.save-button[disabled],
+.reset-button[disabled] {
   opacity: 0.6;
 }
 
@@ -99,10 +122,33 @@
   margin-top: 22rpx;
 }
 
-.config-card,
+.config-tools,
+.config-section,
 .raw-card {
   padding: 26rpx;
   margin-top: 20rpx;
+}
+
+.config-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.tools-title {
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.tools-desc,
+.card-desc {
+  margin-top: 8rpx;
+  color: #807987;
+  font-size: 23rpx;
+  line-height: 1.45;
 }
 
 .card-title {
@@ -112,36 +158,72 @@
   line-height: 1.3;
 }
 
-.config-list {
+.field-list {
   margin-top: 18rpx;
 }
 
-.config-row {
+.config-field {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24rpx;
-  min-height: 70rpx;
-  padding: 12rpx 0;
+  min-height: 82rpx;
+  padding: 14rpx 0;
   border-bottom: 1rpx solid #F0ECE7;
 }
 
-.config-row:last-child {
+.config-field:last-child {
   border-bottom: 0;
 }
 
+.textarea-field {
+  display: block;
+}
+
+.field-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  min-width: 0;
+}
+
 .config-label {
-  flex-shrink: 0;
   color: #807987;
   font-size: 24rpx;
 }
 
-.config-value {
+.config-unit {
+  color: #AEA7B3;
+  font-size: 21rpx;
+}
+
+.config-input {
+  flex: 1;
+  min-width: 220rpx;
+  height: 68rpx;
+  padding: 0 18rpx;
+  border-radius: 16rpx;
   color: #25232A;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
   font-size: 25rpx;
   font-weight: 700;
   text-align: right;
-  word-break: break-all;
+  box-sizing: border-box;
+}
+
+.config-textarea {
+  width: 100%;
+  min-height: 112rpx;
+  margin-top: 14rpx;
+  padding: 18rpx;
+  border-radius: 16rpx;
+  color: #25232A;
+  background: #FAF8F5;
+  border: 1rpx solid #EFE7DE;
+  font-size: 24rpx;
+  line-height: 1.5;
+  box-sizing: border-box;
 }
 
 .raw-json {

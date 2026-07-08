@@ -1,4 +1,5 @@
 .admin-foods-page {
+  opacity: 0.96;
   padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
 }
 
@@ -29,15 +30,15 @@
   height: 60rpx;
   padding: 0 22rpx;
   border-radius: 999rpx;
-  color: #8B6CFF;
-  background: #EEE8FF;
+  color: #6B6570;
+  background: #F5F1ED;
   font-size: 24rpx;
   font-weight: 700;
 }
 
 .add-button {
-  color: #FFFFFF;
-  background: #8B6CFF;
+  color: #25232A;
+  background: #EFE7DE;
 }
 
 .refresh-button[disabled] {
@@ -45,8 +46,9 @@
 }
 
 .foods-summary {
-  padding: 26rpx;
+  padding: 20rpx 22rpx;
   margin-bottom: 20rpx;
+  background: #FFFEFC;
 }
 
 .search-card {
@@ -82,8 +84,8 @@
   height: 72rpx;
   padding: 0 24rpx;
   border-radius: 18rpx;
-  color: #8B6CFF;
-  background: #EEE8FF;
+  color: #6B6570;
+  background: #F5F1ED;
   font-size: 25rpx;
   font-weight: 700;
 }
@@ -232,7 +234,7 @@
 
 .summary-value {
   color: #25232A;
-  font-size: 56rpx;
+  font-size: 40rpx;
   font-weight: 800;
   line-height: 1;
 }
@@ -288,8 +290,37 @@
   gap: 18rpx;
 }
 
+.inline-error-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  padding: 22rpx;
+  color: #B84A62;
+  background: #FFF8FA;
+  border-color: #F0D6DC;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.inline-retry-button {
+  width: 128rpx;
+  height: 56rpx;
+  margin-top: 0;
+}
+
 .food-card {
-  padding: 26rpx;
+  padding: 22rpx;
+  box-shadow: none;
+}
+
+.food-card-enabled {
+  border-color: #E3EEDB;
+}
+
+.food-card-disabled {
+  border-color: #EFE0E0;
+  background: #FFFCFC;
 }
 
 .food-card-head {
@@ -318,9 +349,16 @@
 
 .food-name {
   color: #25232A;
-  font-size: 30rpx;
+  font-size: 27rpx;
   font-weight: 700;
   line-height: 1.3;
+}
+
+.food-secondary-name {
+  margin-top: 6rpx;
+  color: #6B6570;
+  font-size: 23rpx;
+  line-height: 1.35;
 }
 
 .food-category {
@@ -334,10 +372,18 @@
   flex-shrink: 0;
   padding: 8rpx 16rpx;
   border-radius: 999rpx;
-  color: #6E8C50;
-  background: #EEF6E9;
   font-size: 22rpx;
   font-weight: 700;
+}
+
+.status-enabled {
+  color: #2F7D4B;
+  background: #E9F6EE;
+}
+
+.status-disabled {
+  color: #B84A62;
+  background: #FFF0F4;
 }
 
 .kcal-row {
@@ -353,7 +399,7 @@
 .kcal-value {
   margin-top: 8rpx;
   color: #25232A;
-  font-size: 42rpx;
+  font-size: 32rpx;
   font-weight: 800;
   line-height: 1;
 }
@@ -366,7 +412,7 @@
 }
 
 .nutrition-item {
-  min-height: 88rpx;
+  min-height: 78rpx;
   padding: 16rpx 12rpx;
   border-radius: 18rpx;
   background: #FAF8F5;
@@ -474,5 +520,21 @@
   color: #807987;
   font-size: 25rpx;
   font-weight: 700;
+  text-align: center;
+}
+
+.pager-subtext {
+  margin-top: 6rpx;
+  color: #9A929F;
+  font-size: 21rpx;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.load-more-row {
+  padding: 24rpx 0 4rpx;
+  color: #9A929F;
+  font-size: 23rpx;
+  line-height: 1.4;
   text-align: center;
 }

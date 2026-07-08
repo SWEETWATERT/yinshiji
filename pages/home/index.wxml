@@ -1,175 +1,80 @@
 <view class="page-bg-layer">
   <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.10;"></image>
 </view>
-<view class="page page-container home-page">
+<view class="page page-container home-page ai-home-page">
 
-  <!-- Brand Header -->
   <brand-header></brand-header>
 
-  <!-- Header -->
-  <view class="home-header">
+  <view class="home-header ai-home-header">
     <view>
-      <view class="page-title">今日饮食</view>
-      <view class="page-subtitle">{{todayText}} · 拍一餐，自动估算热量和营养</view>
+      <view class="page-title">AI今日分析中心</view>
+      <view class="page-subtitle">{{todayText}} · AI正在分析你的饮食状态</view>
     </view>
     <button class="report-btn" bindtap="goReport">周报</button>
   </view>
 
-  <!-- Today Intake -->
-  <view class="intake-card section-card">
-    <view class="intake-head">
-      <text class="section-title">今日摄入</text>
-      <text class="intake-tag">{{caloriePercent}}%</text>
-    </view>
-    <view class="calorie-row">
-      <text class="calorie-big">{{totals.kcal}}</text>
-      <text class="calorie-sep"> / {{target}} kcal</text>
-    </view>
-    <view class="progress-bar">
-      <view class="progress-inner" style="width: {{caloriePercent}}%;"></view>
-    </view>
-    <text class="remain-txt">还可摄入 {{remainingCalories}} kcal</text>
-  </view>
-
-  <view wx:if="{{weightProgress.visible}}" class="weight-progress-mini section-card" bindtap="goProgress">
-    <view>
-      <view class="weight-progress-label">减脂进度</view>
-      <view class="weight-progress-text">{{weightProgress.text}}</view>
-    </view>
-    <view class="weight-progress-link">记录体重</view>
-  </view>
-
-  <!-- First Use Guide -->
-  <view wx:if="{{!hasMeals}}" class="guide-card section-card" bindtap="goRecord">
-    <view class="guide-mark">1</view>
-    <view class="guide-copy">
-      <view class="guide-title">从记录第一餐开始</view>
-      <view class="guide-desc">拍照上传餐食，确认识别结果后，首页会生成今日摄入和健康评分。</view>
-    </view>
-    <text class="guide-action">去记录</text>
-  </view>
-
-  <!-- Record Entry -->
-  <view class="record-entry section-card" bindtap="goRecord">
-    <view class="rec-icon-box">
-      <text class="rec-icon-char">拍</text>
-    </view>
-    <view class="rec-text">
-      <view class="rec-title">拍照记录这一餐</view>
-      <view class="rec-sub">拍清楚食物和份量，识别会更准</view>
-    </view>
-    <text class="rec-arrow">›</text>
-  </view>
-
-  <!-- Nutrition Grid 2x2 -->
-  <view class="module-title">营养结构</view>
-  <view class="nutri-grid">
-
-    <view class="nutri-card section-card">
-      <view class="nutri-hd">
-        <view class="ndot ndot-purple"></view>
-        <text class="nutri-name">蛋白质</text>
+  <view class="ai-center-card section-card {{!hasMeals ? 'ai-center-empty' : ''}}">
+    <view class="ai-center-head">
+      <view>
+        <view class="ai-center-kicker">AI结论优先</view>
+        <view class="ai-center-title">今日饮食判断</view>
       </view>
-      <view class="nutri-num-row">
-        <text class="nutri-big">{{totals.protein}}</text>
-        <text class="nutri-g">g</text>
-      </view>
-      <text class="nutri-goal">目标 90g</text>
-      <view class="nutri-bar">
-        <view class="nbar-fill nbar-purple" style="width: {{proteinPercent}}%;"></view>
+      <view class="ai-center-grade">{{aiCenter.grade}}</view>
+    </view>
+
+    <view class="ai-score-hero">
+      <text class="ai-score-main-num">{{aiCenter.score}}</text>
+      <text class="ai-score-main-unit">分</text>
+    </view>
+    <view class="ai-center-evaluation">{{aiCenter.evaluation}}</view>
+
+    <view class="ai-center-section">
+      <view class="ai-center-section-title">今日营养问题</view>
+      <view class="ai-center-issue-list">
+        <block wx:for="{{aiCenter.issues}}" wx:key="*this">
+          <view class="ai-center-issue">{{item}}</view>
+        </block>
       </view>
     </view>
 
-    <view class="nutri-card section-card">
-      <view class="nutri-hd">
-        <view class="ndot ndot-amber"></view>
-        <text class="nutri-name">碳水</text>
-      </view>
-      <view class="nutri-num-row">
-        <text class="nutri-big">{{totals.carbs}}</text>
-        <text class="nutri-g">g</text>
-      </view>
-      <text class="nutri-goal">目标 250g</text>
-      <view class="nutri-bar">
-        <view class="nbar-fill nbar-amber" style="width: {{carbsPercent}}%;"></view>
-      </view>
-    </view>
-
-    <view class="nutri-card section-card">
-      <view class="nutri-hd">
-        <view class="ndot ndot-green"></view>
-        <text class="nutri-name">脂肪</text>
-      </view>
-      <view class="nutri-num-row">
-        <text class="nutri-big">{{totals.fat}}</text>
-        <text class="nutri-g">g</text>
-      </view>
-      <text class="nutri-goal">目标 65g</text>
-      <view class="nutri-bar">
-        <view class="nbar-fill nbar-green" style="width: {{fatPercent}}%;"></view>
-      </view>
-    </view>
-
-    <view class="nutri-card section-card">
-      <view class="nutri-hd">
-        <view class="ndot ndot-teal"></view>
-        <text class="nutri-name">纤维</text>
-      </view>
-      <view class="nutri-num-row">
-        <text class="nutri-big">{{totals.fiber}}</text>
-        <text class="nutri-g">g</text>
-      </view>
-      <text class="nutri-goal">目标 25g</text>
-      <view class="nutri-bar">
-        <view class="nbar-fill nbar-teal" style="width: {{fiberPercent}}%;"></view>
-      </view>
-    </view>
-
-  </view>
-
-  <!-- Today Meals -->
-  <view class="module-title">今日餐次</view>
-  <view class="meal-grid">
-    <block wx:for="{{mealCards}}" wx:key="type">
-      <view class="meal-card section-card" bindtap="goRecord">
-        <view class="meal-accent tone-{{item.tone}}"></view>
-        <view class="meal-body">
-          <text class="meal-emoji-lg">{{item.image}}</text>
-          <view class="meal-name-lg">{{item.name}}</view>
-          <view class="meal-kcal-row">
-            <text class="meal-kcal-big {{item.recorded ? '' : 'kcal-dim'}}">
-              {{item.recorded ? item.kcal : '—'}}
-            </text>
-            <text wx:if="{{item.recorded}}" class="meal-kcal-u"> kcal</text>
-          </view>
-          <view class="meal-status-tag {{item.recorded ? 'tag-done' : 'tag-todo'}}">
-            {{item.recorded ? '已记录' : '点这里补记'}}
-          </view>
-        </view>
-      </view>
-    </block>
-  </view>
-
-  <!-- Health Score Hero -->
-  <view class="hero-card {{hasMeals ? '' : 'hero-card-empty'}}">
-    <view class="hero-inner">
-      <text class="hero-label">今日健康评分</text>
-      <block wx:if="{{hasMeals}}">
-        <view class="hero-score-row">
-          <text class="hero-score">{{healthScore}}</text>
-          <text class="hero-unit">分</text>
-        </view>
-        <text class="hero-praise">这一天吃得不错，继续保持</text>
-        <view class="hero-divider"></view>
-        <view class="hero-stat-row">
-          <text class="hero-stat-label">热量完成度</text>
-          <text class="hero-stat-val">{{caloriePercent}}%</text>
-        </view>
+    <view class="ai-center-section">
+      <view class="ai-center-section-title">AI建议</view>
+      <block wx:for="{{aiCenter.advice}}" wx:key="*this">
+        <view class="ai-center-advice">{{item}}</view>
       </block>
-      <block wx:else>
-        <view class="hero-empty-title">暂无评分</view>
-        <text class="hero-praise">记录一餐后，会自动生成今日评分和建议</text>
-      </block>
+      <view wx:if="{{aiCenter.advice.length === 0}}" class="ai-center-advice">先记录一餐，AI会给出下一餐建议。</view>
+    </view>
+
+    <view class="ai-center-nutrition">
+      <view class="ai-center-nutrition-item">
+        <text class="ai-center-nutrition-label">kcal</text>
+        <text class="ai-center-nutrition-value">{{aiCenter.kcal}}</text>
+      </view>
+      <view class="ai-center-nutrition-item">
+        <text class="ai-center-nutrition-label">蛋白</text>
+        <text class="ai-center-nutrition-value">{{aiCenter.protein}}g</text>
+      </view>
+      <view class="ai-center-nutrition-item">
+        <text class="ai-center-nutrition-label">碳水</text>
+        <text class="ai-center-nutrition-value">{{aiCenter.carbs}}g</text>
+      </view>
+      <view class="ai-center-nutrition-item">
+        <text class="ai-center-nutrition-label">脂肪</text>
+        <text class="ai-center-nutrition-value">{{aiCenter.fat}}g</text>
+      </view>
+    </view>
+
+    <view class="ai-center-footer">
+      <view class="ai-center-streak">{{streak.todayCheckedIn ? '今日已打卡' : '今日待打卡'}} · 连续 {{streak.consecutiveDays}} 天</view>
+      <button class="ai-center-action" bindtap="goAnalyze">开始AI饮食分析</button>
+    </view>
+
+    <view wx:if="{{weightProgress.visible}}" class="weight-progress-mini" bindtap="goProgress">
+      <view>
+        <view class="weight-progress-label">减脂进度</view>
+        <view class="weight-progress-text">{{weightProgress.text}}</view>
+      </view>
+      <view class="weight-progress-link">记录体重</view>
     </view>
   </view>
 
