@@ -127,6 +127,39 @@
   margin-bottom: 24rpx;
 }
 
+.weight-progress-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 24rpx;
+  border-color: #DFEEE5;
+  background: #FBFDFC;
+}
+
+.weight-progress-label {
+  color: #256850;
+  font-size: 22rpx;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.weight-progress-text {
+  margin-top: 6rpx;
+  color: #25232A;
+  font-size: 25rpx;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.weight-progress-link {
+  flex: 0 0 auto;
+  color: #8B6CFF;
+  font-size: 23rpx;
+  font-weight: 900;
+}
+
 /* ── First Use Guide ── */
 .guide-card {
   display: flex;

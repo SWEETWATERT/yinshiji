@@ -9,6 +9,7 @@
     "pages/report/index",
     "pages/profile/index",
     "pages/goal/index",
+    "pages/progress/index",
     "pages/onboarding/index",
     "pages/admin/index",
     "pages/admin/users",

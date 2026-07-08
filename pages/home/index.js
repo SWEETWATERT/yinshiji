@@ -1,4 +1,6 @@
 const { calculateHealthScore, calculateTotals } = require('../../utils/nutrition')
+const { loadUserGoal } = require('../../services/goalService')
+const { calculateProgress, getLatestWeight } = require('../../services/weightService')
 
 const MEAL_META = [
   { type: 'breakfast', name: '早餐', image: '🥣', tone: 'pink' },
@@ -8,6 +10,17 @@ const MEAL_META = [
 ]
 
 const EMPTY_TOTALS = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+
+function buildEmptyWeightProgress() {
+  return {
+    loading: false,
+    visible: false,
+    text: '',
+    remainingKgText: '0.0',
+    currentWeightText: '--',
+    targetWeightText: '--'
+  }
+}
 
 function normalizeMealType(mealType) {
   const typeMap = {
@@ -95,6 +108,7 @@ Page({
     carbsPercent: 0,
     fatPercent: 0,
     fiberPercent: 0,
+    weightProgress: buildEmptyWeightProgress(),
     mealCards: MEAL_META.map(m => ({
       ...m, recorded: false, kcal: 0
     }))
@@ -161,6 +175,7 @@ Page({
           caloriePercent: calPct, proteinPercent: protPct,
           carbsPercent: carbPct, fatPercent: fatPct, fiberPercent: fiberPct, mealCards
         })
+        this.loadWeightProgress()
       })
       .catch(() => {
         this.setData({
@@ -173,6 +188,7 @@ Page({
           carbsPercent: 0,
           fatPercent: 0,
           fiberPercent: 0,
+          weightProgress: buildEmptyWeightProgress(),
           mealCards: MEAL_META.map(m => ({
             ...m, recorded: false, kcal: 0, imageUrl: ''
           }))
@@ -180,8 +196,53 @@ Page({
       })
   },
 
+  loadWeightProgress() {
+    const user = getApp().globalData.user || {}
+    const userId = user._id || user.userId || user.openid || user._openid || ''
+    if (!userId) {
+      this.setData({ weightProgress: buildEmptyWeightProgress() })
+      return
+    }
+
+    this.setData({
+      weightProgress: {
+        ...this.data.weightProgress,
+        loading: true
+      }
+    })
+
+    Promise.all([
+      loadUserGoal(userId),
+      getLatestWeight(userId)
+    ])
+      .then(([goal, latestWeight]) => {
+        if (!goal || !goal.targetWeight) {
+          this.setData({ weightProgress: buildEmptyWeightProgress() })
+          return
+        }
+        const progress = calculateProgress(goal, latestWeight)
+        this.setData({
+          weightProgress: {
+            loading: false,
+            visible: true,
+            text: `距离目标还差 ${progress.remainingKgText} kg`,
+            remainingKgText: progress.remainingKgText,
+            currentWeightText: progress.currentWeightText,
+            targetWeightText: progress.targetWeightText
+          }
+        })
+      })
+      .catch(() => {
+        this.setData({ weightProgress: buildEmptyWeightProgress() })
+      })
+  },
+
   goRecord() {
     wx.switchTab({ url: '/pages/record/index' })
+  },
+
+  goProgress() {
+    wx.navigateTo({ url: '/pages/progress/index' })
   },
 
   goReport() {

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "减脂进度",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
+}

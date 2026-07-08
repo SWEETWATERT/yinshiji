@@ -31,6 +31,14 @@
     <text class="remain-txt">还可摄入 {{remainingCalories}} kcal</text>
   </view>
 
+  <view wx:if="{{weightProgress.visible}}" class="weight-progress-mini section-card" bindtap="goProgress">
+    <view>
+      <view class="weight-progress-label">减脂进度</view>
+      <view class="weight-progress-text">{{weightProgress.text}}</view>
+    </view>
+    <view class="weight-progress-link">记录体重</view>
+  </view>
+
   <!-- First Use Guide -->
   <view wx:if="{{!hasMeals}}" class="guide-card section-card" bindtap="goRecord">
     <view class="guide-mark">1</view>

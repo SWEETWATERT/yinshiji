@@ -1,0 +1,117 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
+
+<view class="page page-container progress-page">
+  <brand-header></brand-header>
+
+  <view class="progress-header">
+    <view>
+      <view class="page-title">减脂进度</view>
+      <view class="page-subtitle">记录体重，查看距离目标还差多少</view>
+    </view>
+    <button class="refresh-button" bindtap="refreshProgress" disabled="{{loading || saving}}">
+      {{loading ? '读取中' : '刷新'}}
+    </button>
+  </view>
+
+  <view wx:if="{{loading}}" class="progress-card section-card state-card">
+    <view class="state-title">正在读取进度</view>
+    <view class="state-text">同步你的减脂目标和最近体重记录。</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="progress-card section-card state-card error-card">
+    <view class="state-title">{{error}}</view>
+    <view class="state-text">请确认云数据库集合 weight_records 已创建。</view>
+    <button class="retry-button" bindtap="refreshProgress">重试</button>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{!hasGoal}}" class="progress-card section-card state-card">
+      <view class="state-title">还没有减脂目标</view>
+      <view class="state-text">先设置当前体重、目标体重和周期，系统会用目标计算进度。</view>
+      <button class="primary-mini-button" bindtap="goGoal">设置减脂目标</button>
+    </view>
+
+    <block wx:else>
+      <view class="progress-hero section-card">
+        <view class="hero-head">
+          <view>
+            <view class="hero-label">当前体重</view>
+            <view class="hero-weight">{{progress.currentWeightText}} kg</view>
+          </view>
+          <view class="hero-target">目标 {{progress.targetWeightText}} kg</view>
+        </view>
+
+        <view class="progress-track">
+          <view class="progress-fill" style="width: {{progress.progressPercent}}%;"></view>
+        </view>
+
+        <view class="metric-grid">
+          <view class="metric-item">
+            <text class="metric-label">距离目标</text>
+            <text class="metric-value">{{progress.remainingKgText}} kg</text>
+          </view>
+          <view class="metric-item">
+            <text class="metric-label">已减重</text>
+            <text class="metric-value">{{progress.lostKgText}} kg</text>
+          </view>
+          <view class="metric-item">
+            <text class="metric-label">完成度</text>
+            <text class="metric-value">{{progress.progressPercent}}%</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="progress-card section-card">
+        <view class="card-title">新增今日体重</view>
+        <view class="input-row">
+          <input
+            class="weight-input"
+            type="digit"
+            value="{{weightInput}}"
+            bindinput="onWeightInput"
+            placeholder="输入今日体重"
+          />
+          <text class="input-unit">kg</text>
+        </view>
+        <textarea
+          class="note-input"
+          value="{{noteInput}}"
+          bindinput="onNoteInput"
+          maxlength="80"
+          placeholder="备注，可选"
+          auto-height
+        />
+        <button class="save-button" loading="{{saving}}" disabled="{{saving}}" bindtap="saveTodayWeight">
+          {{saving ? '保存中' : '保存今日体重'}}
+        </button>
+      </view>
+
+      <view class="progress-card section-card">
+        <view class="record-head">
+          <view>
+            <view class="card-title">最近 7 条体重记录</view>
+            <view class="card-subtitle">{{hasRecords ? '按日期倒序展示' : '记录后会显示在这里'}}</view>
+          </view>
+        </view>
+
+        <view wx:if="{{!hasRecords}}" class="empty-records">
+          暂无体重记录，当前进度先使用目标里的初始体重。
+        </view>
+
+        <block wx:else>
+          <block wx:for="{{records}}" wx:key="id">
+            <view class="record-row">
+              <view>
+                <view class="record-date">{{item.date}}</view>
+                <view wx:if="{{item.note}}" class="record-note">{{item.note}}</view>
+              </view>
+              <view class="record-weight">{{item.weightText}}</view>
+            </view>
+          </block>
+        </block>
+      </view>
+    </block>
+  </block>
+</view>
