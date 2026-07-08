@@ -1,7 +1,9 @@
 const { calculateHealthScore, calculateTotals } = require('../../utils/nutrition')
 const { loadTodayAiAdvice } = require('../../services/aiAdviceService')
+const { buildEmptyFatLossCoach, buildFatLossCoach } = require('../../services/fatLossCoachService')
 const { loadUserGoal } = require('../../services/goalService')
-const { calculateProgress, getLatestWeight } = require('../../services/weightService')
+const { calculateProgress, getLatestWeight, getWeightRecords } = require('../../services/weightService')
+const { buildEmptyWeeklyInsight, buildWeeklyInsight } = require('../../services/weeklyInsightService')
 const {
   addDays,
   aiBehaviorInsight,
@@ -224,6 +226,9 @@ Page({
     shareCard: buildDefaultShareCard(),
     aiCenter: buildAiCenter(),
     weightProgress: buildEmptyWeightProgress(),
+    fatLossCoach: buildEmptyFatLossCoach(),
+    weeklyInsight: buildEmptyWeeklyInsight(),
+    fatLossLoopLoading: false,
     mealCards: MEAL_META.map(m => ({
       ...m, recorded: false, kcal: 0
     }))
@@ -307,6 +312,7 @@ Page({
         }
         this.loadGrowth(user, date, totals)
         this.loadWeightProgress()
+        this.loadFatLossLoop(user, date, totals)
       })
       .catch(() => {
         const aiDaily = buildEmptyAiDaily({
@@ -331,10 +337,73 @@ Page({
           insight: buildEmptyInsight(),
           aiCenter: buildAiCenter(aiDaily, { ...EMPTY_TOTALS }),
           weightProgress: buildEmptyWeightProgress(),
+          fatLossCoach: buildEmptyFatLossCoach(),
+          weeklyInsight: buildEmptyWeeklyInsight(),
+          fatLossLoopLoading: false,
           shareCard: buildShareCard({ totals: { ...EMPTY_TOTALS }, aiDaily, streak: buildEmptyStreak() }),
           mealCards: MEAL_META.map(m => ({
             ...m, recorded: false, kcal: 0, imageUrl: ''
           }))
+        })
+      })
+  },
+
+  loadFatLossLoop(user, todayDate, todayTotals) {
+    const userId = user._id || user.userId || user.openid || user._openid || ''
+    if (!userId) {
+      this.setData({
+        fatLossCoach: buildEmptyFatLossCoach(),
+        weeklyInsight: buildEmptyWeeklyInsight(),
+        fatLossLoopLoading: false
+      })
+      return
+    }
+
+    const startDate = addDays(todayDate, -6)
+    this.setData({ fatLossLoopLoading: true })
+
+    Promise.all([
+      loadUserGoal(userId),
+      getWeightRecords({ userId, limit: 30 }),
+      wx.cloud.callFunction({
+        name: 'getMealRecords',
+        data: {
+          startDate,
+          endDate: todayDate
+        }
+      })
+    ])
+      .then(([goal, weightRecords, mealRes]) => {
+        const mealResult = mealRes.result || {}
+        const mealRecords = mealResult.records || []
+        const fatLossCoach = buildFatLossCoach({
+          goal: goal || {},
+          weightRecords,
+          mealRecords,
+          todayTotals,
+          todayKey: todayDate
+        })
+        const weeklyInsight = buildWeeklyInsight({
+          goal: goal || {},
+          weightRecords,
+          mealRecords,
+          todayKey: todayDate
+        })
+
+        this.setData({
+          fatLossCoach,
+          weeklyInsight,
+          fatLossLoopLoading: false
+        })
+      })
+      .catch(() => {
+        this.setData({
+          fatLossCoach: {
+            ...buildEmptyFatLossCoach(),
+            advice: '减脂闭环暂时无法生成，请稍后刷新。'
+          },
+          weeklyInsight: buildEmptyWeeklyInsight(),
+          fatLossLoopLoading: false
         })
       })
   },

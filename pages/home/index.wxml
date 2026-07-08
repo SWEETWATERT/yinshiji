@@ -78,4 +78,57 @@
     </view>
   </view>
 
+  <view class="fat-loss-card section-card status-{{fatLossCoach.fatLossStatus.level}}">
+    <view class="fat-loss-head">
+      <view>
+        <view class="fat-loss-kicker">今日减脂助手</view>
+        <view class="fat-loss-title">
+          <text>{{fatLossCoach.fatLossStatus.icon}}</text>
+          <text>{{fatLossCoach.fatLossStatus.label}}</text>
+        </view>
+      </view>
+      <view class="fat-loss-refresh">{{fatLossLoopLoading ? '生成中' : 'AI闭环'}}</view>
+    </view>
+
+    <view class="fat-loss-status-text">{{fatLossCoach.fatLossStatus.text}}</view>
+
+    <view class="fat-loss-metrics">
+      <view class="fat-loss-metric">
+        <text class="fat-loss-metric-label">今日热量</text>
+        <text class="fat-loss-metric-value">{{fatLossCoach.calorieStatus.text}}</text>
+      </view>
+      <view class="fat-loss-metric">
+        <text class="fat-loss-metric-label">蛋白质</text>
+        <text class="fat-loss-metric-value">{{fatLossCoach.proteinStatus.text}}</text>
+      </view>
+    </view>
+
+    <view class="fat-loss-advice">
+      <view class="fat-loss-section-label">AI建议</view>
+      <view class="fat-loss-advice-text">{{fatLossCoach.advice}}</view>
+      <view class="fat-loss-next">{{fatLossCoach.nextMealSuggestion}}</view>
+    </view>
+
+    <view class="fat-loss-streak">{{fatLossCoach.streakText}}</view>
+
+    <view class="weekly-insight">
+      <view class="fat-loss-section-label">AI周总结</view>
+      <view class="weekly-summary">{{weeklyInsight.summary}}</view>
+      <view class="weekly-grid">
+        <view class="weekly-item">
+          <text class="weekly-label">平均热量</text>
+          <text class="weekly-value">{{weeklyInsight.averageCalories}} kcal</text>
+        </view>
+        <view class="weekly-item">
+          <text class="weekly-label">平均蛋白</text>
+          <text class="weekly-value">{{weeklyInsight.averageProtein}} g</text>
+        </view>
+        <view class="weekly-item">
+          <text class="weekly-label">完成率</text>
+          <text class="weekly-value">{{weeklyInsight.completionRate}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
 </view>
