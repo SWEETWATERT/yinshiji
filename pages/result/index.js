@@ -57,6 +57,39 @@ function normalizeFood(food = {}, index = 0) {
   }
 }
 
+function buildFoodNames(foods = []) {
+  return foods
+    .map(food => food.nameCn || food.name || food.foodName)
+    .filter(Boolean)
+    .slice(0, 6)
+}
+
+function buildStrengths(aiScore = {}, total = {}, foods = []) {
+  const strengths = []
+  if (num(aiScore.proteinScore) >= 80 || num(total.proteinG) >= 30) strengths.push('蛋白质补充较好')
+  if (num(aiScore.fatScore) >= 80) strengths.push('脂肪控制稳定')
+  if (foods.length >= 2) strengths.push('餐食结构不单一')
+  if (!strengths.length) strengths.push('已完成本餐记录，AI可以继续追踪全天摄入')
+  return strengths.slice(0, 3)
+}
+
+function buildProblems(aiScore = {}, total = {}) {
+  const problems = []
+  if (num(aiScore.proteinScore) < 70) problems.push('蛋白质不足')
+  if (num(aiScore.fiberScore) < 70 || num(total.fiberG) < 5) problems.push('蔬菜或膳食纤维不足')
+  if (num(aiScore.fatScore) < 70) problems.push('脂肪可能偏高')
+  if (num(aiScore.carbScore) < 70) problems.push('主食比例需要确认')
+  if (!problems.length) problems.push('暂无明显问题，继续保持均衡搭配')
+  return problems.slice(0, 3)
+}
+
+function buildNextMealRecommendation(problems = []) {
+  if (problems.includes('蛋白质不足')) return '下一餐推荐：增加鱼肉、鸡蛋或豆腐。'
+  if (problems.includes('蔬菜或膳食纤维不足')) return '下一餐推荐：增加绿色蔬菜200g。'
+  if (problems.includes('脂肪可能偏高')) return '下一餐推荐：少油烹饪，优先清蒸或水煮。'
+  return '下一餐推荐：保持一份蛋白质、一份主食和两份蔬菜。'
+}
+
 function normalizeResult(payload = {}) {
   const total = normalizeTotal(payload.total || {})
   const detectedFoods = (payload.detectedFoods || []).map(normalizeFood)
@@ -66,6 +99,8 @@ function normalizeResult(payload = {}) {
     scope: 'meal'
   })
   const confidence = num(payload.confidence)
+  const strengths = buildStrengths(aiScore, total, detectedFoods)
+  const problems = buildProblems(aiScore, total)
   return {
     ...payload,
     total,
@@ -79,6 +114,10 @@ function normalizeResult(payload = {}) {
     confidencePercent: formatConfidence(confidence),
     modelText: `${payload.modelProvider || '本地估算'} ${payload.modelVersion || ''}`.trim(),
     hasFoods: detectedFoods.length > 0,
+    recognizedNames: buildFoodNames(detectedFoods),
+    strengths,
+    problems,
+    nextMealRecommendation: buildNextMealRecommendation(problems),
     warnings: payload.warnings || []
   }
 }

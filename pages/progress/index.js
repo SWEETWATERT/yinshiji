@@ -70,6 +70,113 @@ function buildTrendSummary(records, progress) {
   }
 }
 
+function dateToTime(dateText) {
+  if (!dateText) return 0
+  const time = new Date(`${dateText}T00:00:00`).getTime()
+  return Number.isFinite(time) ? time : 0
+}
+
+function formatShortDate(dateText) {
+  if (!dateText || dateText.indexOf('-') === -1) return '--'
+  const parts = dateText.split('-')
+  return `${Number(parts[1])}.${Number(parts[2])}`
+}
+
+function buildTargetDateInfo(goal = {}) {
+  const targetDate = goal.targetDate || ''
+  if (!targetDate) {
+    return {
+      dateText: '--',
+      desc: '设置周期后生成预计达成日期'
+    }
+  }
+
+  const today = dateToTime(formatDate())
+  const target = dateToTime(targetDate)
+  const daysLeft = target > today ? Math.ceil((target - today) / 86400000) : 0
+
+  return {
+    dateText: targetDate,
+    desc: daysLeft > 0 ? `预计还需 ${daysLeft} 天` : '目标日期已到，建议更新计划'
+  }
+}
+
+function countConsecutiveRecordDays(records = []) {
+  const dates = Array.from(new Set(
+    records
+      .map(record => record.date)
+      .filter(Boolean)
+  )).sort((a, b) => b.localeCompare(a))
+
+  if (!dates.length) return 0
+
+  let count = 1
+  for (let i = 1; i < dates.length; i += 1) {
+    const prev = dateToTime(dates[i - 1])
+    const current = dateToTime(dates[i])
+    if (!prev || !current || Math.round((prev - current) / 86400000) !== 1) break
+    count += 1
+  }
+  return count
+}
+
+function buildMilestones(progress, records = []) {
+  const consecutiveDays = countConsecutiveRecordDays(records)
+  const lostKg = num(progress.lostKg)
+  const percent = num(progress.progressPercent)
+
+  return [
+    {
+      id: 'first_kg',
+      done: lostKg >= 1,
+      title: '第一次下降 1kg',
+      desc: lostKg >= 1 ? `已下降 ${progress.lostKgText}kg` : '距离第一个里程碑还差一点'
+    },
+    {
+      id: 'seven_days',
+      done: consecutiveDays >= 7,
+      title: '连续记录 7 天',
+      desc: consecutiveDays >= 7 ? '体重追踪已形成习惯' : `当前连续 ${consecutiveDays} 天`
+    },
+    {
+      id: 'half_goal',
+      done: percent >= 50,
+      title: '达成目标 50%',
+      desc: percent >= 50 ? '已经完成一半目标' : `当前完成 ${percent}%`
+    }
+  ]
+}
+
+function buildCurvePoints(records = [], progress = {}) {
+  const sorted = (records || [])
+    .filter(record => Number(record.weightKg) > 0)
+    .slice()
+    .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
+    .slice(-7)
+
+  if (!sorted.length) return []
+
+  const weights = sorted.map(record => Number(record.weightKg))
+  const minWeight = Math.min(...weights, num(progress.targetWeight, weights[0]))
+  const maxWeight = Math.max(...weights, num(progress.startWeight, weights[0]))
+  const range = Math.max(0.1, maxWeight - minWeight)
+
+  return sorted.map((record, index) => {
+    const weight = Number(record.weightKg)
+    const top = Math.round(12 + ((weight - minWeight) / range) * 64)
+    const dropHeight = Math.max(18, 88 - top)
+
+    return {
+      id: record.id || record._id || `${record.date}_${index}`,
+      dateLabel: formatShortDate(record.date),
+      weightText: `${weight.toFixed(1)}kg`,
+      top,
+      dropHeight,
+      isLatest: index === sorted.length - 1
+    }
+  })
+}
+
 Page({
   data: {
     loading: true,
@@ -85,7 +192,10 @@ Page({
     noteInput: '',
     hasGoal: false,
     hasRecords: false,
-    trendSummary: buildTrendSummary([], defaultProgress())
+    trendSummary: buildTrendSummary([], defaultProgress()),
+    targetDateInfo: buildTargetDateInfo(),
+    curvePoints: [],
+    milestones: buildMilestones(defaultProgress(), [])
   },
 
   onLoad() {
@@ -114,6 +224,9 @@ Page({
         const safeRecords = records || []
         const progress = calculateProgress(goal || {}, latestWeight)
         const trendSummary = buildTrendSummary(safeRecords, progress)
+        const targetDateInfo = buildTargetDateInfo(goal || {})
+        const curvePoints = buildCurvePoints(safeRecords, progress)
+        const milestones = buildMilestones(progress, safeRecords)
         this.setData({
           loading: false,
           goal: goal || null,
@@ -121,6 +234,9 @@ Page({
           latestWeight,
           progress,
           trendSummary,
+          targetDateInfo,
+          curvePoints,
+          milestones,
           hasGoal: Boolean(goal && goal.targetWeight),
           hasRecords: safeRecords.length > 0,
           weightInput: asInput(progress.currentWeight),

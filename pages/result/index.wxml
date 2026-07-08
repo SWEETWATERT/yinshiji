@@ -12,30 +12,71 @@
   </view>
 
   <block wx:else>
-    <view class="result-hero section-card">
-      <view class="result-head">
+    <view class="meal-recognition-card section-card">
+      <view wx:if="{{result.imageUrl}}" class="meal-image-wrap">
+        <image class="meal-image" src="{{result.imageUrl}}" mode="aspectFill"></image>
+        <view class="meal-image-mask"></view>
+        <view class="meal-image-label">AI正在看这餐</view>
+      </view>
+      <view wx:else class="meal-no-image">
+        <view class="meal-no-image-icon">AI</view>
+        <view>根据备注和食物库生成分析</view>
+      </view>
+
+      <view class="recognition-body">
+        <view class="result-kicker">识别结果</view>
+        <view class="recognized-list">
+          <block wx:for="{{result.recognizedNames}}" wx:key="*this">
+            <view class="recognized-pill">{{item}}</view>
+          </block>
+          <view wx:if="{{!result.recognizedNames.length}}" class="recognized-empty">还没有识别到明确食物</view>
+        </view>
+        <view class="recognition-note">AI会结合食物库营养值和份量估算本餐结构。</view>
+      </view>
+    </view>
+
+    <view class="score-card section-card">
+      <view class="score-head">
         <view>
-          <view class="result-kicker">AI输出</view>
-          <view class="result-title">本餐分析结果</view>
+          <view class="result-kicker">健康评分</view>
+          <view class="score-title">本餐营养判断</view>
         </view>
         <view class="result-grade">{{result.grade}}</view>
       </view>
 
-      <view class="result-score-row">
-        <text class="result-score">{{result.score}}</text>
-        <text class="result-score-unit">分</text>
+      <view class="score-layout">
+        <view class="score-ring" style="background: conic-gradient(#58A27F 0 {{result.score}}%, #E5EFE9 {{result.score}}% 100%);">
+          <view class="score-ring-inner">
+            <text class="result-score">{{result.score}}</text>
+            <text class="result-score-unit">分</text>
+          </view>
+        </view>
+        <view class="score-copy">{{result.explanation}}</view>
       </view>
-      <view class="result-explanation">{{result.explanation}}</view>
 
-      <view class="confidence-row">
-        <text>置信度 {{result.confidencePercent}}%</text>
-        <text>{{result.modelText}}</text>
+      <view class="insight-grid">
+        <view class="insight-block strength-block">
+          <view class="insight-title">优点</view>
+          <block wx:for="{{result.strengths}}" wx:key="*this">
+            <view class="insight-line">{{item}}</view>
+          </block>
+        </view>
+        <view class="insight-block problem-block">
+          <view class="insight-title">问题</view>
+          <block wx:for="{{result.problems}}" wx:key="*this">
+            <view class="insight-line">{{item}}</view>
+          </block>
+        </view>
       </view>
     </view>
 
     <view class="advice-card section-card">
       <view class="card-title">AI建议</view>
       <view class="advice-text">{{result.aiAdvice}}</view>
+      <view class="next-meal-box">
+        <view class="next-meal-label">下一餐推荐</view>
+        <view class="next-meal-text">{{result.nextMealRecommendation}}</view>
+      </view>
     </view>
 
     <view class="summary-card section-card">
@@ -64,7 +105,7 @@
     </view>
 
     <view class="foods-card section-card">
-      <view class="card-title">detectedFoods</view>
+      <view class="card-title">食物明细</view>
       <view wx:if="{{!result.hasFoods}}" class="empty-foods">AI没有识别到具体食物，请返回后补充食物名称或上传餐食照片。</view>
       <block wx:else>
         <block wx:for="{{result.detectedFoods}}" wx:key="uid">

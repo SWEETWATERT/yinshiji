@@ -7,111 +7,77 @@
 
   <view class="home-header ai-home-header">
     <view>
-      <view class="page-title">AI今日分析中心</view>
-      <view class="page-subtitle">{{todayText}} · AI正在分析你的饮食状态</view>
+      <view class="page-title">今日健康</view>
+      <view class="page-subtitle">{{todayText}} · 每天打开，看清今天怎么吃</view>
     </view>
     <button class="report-btn" bindtap="goReport">周报</button>
   </view>
 
-  <view class="ai-center-card section-card {{!hasMeals ? 'ai-center-empty' : ''}}">
-    <view class="ai-center-head">
-      <view>
-        <view class="ai-center-kicker">AI结论优先</view>
-        <view class="ai-center-title">今日饮食判断</view>
+  <view class="daily-hero section-card">
+    <view class="daily-metric-row">
+      <view class="daily-metric">
+        <text class="daily-metric-label">今日体重</text>
+        <text class="daily-metric-value">{{weightProgress.currentWeightText}}kg</text>
       </view>
-      <view class="ai-center-grade">{{aiCenter.grade}}</view>
-    </view>
-
-    <view class="ai-score-hero">
-      <text class="ai-score-main-num">{{aiCenter.score}}</text>
-      <text class="ai-score-main-unit">分</text>
-    </view>
-    <view class="ai-center-evaluation">{{aiCenter.evaluation}}</view>
-
-    <view class="ai-center-section">
-      <view class="ai-center-section-title">今日营养问题</view>
-      <view class="ai-center-issue-list">
-        <block wx:for="{{aiCenter.issues}}" wx:key="*this">
-          <view class="ai-center-issue">{{item}}</view>
-        </block>
+      <view class="daily-metric">
+        <text class="daily-metric-label">距目标</text>
+        <text class="daily-metric-value">{{weightProgress.remainingKgText}}kg</text>
+      </view>
+      <view class="daily-metric">
+        <text class="daily-metric-label">连续打卡</text>
+        <text class="daily-metric-value">{{fatLossCoach.consecutiveDays}}天</text>
       </view>
     </view>
 
-    <view class="ai-center-section">
-      <view class="ai-center-section-title">AI建议</view>
-      <block wx:for="{{aiCenter.advice}}" wx:key="*this">
-        <view class="ai-center-advice">{{item}}</view>
-      </block>
-      <view wx:if="{{aiCenter.advice.length === 0}}" class="ai-center-advice">先记录一餐，AI会给出下一餐建议。</view>
-    </view>
-
-    <view class="ai-center-nutrition">
-      <view class="ai-center-nutrition-item">
-        <text class="ai-center-nutrition-label">kcal</text>
-        <text class="ai-center-nutrition-value">{{aiCenter.kcal}}</text>
+    <view class="daily-hero-main">
+      <view class="daily-score-ring" style="background: conic-gradient(#58A27F 0 {{aiCenter.score}}%, #E5EFE9 {{aiCenter.score}}% 100%);">
+        <view class="daily-score-inner">
+          <text class="daily-score-num">{{aiCenter.score}}</text>
+          <text class="daily-score-unit">分</text>
+        </view>
       </view>
-      <view class="ai-center-nutrition-item">
-        <text class="ai-center-nutrition-label">蛋白</text>
-        <text class="ai-center-nutrition-value">{{aiCenter.protein}}g</text>
-      </view>
-      <view class="ai-center-nutrition-item">
-        <text class="ai-center-nutrition-label">碳水</text>
-        <text class="ai-center-nutrition-value">{{aiCenter.carbs}}g</text>
-      </view>
-      <view class="ai-center-nutrition-item">
-        <text class="ai-center-nutrition-label">脂肪</text>
-        <text class="ai-center-nutrition-value">{{aiCenter.fat}}g</text>
+      <view class="daily-hero-copy">
+        <view class="daily-hero-kicker">AI今日饮食助手</view>
+        <view class="daily-hero-title">{{fatLossCoach.fatLossStatus.label}}</view>
+        <view class="daily-hero-desc">{{fatLossCoach.fatLossStatus.text}}</view>
       </view>
     </view>
 
-    <view class="ai-center-footer">
-      <view class="ai-center-streak">{{streak.todayCheckedIn ? '今日已打卡' : '今日待打卡'}} · 连续 {{streak.consecutiveDays}} 天</view>
-      <button class="ai-center-action" bindtap="goAnalyze">开始AI饮食分析</button>
-    </view>
-
-    <view wx:if="{{weightProgress.visible}}" class="weight-progress-mini" bindtap="goProgress">
-      <view>
-        <view class="weight-progress-label">减脂进度</view>
-        <view class="weight-progress-text">{{weightProgress.text}}</view>
+    <view class="daily-target-grid">
+      <view class="daily-target">
+        <view class="daily-target-head">
+          <text>热量</text>
+          <text>{{fatLossCoach.calorieStatus.percent}}%</text>
+        </view>
+        <view class="daily-target-value">{{fatLossCoach.calorieStatus.text}}</view>
+        <view class="daily-target-track">
+          <view class="daily-target-fill" style="width: {{fatLossCoach.calorieStatus.percent}}%;"></view>
+        </view>
       </view>
-      <view class="weight-progress-link">记录体重</view>
+      <view class="daily-target">
+        <view class="daily-target-head">
+          <text>蛋白</text>
+          <text>{{fatLossCoach.proteinStatus.percent}}%</text>
+        </view>
+        <view class="daily-target-value">{{fatLossCoach.proteinStatus.text}}</view>
+        <view class="daily-target-track">
+          <view class="daily-target-fill protein-fill" style="width: {{fatLossCoach.proteinStatus.percent}}%;"></view>
+        </view>
+      </view>
     </view>
   </view>
 
-  <view class="fat-loss-card section-card status-{{fatLossCoach.fatLossStatus.level}}">
-    <view class="fat-loss-head">
-      <view>
-        <view class="fat-loss-kicker">今日减脂助手</view>
-        <view class="fat-loss-title">
-          <text>{{fatLossCoach.fatLossStatus.icon}}</text>
-          <text>{{fatLossCoach.fatLossStatus.label}}</text>
-        </view>
-      </view>
-      <view class="fat-loss-refresh">{{fatLossLoopLoading ? '生成中' : 'AI闭环'}}</view>
-    </view>
-
-    <view class="fat-loss-status-text">{{fatLossCoach.fatLossStatus.text}}</view>
-
-    <view class="fat-loss-metrics">
-      <view class="fat-loss-metric">
-        <text class="fat-loss-metric-label">今日热量</text>
-        <text class="fat-loss-metric-value">{{fatLossCoach.calorieStatus.text}}</text>
-        <text class="fat-loss-metric-sub">完成度 {{fatLossCoach.calorieStatus.percent}}%</text>
-      </view>
-      <view class="fat-loss-metric">
-        <text class="fat-loss-metric-label">蛋白质</text>
-        <text class="fat-loss-metric-value">{{fatLossCoach.proteinStatus.text}}</text>
-        <text class="fat-loss-metric-sub">完成度 {{fatLossCoach.proteinStatus.percent}}%</text>
-      </view>
-    </view>
-
+  <view class="daily-ai-card section-card status-{{fatLossCoach.fatLossStatus.level}}">
     <view class="fat-loss-advice">
       <view class="fat-loss-section-label">AI建议</view>
       <view class="fat-loss-advice-text">{{fatLossCoach.advice}}</view>
       <view class="fat-loss-next">{{fatLossCoach.nextMealSuggestion}}</view>
     </view>
 
-    <view class="fat-loss-streak">{{fatLossCoach.streakText}}</view>
+    <view class="daily-action-row">
+      <button class="daily-primary-action" bindtap="goAnalyze">开始AI饮食分析</button>
+      <button class="daily-secondary-action" bindtap="goProgress">记录体重</button>
+    </view>
 
     <view class="weekly-insight">
       <view class="fat-loss-section-label">AI周总结</view>

@@ -35,16 +35,27 @@
 
     <block wx:else>
       <view class="progress-hero section-card">
-        <view class="hero-head">
+        <view class="hero-topline">
           <view>
-            <view class="hero-label">当前体重</view>
-            <view class="hero-weight">{{progress.currentWeightText}} kg</view>
+            <view class="hero-label">减脂目标</view>
+            <view class="hero-title">{{progress.currentWeightText}} → {{progress.targetWeightText}} kg</view>
           </view>
-          <view class="hero-target">目标 {{progress.targetWeightText}} kg</view>
+          <view class="hero-target">预计 {{targetDateInfo.dateText}}</view>
         </view>
 
-        <view class="progress-track">
-          <view class="progress-fill" style="width: {{progress.progressPercent}}%;"></view>
+        <view class="hero-main-grid">
+          <view class="goal-ring" style="background: conic-gradient(#58A27F 0 {{progress.progressPercent}}%, #E5EFE9 {{progress.progressPercent}}% 100%);">
+            <view class="goal-ring-inner">
+              <text class="goal-percent">{{progress.progressPercent}}</text>
+              <text class="goal-percent-unit">%</text>
+            </view>
+          </view>
+
+          <view class="hero-copy">
+            <view class="hero-current-label">当前体重</view>
+            <view class="hero-weight">{{progress.currentWeightText}} kg</view>
+            <view class="hero-target-date">{{targetDateInfo.desc}}</view>
+          </view>
         </view>
 
         <view class="metric-grid">
@@ -60,6 +71,51 @@
             <text class="metric-label">完成度</text>
             <text class="metric-value">{{progress.progressPercent}}%</text>
           </view>
+        </view>
+      </view>
+
+      <view class="progress-card section-card curve-card">
+        <view class="record-head">
+          <view>
+            <view class="card-title">下降曲线</view>
+            <view class="card-subtitle">{{hasRecords ? '最近7次体重变化' : '记录体重后生成趋势'}}</view>
+          </view>
+          <view class="trend-badge {{trendSummary.isDown ? 'trend-down' : ''}}">{{trendSummary.changeText}}</view>
+        </view>
+
+        <view wx:if="{{!curvePoints.length}}" class="empty-records">
+          暂无曲线数据。保存今日体重后，系统会开始生成目标进度曲线。
+        </view>
+
+        <view wx:else class="curve-stage">
+          <view class="curve-grid-line top"></view>
+          <view class="curve-grid-line middle"></view>
+          <view class="curve-grid-line bottom"></view>
+          <block wx:for="{{curvePoints}}" wx:key="id">
+            <view class="curve-column">
+              <view class="curve-plot">
+                <view class="curve-drop {{item.isLatest ? 'latest' : ''}}" style="height: {{item.dropHeight}}%;"></view>
+                <view class="curve-point {{item.isLatest ? 'latest' : ''}}" style="top: {{item.top}}%;"></view>
+              </view>
+              <view class="curve-weight">{{item.weightText}}</view>
+              <view class="curve-date">{{item.dateLabel}}</view>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <view class="progress-card section-card milestones-card">
+        <view class="card-title">里程碑</view>
+        <view class="milestone-list">
+          <block wx:for="{{milestones}}" wx:key="id">
+            <view class="milestone-item {{item.done ? 'done' : 'pending'}}">
+              <view class="milestone-dot"></view>
+              <view class="milestone-copy">
+                <view class="milestone-title">{{item.title}}</view>
+                <view class="milestone-desc">{{item.desc}}</view>
+              </view>
+            </view>
+          </block>
         </view>
       </view>
 
@@ -106,13 +162,12 @@
         </button>
       </view>
 
-      <view class="progress-card section-card">
+      <view class="progress-card section-card record-list-card">
         <view class="record-head">
           <view>
             <view class="card-title">最近 7 次体重趋势</view>
             <view class="card-subtitle">{{hasRecords ? '按日期倒序展示' : '记录后会显示在这里'}}</view>
           </view>
-          <view class="trend-badge {{trendSummary.isDown ? 'trend-down' : ''}}">{{trendSummary.changeText}}</view>
         </view>
 
         <view wx:if="{{!hasRecords}}" class="empty-records">
