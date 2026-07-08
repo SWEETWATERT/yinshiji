@@ -1,0 +1,91 @@
+<view class="page-bg-layer">
+  <image class="page-bg-img" src="/assets/bg-silhouette-abstract.png" mode="aspectFill" style="opacity:0.08;"></image>
+</view>
+
+<view class="page page-container goal-page">
+  <brand-header></brand-header>
+
+  <view class="page-title">AI减脂目标</view>
+  <view class="page-subtitle">所有AI指导免费，用目标帮助系统生成更稳定的减脂建议</view>
+
+  <view wx:if="{{loading}}" class="goal-card section-card">
+    <view class="state-title">正在读取目标…</view>
+    <view class="state-text">稍等一下，正在同步你的减脂计划。</view>
+  </view>
+
+  <block wx:else>
+    <view class="goal-hero section-card">
+      <view>
+        <view class="hero-label">目标</view>
+        <view class="hero-title">{{currentWeight || '--'}}kg → {{targetWeight || '--'}}kg</view>
+      </view>
+      <view class="hero-gap">减 {{weightGap}}kg</view>
+    </view>
+
+    <view class="goal-card section-card">
+      <view class="goal-field">
+        <view>
+          <view class="goal-label">当前体重</view>
+          <view class="goal-hint">用于估算基础热量</view>
+        </view>
+        <view class="goal-input-wrap">
+          <input class="goal-input" type="digit" value="{{currentWeight}}" bindinput="onCurrentWeightInput" placeholder="60" />
+          <text class="goal-unit">kg</text>
+        </view>
+      </view>
+
+      <view class="goal-divider"></view>
+
+      <view class="goal-field">
+        <view>
+          <view class="goal-label">目标体重</view>
+          <view class="goal-hint">建议逐步下降</view>
+        </view>
+        <view class="goal-input-wrap">
+          <input class="goal-input" type="digit" value="{{targetWeight}}" bindinput="onTargetWeightInput" placeholder="55" />
+          <text class="goal-unit">kg</text>
+        </view>
+      </view>
+
+      <view class="goal-divider"></view>
+
+      <view class="goal-field">
+        <view>
+          <view class="goal-label">时间周期</view>
+          <view class="goal-hint">至少 14 天</view>
+        </view>
+        <view class="goal-input-wrap">
+          <input class="goal-input" type="number" value="{{periodDays}}" bindinput="onPeriodInput" placeholder="60" />
+          <text class="goal-unit">天</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="goal-result section-card">
+      <view class="result-title">AI计算目标</view>
+      <view class="result-grid">
+        <view class="result-item">
+          <text class="result-label">目标日期</text>
+          <text class="result-value date-value">{{targetDate}}</text>
+        </view>
+        <view class="result-item">
+          <text class="result-label">每日热量</text>
+          <text class="result-value">{{dailyCalories}} kcal</text>
+        </view>
+        <view class="result-item">
+          <text class="result-label">蛋白目标</text>
+          <text class="result-value">{{proteinGoal}} g</text>
+        </view>
+      </view>
+      <view class="result-note">计算逻辑：基于当前体重、目标体重和周期估算热量缺口，蛋白目标按减脂期高蛋白策略生成。</view>
+    </view>
+
+    <view wx:if="{{error}}" class="goal-error section-card">{{error}}</view>
+
+    <view class="fixed-bottom-button goal-bottom">
+      <button class="primary-button" bindtap="saveGoal" disabled="{{saving}}">
+        {{saving ? '保存中…' : '保存减脂目标'}}
+      </button>
+    </view>
+  </block>
+</view>

@@ -8,6 +8,7 @@
     "pages/meal-detail/index",
     "pages/report/index",
     "pages/profile/index",
+    "pages/goal/index",
     "pages/onboarding/index",
     "pages/admin/index",
     "pages/admin/users",

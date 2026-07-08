@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "AI减脂目标",
+  "usingComponents": {
+    "brand-header": "/components/BrandHeader/index"
+  }
+}

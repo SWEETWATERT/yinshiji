@@ -102,6 +102,10 @@
       <text class="setting-label">编辑身体资料</text>
       <text class="setting-arr">›</text>
     </button>
+    <button class="setting-row" bindtap="goGoal">
+      <text class="setting-label">AI减脂目标</text>
+      <text class="setting-arr">›</text>
+    </button>
     <button class="setting-row setting-row-last" bindtap="showSettingToast">
       <text class="setting-label">设置</text>
       <text class="setting-arr">›</text>

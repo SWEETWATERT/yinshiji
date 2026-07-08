@@ -1,0 +1,175 @@
+.goal-page {
+  padding-bottom: calc(190rpx + env(safe-area-inset-bottom));
+}
+
+.goal-page .page-title {
+  margin-top: 16rpx;
+}
+
+.goal-hero,
+.goal-card,
+.goal-result,
+.goal-error {
+  padding: 28rpx;
+  margin-top: 24rpx;
+}
+
+.goal-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+  border-color: #dfeee5;
+  background: #fbfdfc;
+}
+
+.hero-label {
+  color: #256850;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.hero-title {
+  margin-top: 8rpx;
+  color: #25232A;
+  font-size: 42rpx;
+  font-weight: 900;
+  line-height: 1.18;
+}
+
+.hero-gap {
+  flex: 0 0 auto;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  background: #58A27F;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.goal-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  min-height: 78rpx;
+}
+
+.goal-label {
+  color: #25232A;
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.goal-hint {
+  margin-top: 6rpx;
+  color: #807987;
+  font-size: 23rpx;
+  line-height: 1.35;
+}
+
+.goal-input-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.goal-input {
+  width: 170rpx;
+  height: 72rpx;
+  padding: 0 18rpx;
+  border-radius: 14rpx;
+  color: #25232A;
+  background: #F7F2EA;
+  border: 1.5rpx solid #E9E1D8;
+  font-size: 30rpx;
+  font-weight: 700;
+  text-align: right;
+}
+
+.goal-unit {
+  min-width: 44rpx;
+  color: #807987;
+  font-size: 25rpx;
+}
+
+.goal-divider {
+  height: 1rpx;
+  margin: 18rpx 0;
+  background: #F0ECF4;
+}
+
+.goal-result {
+  border-color: rgba(139, 108, 255, 0.16);
+  background: #FFFCFE;
+}
+
+.result-title {
+  color: #25232A;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.result-item {
+  min-width: 0;
+  padding: 16rpx 10rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  border: 1rpx solid #EDF1EE;
+  text-align: center;
+}
+
+.result-label {
+  display: block;
+  color: #807987;
+  font-size: 20rpx;
+  line-height: 1.25;
+}
+
+.result-value {
+  display: block;
+  margin-top: 8rpx;
+  color: #25232A;
+  font-size: 24rpx;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.date-value {
+  font-size: 21rpx;
+}
+
+.result-note,
+.state-text {
+  margin-top: 16rpx;
+  color: #807987;
+  font-size: 23rpx;
+  line-height: 1.55;
+}
+
+.state-title {
+  color: #25232A;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.goal-error {
+  color: #8A5D00;
+  background: #FFF6DC;
+  border-color: #F5D48A;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.goal-bottom {
+  bottom: calc(20rpx + env(safe-area-inset-bottom)) !important;
+}

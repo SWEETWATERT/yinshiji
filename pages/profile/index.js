@@ -90,6 +90,10 @@ Page({
     wx.navigateTo({ url: '/pages/onboarding/index?mode=edit' })
   },
 
+  goGoal() {
+    wx.navigateTo({ url: '/pages/goal/index' })
+  },
+
   goAdmin() {
     wx.navigateTo({ url: '/pages/admin/index' })
   },
