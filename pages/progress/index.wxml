@@ -63,6 +63,24 @@
         </view>
       </view>
 
+      <view wx:if="{{!hasRecords}}" class="progress-card section-card first-guide-card">
+        <view class="card-title">第一次使用</view>
+        <view class="guide-steps">
+          <view class="guide-step">
+            <text class="guide-step-num">1</text>
+            <text class="guide-step-text">保存今天的真实体重</text>
+          </view>
+          <view class="guide-step">
+            <text class="guide-step-num">2</text>
+            <text class="guide-step-text">每天记录饮食，首页会生成减脂建议</text>
+          </view>
+          <view class="guide-step">
+            <text class="guide-step-num">3</text>
+            <text class="guide-step-text">连续记录后查看最近7次体重趋势</text>
+          </view>
+        </view>
+      </view>
+
       <view class="progress-card section-card">
         <view class="card-title">新增今日体重</view>
         <view class="input-row">
@@ -91,16 +109,21 @@
       <view class="progress-card section-card">
         <view class="record-head">
           <view>
-            <view class="card-title">最近 7 条体重记录</view>
+            <view class="card-title">最近 7 次体重趋势</view>
             <view class="card-subtitle">{{hasRecords ? '按日期倒序展示' : '记录后会显示在这里'}}</view>
           </view>
+          <view class="trend-badge {{trendSummary.isDown ? 'trend-down' : ''}}">{{trendSummary.changeText}}</view>
         </view>
 
         <view wx:if="{{!hasRecords}}" class="empty-records">
-          暂无体重记录，当前进度先使用目标里的初始体重。
+          暂无体重记录，当前进度先使用目标里的初始体重。保存今日体重后，会从这里开始形成趋势。
         </view>
 
         <block wx:else>
+          <view class="trend-summary-card">
+            <view class="trend-summary-title">{{trendSummary.title}}</view>
+            <view class="trend-summary-desc">{{trendSummary.desc}}</view>
+          </view>
           <block wx:for="{{records}}" wx:key="id">
             <view class="record-row">
               <view>

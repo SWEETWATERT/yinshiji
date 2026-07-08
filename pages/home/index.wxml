@@ -96,10 +96,12 @@
       <view class="fat-loss-metric">
         <text class="fat-loss-metric-label">今日热量</text>
         <text class="fat-loss-metric-value">{{fatLossCoach.calorieStatus.text}}</text>
+        <text class="fat-loss-metric-sub">完成度 {{fatLossCoach.calorieStatus.percent}}%</text>
       </view>
       <view class="fat-loss-metric">
         <text class="fat-loss-metric-label">蛋白质</text>
         <text class="fat-loss-metric-value">{{fatLossCoach.proteinStatus.text}}</text>
+        <text class="fat-loss-metric-sub">完成度 {{fatLossCoach.proteinStatus.percent}}%</text>
       </view>
     </view>
 

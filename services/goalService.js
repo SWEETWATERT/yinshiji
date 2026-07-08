@@ -74,6 +74,7 @@ function saveUserGoal(goal) {
     userId,
     currentWeight: num(goal.currentWeight),
     targetWeight: num(goal.targetWeight),
+    periodDays: Math.max(1, Math.round(num(goal.periodDays, 60))),
     targetDate: goal.targetDate,
     dailyCalories: Math.round(num(goal.dailyCalories)),
     proteinGoal: Math.round(num(goal.proteinGoal))
@@ -85,7 +86,12 @@ function saveUserGoal(goal) {
     .then(res => {
       const existing = (res.data && res.data[0]) || null
       if (existing && existing._id) {
-        return collection.doc(existing._id).update({ data })
+        return collection.doc(existing._id).update({
+          data: {
+            ...data,
+            updatedAt: db.serverDate()
+          }
+        })
           .then(() => ({ ...existing, ...data }))
       }
       return collection.add({

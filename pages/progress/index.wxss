@@ -234,6 +234,80 @@
   background: #FAF8F5;
 }
 
+.first-guide-card {
+  border-color: rgba(139, 108, 255, 0.16);
+  background: #FFFCFE;
+}
+
+.guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+
+.guide-step {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.guide-step-num {
+  flex: 0 0 auto;
+  width: 42rpx;
+  height: 42rpx;
+  border-radius: 50%;
+  color: #FFFFFF;
+  background: #8B6CFF;
+  font-size: 23rpx;
+  font-weight: 900;
+  line-height: 42rpx;
+  text-align: center;
+}
+
+.guide-step-text {
+  color: #5F6762;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.trend-badge {
+  flex: 0 0 auto;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  color: #8A5D00;
+  background: #FFF1C7;
+  font-size: 23rpx;
+  font-weight: 900;
+}
+
+.trend-down {
+  color: #256850;
+  background: #E8F5EF;
+}
+
+.trend-summary-card {
+  margin-top: 18rpx;
+  padding: 18rpx;
+  border-radius: 16rpx;
+  background: #FBFDFC;
+  border: 1rpx solid #DFEEE5;
+}
+
+.trend-summary-title {
+  color: #25232A;
+  font-size: 26rpx;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.trend-summary-desc {
+  margin-top: 8rpx;
+  color: #5F6762;
+  font-size: 23rpx;
+  line-height: 1.5;
+}
+
 .record-row {
   display: flex;
   align-items: center;
